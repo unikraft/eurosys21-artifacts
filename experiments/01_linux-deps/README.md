@@ -1,10 +1,17 @@
 In order to run this experiment you have to run run.sh. This will download linux from github and checkout to commit c85fb28b6f999db9928b841f63f1beeb3074eeca.
-This program will return a .dot description of the dependency graph. We can use `dot fis.dot -Tpdf -o fis.pdf` to generate a pdf.
+This program will return a .dot and a .pdf output in the output folder.
 For cleaning we use the scrip `clean.sh`
+
+Note: We can use `dot fis.dot -Tpdf -o fis.pdf` to generate a pdf from the.dor
+
+Note2: We use the following two aesthetic options in the .dot file from the paper:
+edge [ fontname=Helvetica, fontcolor=blue, fontsize=35 ];
+node [ fontname=Helvetica, fontcolor=black, fontsize=80,shape=box];	
 
 Dependencies:
 * cscope
 * git
+* graphviz
 
 Scripts description:
 * `create_cscope_db.sh` -> creates the cscope database of used files. We exclude drivers, arch etc.

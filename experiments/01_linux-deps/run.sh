@@ -1,5 +1,6 @@
 # Get dependencies
-apt-get install -y cscope git
+apt-get install -y cscope git graphviz
+pip3 install graphviz
 
 # Modify tmpdir, on my end it would fail if I was using tmpfs
 mkdir tmp
@@ -14,3 +15,5 @@ cd ..
 ./create_cscope_db.sh
 
 ./component_symbols.sh
+
+python3 plot.py
