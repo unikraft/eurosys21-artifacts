@@ -4,7 +4,7 @@ pip3 install graphviz
 
 # Modify tmpdir, on my end it would fail if I was using tmpfs
 mkdir tmp
-export TMPDIR=./tmp
+export TMPDIR=$PWD/tmp
 
 git clone https://github.com/torvalds/linux
 
