@@ -1,0 +1,190 @@
+diff --git a/app/test-pmd/config.c b/app/test-pmd/config.c
+index 1a5a5c13c..d041b5f2d 100644
+--- a/app/test-pmd/config.c
++++ b/app/test-pmd/config.c
+@@ -2164,7 +2164,7 @@ dcb_fwd_config_setup(void)
+ }
+ 
+ static void
+-icmp_echo_config_setup(void)
++echo_config_setup(void)
+ {
+ 	portid_t  rxp;
+ 	queueid_t rxq;
+@@ -2272,8 +2272,9 @@ void
+ fwd_config_setup(void)
+ {
+ 	cur_fwd_config.fwd_eng = cur_fwd_eng;
+-	if (strcmp(cur_fwd_eng->fwd_mode_name, "icmpecho") == 0) {
+-		icmp_echo_config_setup();
++	if (strcmp(cur_fwd_eng->fwd_mode_name, "icmpecho") == 0 ||
++	    strcmp(cur_fwd_eng->fwd_mode_name, "udpecho") == 0) {
++		echo_config_setup();
+ 		return;
+ 	}
+ 
+diff --git a/app/test-pmd/icmpecho.c b/app/test-pmd/icmpecho.c
+index 2d359c943..8796c279b 100644
+--- a/app/test-pmd/icmpecho.c
++++ b/app/test-pmd/icmpecho.c
+@@ -32,6 +32,7 @@
+ #include <rte_icmp.h>
+ #include <rte_string_fns.h>
+ #include <rte_flow.h>
++#include <rte_udp.h>
+ 
+ #include "testpmd.h"
+ 
+@@ -271,7 +272,7 @@ ipv4_hdr_cksum(struct rte_ipv4_hdr *ip_h)
+  * send back ICMP echo replies.
+  */
+ static void
+-reply_to_icmp_echo_rqsts(struct fwd_stream *fs)
++reply_to_echo_rqsts(struct fwd_stream *fs, int proto)
+ {
+ 	struct rte_mbuf *pkts_burst[MAX_PKT_BURST];
+ 	struct rte_mbuf *pkt;
+@@ -279,7 +280,8 @@ reply_to_icmp_echo_rqsts(struct fwd_stream *fs)
+ 	struct rte_vlan_hdr *vlan_h;
+ 	struct rte_arp_hdr  *arp_h;
+ 	struct rte_ipv4_hdr *ip_h;
+-	struct rte_icmp_hdr *icmp_h;
++	struct rte_icmp_hdr *icmp_h = NULL;
++	struct rte_udp_hdr *udp_h = NULL;
+ 	struct rte_ether_addr eth_addr;
+ 	uint32_t retry;
+ 	uint32_t ip_addr;
+@@ -290,6 +292,7 @@ reply_to_icmp_echo_rqsts(struct fwd_stream *fs)
+ 	uint16_t vlan_id;
+ 	uint16_t arp_op;
+ 	uint16_t arp_pro;
++	uint16_t udp_port;
+ 	uint32_t cksum;
+ 	uint8_t  i;
+ 	int l2_len;
+@@ -430,19 +433,35 @@ reply_to_icmp_echo_rqsts(struct fwd_stream *fs)
+ 		/*
+ 		 * Check if packet is a ICMP echo request.
+ 		 */
+-		icmp_h = (struct rte_icmp_hdr *) ((char *)ip_h +
+-					      sizeof(struct rte_ipv4_hdr));
+-		if (! ((ip_h->next_proto_id == IPPROTO_ICMP) &&
+-		       (icmp_h->icmp_type == RTE_IP_ICMP_ECHO_REQUEST) &&
+-		       (icmp_h->icmp_code == 0))) {
+-			rte_pktmbuf_free(pkt);
+-			continue;
++		if (proto == IPPROTO_ICMP) {
++			icmp_h = (struct rte_icmp_hdr *) ((char *)ip_h +
++					sizeof(struct rte_ipv4_hdr));
++			if (! ((ip_h->next_proto_id == IPPROTO_ICMP) &&
++						(icmp_h->icmp_type == RTE_IP_ICMP_ECHO_REQUEST) &&
++						(icmp_h->icmp_code == 0))) {
++				rte_pktmbuf_free(pkt);
++				continue;
++			}
++		} else if (proto == IPPROTO_UDP) {
++			udp_h = (struct rte_udp_hdr *) ((char *)ip_h +
++				 sizeof(struct rte_ipv4_hdr));
++			if ((ip_h->next_proto_id != IPPROTO_UDP) &&
++			    (rte_be_to_cpu_16(udp_h->dst_port) != 7)) {
++				rte_pktmbuf_free(pkt);
++				continue;
++			}
++ 		}
++
++		if (proto == IPPROTO_ICMP) {
++			if (verbose_level > 0)
++				printf("  ICMP: echo request seq id=%d\n",
++				       rte_be_to_cpu_16(icmp_h->icmp_seq_nb));
++		} else if (proto == IPPROTO_UDP) {
++			if (verbose_level > 0)
++				printf("  UDP: echo request from port=%d\n",
++				       rte_be_to_cpu_16(udp_h->src_port));
+ 		}
+ 
+-		if (verbose_level > 0)
+-			printf("  ICMP: echo request seq id=%d\n",
+-			       rte_be_to_cpu_16(icmp_h->icmp_seq_nb));
+-
+ 		/*
+ 		 * Prepare ICMP echo reply to be sent back.
+ 		 * - switch ethernet source and destinations addresses,
+@@ -480,13 +499,19 @@ reply_to_icmp_echo_rqsts(struct fwd_stream *fs)
+ 			ip_h->src_addr = ip_h->dst_addr;
+ 			ip_h->dst_addr = ip_addr;
+ 		}
+-		icmp_h->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
+-		cksum = ~icmp_h->icmp_cksum & 0xffff;
+-		cksum += ~htons(RTE_IP_ICMP_ECHO_REQUEST << 8) & 0xffff;
+-		cksum += htons(RTE_IP_ICMP_ECHO_REPLY << 8);
+-		cksum = (cksum & 0xffff) + (cksum >> 16);
+-		cksum = (cksum & 0xffff) + (cksum >> 16);
+-		icmp_h->icmp_cksum = ~cksum;
++		if (proto == IPPROTO_ICMP) {
++			icmp_h->icmp_type = RTE_IP_ICMP_ECHO_REPLY;
++			cksum = ~icmp_h->icmp_cksum & 0xffff;
++			cksum += ~htons(RTE_IP_ICMP_ECHO_REQUEST << 8) & 0xffff;
++			cksum += htons(RTE_IP_ICMP_ECHO_REPLY << 8);
++			cksum = (cksum & 0xffff) + (cksum >> 16);
++			cksum = (cksum & 0xffff) + (cksum >> 16);
++			icmp_h->icmp_cksum = ~cksum;
++		} else if (proto == IPPROTO_UDP) {
++			udp_port = udp_h->src_port;
++			udp_h->src_port = udp_h->dst_port;
++			udp_h->dst_port = udp_port;
++		}
+ 		pkts_burst[nb_replies++] = pkt;
+ 	}
+ 
+@@ -527,6 +552,27 @@ reply_to_icmp_echo_rqsts(struct fwd_stream *fs)
+ #endif
+ }
+ 
++
++static void
++reply_to_icmp_echo_rqsts(struct fwd_stream *fs)
++{
++	reply_to_echo_rqsts(fs, IPPROTO_ICMP);
++}
++
++static void
++reply_to_udp_echo_rqsts(struct fwd_stream *fs)
++{
++	reply_to_echo_rqsts(fs, IPPROTO_UDP);
++}
++
++ 
++struct fwd_engine udp_echo_engine = {
++	.fwd_mode_name  = "udpecho",
++	.port_fwd_begin = NULL,
++	.port_fwd_end   = NULL,
++	.packet_fwd     = reply_to_udp_echo_rqsts,
++};
++
+ struct fwd_engine icmp_echo_engine = {
+ 	.fwd_mode_name  = "icmpecho",
+ 	.port_fwd_begin = NULL,
+diff --git a/app/test-pmd/testpmd.c b/app/test-pmd/testpmd.c
+index e8e2a39b6..ec8402413 100644
+--- a/app/test-pmd/testpmd.c
++++ b/app/test-pmd/testpmd.c
+@@ -178,6 +178,7 @@ struct fwd_engine * fwd_engines[] = {
+ 	&tx_only_engine,
+ 	&csum_fwd_engine,
+ 	&icmp_echo_engine,
++	&udp_echo_engine,
+ 	&noisy_vnf_engine,
+ #if defined RTE_LIBRTE_PMD_SOFTNIC
+ 	&softnic_fwd_engine,
+diff --git a/app/test-pmd/testpmd.h b/app/test-pmd/testpmd.h
+index ce13eb8e6..6454ac05d 100644
+--- a/app/test-pmd/testpmd.h
++++ b/app/test-pmd/testpmd.h
+@@ -255,6 +255,7 @@ extern struct fwd_engine rx_only_engine;
+ extern struct fwd_engine tx_only_engine;
+ extern struct fwd_engine csum_fwd_engine;
+ extern struct fwd_engine icmp_echo_engine;
++extern struct fwd_engine udp_echo_engine;
+ extern struct fwd_engine noisy_vnf_engine;
+ #ifdef SOFTNIC
+ extern struct fwd_engine softnic_fwd_engine;

@@ -1,0 +1,19 @@
+#!/bin/bash
+NL=$'\n'
+CORES=( $( ls /sys/devices/system/cpu/ | egrep cpu\[0-9\]\+\{1,2\} | sed "s/cpu//" | sed "s/\///" | sort -h ) )
+echo "Found cores ids: ${CORES[*]}" 1>&2
+AVAILFREQ=$( cat "/sys/devices/system/cpu/cpufreq/policy0/scaling_available_frequencies" )
+
+while [ 0 ]; do
+	BUFFER=
+	for C in ${CORES[@]}; do
+		CFREQ=/sys/devices/system/cpu/cpufreq/policy${C}
+		BUFFER+=$( printf "[%02d] Current frequency: %d kHz%s" "$C" "$( cat "$CFREQ/scaling_cur_freq" )" )"$NL"
+	done
+	BUFFER+="$NL"$( printf "Available (kHz): %s" "$AVAILFREQ" )"$NL"
+
+	clear
+	echo -n "$BUFFER"
+	sleep 0.5
+	[ $? -ne 0 ] && exit 1
+done
