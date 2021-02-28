@@ -1,0 +1,18 @@
+#include <uk/plat/common/common.lds.h>
+
+SECTIONS
+{
+	EXCEPTION_SECTIONS
+
+	CTORTAB_SECTION
+
+	INITTAB_SECTION
+}
+INSERT BEFORE .rodata
+
+SECTIONS
+{
+	TLS_SECTIONS
+}
+
+INSERT BEFORE .data

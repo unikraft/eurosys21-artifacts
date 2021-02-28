@@ -1,0 +1,5 @@
+$(eval $(call addlib_s,libuksyslog,$(CONFIG_LIBUKSYSLOG)))
+
+CINCLUDES-y += -I$(LIBUKSYSLOG_BASE)/include
+
+LIBUKSYSLOG_SRC-y += $(LIBUKSYSLOG_BASE)/syslog.c

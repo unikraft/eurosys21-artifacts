@@ -1,0 +1,37 @@
+menuconfig LIBSYSCALL_SHIM
+	bool "syscall_shim: Syscall shim layer"
+	default n
+
+if LIBSYSCALL_SHIM
+	# Hidden configuration option that can be set by libc's in order to
+	# switch off the generation of libc-style wrapper symbols
+	config LIBSYSCALL_SHIM_NOWRAPPER
+	bool
+	default n
+
+	config LIBSYSCALL_SHIM_LIBCSTUBS
+	depends on !LIBSYSCALL_SHIM_NOWRAPPER
+	bool "Provide libc-style stubs"
+	default n
+	help
+		Automatically generate libc-style stubs for unavailable
+		system calls. The aim is to provide all libc-style system
+		call symbols although just a subset of the full API may be
+		implemtented. The symbols are defined as `weak`.
+		Please note that depending on the used compiler and optimization
+		options, this functionality may sometimes cause linking failures
+		because of double definitions of symbols. This is the case when
+		another library is providing some libc-style system calls
+		without registering them to libsyscall_shim.
+
+	config LIBSYSCALL_SHIM_HANDLER
+		bool "Binary system call handler (Linux ABI)"
+		default n
+		depends on ARCH_X86_64
+		select HAVE_SYSCALL
+		help
+			Enables a system call handler for binary system call
+			requests (e.g., sysenter/sysexit). The handler maps
+			register values accordingly to the Linux ABI standard
+			(see: man syscalls[2]).
+endif

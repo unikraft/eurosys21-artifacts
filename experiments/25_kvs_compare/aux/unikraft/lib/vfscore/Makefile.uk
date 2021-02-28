@@ -1,0 +1,31 @@
+$(eval $(call addlib_s,libvfscore,$(CONFIG_LIBVFSCORE)))
+
+# Register to uklibparam, sets "vfs" as parameter prefix (vfs.*)
+$(eval $(call addlib_paramprefix,libvfscore,vfs))
+
+CINCLUDES-y += -I$(LIBVFSCORE_BASE)/include
+
+LIBVFSCORE_CFLAGS-$(call gcc_version_ge,8,0) += -Wno-cast-function-type
+
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/fd.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/file.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/stdio.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/mount.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/vnode.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/dentry.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/syscalls.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/main.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/task.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/lookup.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/fops.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/subr_uio.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/pipe.c
+LIBVFSCORE_SRCS-y += $(LIBVFSCORE_BASE)/extra.ld
+LIBVFSCORE_SRCS-$(CONFIG_LIBVFSCORE_AUTOMOUNT_ROOTFS) += \
+	$(LIBVFSCORE_BASE)/rootfs.c
+
+
+UK_PROVIDED_SYSCALLS-$(CONFIG_LIBVFSCORE) += write-3 writev-3
+UK_PROVIDED_SYSCALLS-$(CONFIG_LIBVFSCORE) += read-3 readv-3
+UK_PROVIDED_SYSCALLS-$(CONFIG_LIBVFSCORE) += fstat-2
+UK_PROVIDED_SYSCALLS-$(CONFIG_LIBVFSCORE) += readlink-3

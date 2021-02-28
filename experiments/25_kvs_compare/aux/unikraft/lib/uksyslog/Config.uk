@@ -1,0 +1,4 @@
+config LIBUKSYSLOG
+	bool "uksyslog: syslog implementation in unikraft"
+	default n
+	select LIBVFSCORE

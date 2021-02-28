@@ -1,0 +1,16 @@
+clock_getres
+clock_gettime
+clock_settime
+gettimeofday
+nanosleep
+setitimer
+sleep
+timegm
+times
+usleep
+utime
+timer_create
+timer_delete
+timer_settime
+timer_gettime
+timer_getoverrun

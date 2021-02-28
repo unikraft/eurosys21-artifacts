@@ -1,0 +1,30 @@
+menu "Platform Interface Options"
+config UKPLAT_MEMRNAME
+	bool "Memory region names"
+	default n
+	help
+		Enable name field in memory region descriptors
+
+config EARLY_PRINT_PL011_UART_ADDR
+	hex "Early debug console pl011 serial address"
+	default 0x09000000
+	depends on (KVM_DEBUG_SERIAL_CONSOLE && ARCH_ARM_64)
+	help
+		Pl011 serial address used by early debug console.
+
+endmenu
+
+config HZ
+	int
+	prompt "Timer frequency (Hz)"
+	default 100
+	help
+		Configure the timer interrupt frequency.
+		Only change this if you know what you're doing.
+
+config FPSIMD
+	bool "floating point & simd support in application"
+	default n
+	depends on ARCH_ARM_64
+	help
+		Enable support FPU usage in application

@@ -1,0 +1,4 @@
+source "/root/Storage/Project/Unikraft/Unikraft_dpdk/unikraft/plat//kvm/Config.uk"
+source "/root/Storage/Project/Unikraft/Unikraft_dpdk/unikraft/plat//linuxu/Config.uk"
+source "/root/Storage/Project/Unikraft/Unikraft_dpdk/unikraft/plat//xen/Config.uk"
+source "/root/Storage/Project/Unikraft/Unikraft_dpdk/unikraft/plat/Config.uk"

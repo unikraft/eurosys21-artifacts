@@ -1,0 +1,4 @@
+config LIBUKSCHEDCOOP
+	bool "ukschedcoop: Cooperative Round-Robin scheduler"
+	default y
+	depends on LIBUKSCHED

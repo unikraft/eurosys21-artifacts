@@ -1,0 +1,5 @@
+config LIBUKCPUSET
+	bool "ukcpuset: Library implement the cpuset function"
+	default n
+	help
+		Library implements the cpuset function
