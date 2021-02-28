@@ -1,0 +1,4 @@
+$(eval $(call adddpdklib,$(DPDK_SRC_BASE),librte_net))
+
+SYMLINK-$(CONFIG_RTE_LIBRTE_NET)-include += net_crc_sse.h
+

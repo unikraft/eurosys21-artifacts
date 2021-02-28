@@ -1,0 +1,26 @@
+From 5671ec3aeb7f237e0c5d25f13a7f2004756b6eea Mon Sep 17 00:00:00 2001
+From: Costin Lupu <costin.lup@gmail.com>
+Date: Fri, 16 Aug 2019 23:09:15 +0200
+Subject: [PATCH] Apply hackish patch in order to include custom malloc.h
+ header first
+
+Signed-off-by: Costin Lupu <costin.lupu@cs.pub.ro>
+---
+ newlib/libc/include/malloc.h | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/newlib/libc/include/malloc.h b/newlib/libc/include/malloc.h
+index 41b5efd..682dde4 100644
+--- a/newlib/libc/include/malloc.h
++++ b/newlib/libc/include/malloc.h
+@@ -166,4 +166,7 @@ extern void cfree _PARAMS ((_PTR));
+ }
+ #endif
+ 
++#else
++#include_next <malloc.h>
++
+ #endif /* _INCLUDE_MALLOC_H_ */
+-- 
+2.20.1
+

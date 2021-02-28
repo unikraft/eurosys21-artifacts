@@ -1,0 +1,1 @@
+$(eval $(call adddpdklib,$(DPDK_SRC_BASE),librte_meter))

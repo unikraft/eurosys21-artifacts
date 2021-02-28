@@ -1,0 +1,26 @@
+From 272e94f69597a1f4c789b345976c293ca63f70c5 Mon Sep 17 00:00:00 2001
+From: Gaulthier Gain <gaulthier.gain@uliege.be>
+Date: Mon, 5 Aug 2019 08:27:22 +0000
+Subject: [PATCH] expose lstat/mknod declaration
+
+Signed-off-by: Gaulthier Gain <gaulthier.gain@uliege.be>
+---
+ newlib/libc/include/sys/stat.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/newlib/libc/include/sys/stat.h b/newlib/libc/include/sys/stat.h
+index a09f2f0..f2a663a 100644
+--- a/newlib/libc/include/sys/stat.h
++++ b/newlib/libc/include/sys/stat.h
+@@ -132,7 +132,7 @@ int _EXFUN(lstat,( const char *__restrict __path, struct stat *__restrict __sbuf
+ int	_EXFUN(stat,( const char *__restrict __path, struct stat *__restrict __sbuf ));
+ mode_t	_EXFUN(umask,( mode_t __mask ));
+ 
+-#if defined (__SPU__) || defined(__rtems__) || defined(__CYGWIN__) && !defined(__INSIDE_CYGWIN__)
++#if defined (__SPU__) || defined(__rtems__) || defined(__Unikraft__) || defined(__CYGWIN__) && !defined(__INSIDE_CYGWIN__)
+ int	_EXFUN(lstat,( const char *__restrict __path, struct stat *__restrict __buf ));
+ int	_EXFUN(mknod,( const char *__path, mode_t __mode, dev_t __dev ));
+ #endif
+-- 
+2.17.1
+

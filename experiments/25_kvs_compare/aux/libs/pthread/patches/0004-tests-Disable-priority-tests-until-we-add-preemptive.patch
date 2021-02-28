@@ -1,0 +1,28 @@
+From 36dec0d3b5e5ef279bdb30ee51b3e98cb21f5519 Mon Sep 17 00:00:00 2001
+From: Costin Lupu <costin.lup@gmail.com>
+Date: Sat, 9 Mar 2019 19:32:58 +0200
+Subject: [PATCH 4/5] tests Disable priority tests until we add preemptive
+ scheduling
+
+
+diff --git a/tests/test_main.c b/tests/test_main.c
+index d4bea48..bd6498e 100644
+--- a/tests/test_main.c
++++ b/tests/test_main.c
+@@ -109,11 +109,13 @@ static void runThreadTests(void)
+     pthread_test_reuse2();
+   */
+ 
++#if 0
+   printf("Priority test #1\n");
+   pthread_test_priority1();
+ 
+   printf("Priority test #2\n");
+   pthread_test_priority2();
++#endif
+ 
+ //  printf("Inherit test #1\n");
+ //  pthread_test_inherit1();  ///@todo
+-- 
+2.11.0
+

@@ -1,0 +1,63 @@
+From 09a21187f7e426147d4d5fb91451ea55cf7ac274 Mon Sep 17 00:00:00 2001
+From: Costin Lupu <costin.lup@gmail.com>
+Date: Wed, 3 Apr 2019 18:56:31 +0300
+Subject: [PATCH 2/2] bugfix Fix atomic operations on semaphore
+
+Field 'semaphore' of struct pthread_once_t_ is of type 'void *'.
+Therefore atomic operations should use long type instead of int.
+
+Signed-off-by: Costin Lupu <costin.lupu@cs.pub.ro>
+---
+ pthread_once.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/pthread_once.c b/pthread_once.c
+index a8166f5..2b6050f 100644
+--- a/pthread_once.c
++++ b/pthread_once.c
+@@ -55,7 +55,7 @@ pte_once_init_routine_cleanup(void * arg)
+ 
+   (void) PTE_ATOMIC_EXCHANGE(&once_control->state,PTE_ONCE_INIT);
+ 
+-  if (PTE_ATOMIC_EXCHANGE_ADD((int*)&once_control->semaphore, 0L)) /* MBR fence */
++  if (PTE_ATOMIC_EXCHANGE_ADD((long*)&once_control->semaphore, 0L)) /* MBR fence */
+     {
+       pte_osSemaphorePost((pte_osSemaphoreHandle) once_control->semaphore, 1);
+     }
+@@ -134,7 +134,7 @@ pthread_once (pthread_once_t * once_control, void (*init_routine) (void))
+            * we didn't create the semaphore.
+            * it is only there if there is someone waiting.
+            */
+-          if (PTE_ATOMIC_EXCHANGE_ADD((int*)&once_control->semaphore, 0L)) /* MBR fence */
++          if (PTE_ATOMIC_EXCHANGE_ADD((long*)&once_control->semaphore, 0L)) /* MBR fence */
+             {
+               pte_osSemaphorePost((pte_osSemaphoreHandle) once_control->semaphore,once_control->numSemaphoreUsers);
+             }
+@@ -143,12 +143,12 @@ pthread_once (pthread_once_t * once_control, void (*init_routine) (void))
+         {
+           PTE_ATOMIC_INCREMENT(&once_control->numSemaphoreUsers);
+ 
+-          if (!PTE_ATOMIC_EXCHANGE_ADD((int*)&once_control->semaphore, 0L)) /* MBR fence */
++          if (!PTE_ATOMIC_EXCHANGE_ADD((long*)&once_control->semaphore, 0L)) /* MBR fence */
+             {
+               pte_osSemaphoreCreate(0, (pte_osSemaphoreHandle*) &sema);
+ 
+-              if (PTE_ATOMIC_COMPARE_EXCHANGE((int *) &once_control->semaphore,
+-                                              (int) sema,
++              if (PTE_ATOMIC_COMPARE_EXCHANGE((long *) &once_control->semaphore,
++                                              (long) sema,
+                                               0))
+                 {
+                   pte_osSemaphoreDelete((pte_osSemaphoreHandle)sema);
+@@ -168,7 +168,7 @@ pthread_once (pthread_once_t * once_control, void (*init_routine) (void))
+             {
+               /* we were last */
+               if ((sema =
+-                     (pte_osSemaphoreHandle) PTE_ATOMIC_EXCHANGE((int *) &once_control->semaphore,0)))
++                     (pte_osSemaphoreHandle) PTE_ATOMIC_EXCHANGE((long *) &once_control->semaphore,0)))
+                 {
+                   pte_osSemaphoreDelete(sema);
+                 }
+-- 
+2.11.0
+

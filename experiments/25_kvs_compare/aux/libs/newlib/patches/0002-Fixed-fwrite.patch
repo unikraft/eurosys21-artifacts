@@ -1,0 +1,39 @@
+From c83670abf70a04ed21c567e659ab66136b40796f Mon Sep 17 00:00:00 2001
+From: Vlad-Andrei Badoiu <vlad_andrei.badoiu@stud.acs.upb.ro>
+Date: Wed, 10 Apr 2019 13:09:41 +0300
+Subject: [PATCH 1/1] Fix fwrite
+
+Fwrite does not return the correct number of items 
+written. If we pass a string that ends in '\n' we
+get n - 1(the '\n') for a string of length n.
+That is because __sputc_r returns EOF for the 
+the newline character. This patch solves the problem 
+by increasing the variable i if  __sputc_r returned 
+EOF when p[i] is '\n'.
+
+Signed-off-by: Vlad-Andrei Badoiu <vlad_andrei.badoiu@stud.acs.upb.ro>
+---
+ newlib/libc/stdio/fwrite.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/newlib/libc/stdio/fwrite.c b/newlib/libc/stdio/fwrite.c
+index 6b3ff90..d910247 100644
+--- a/newlib/libc/stdio/fwrite.c
++++ b/newlib/libc/stdio/fwrite.c
+@@ -188,8 +188,11 @@ _DEFUN(_fwrite_r, (ptr, buf, size, count, fp),
+ 
+   while (i < n)
+     {
+-      if (__sputc_r (ptr, p[i], fp) == EOF)
+-	break;
++      if (__sputc_r (ptr, p[i], fp) == EOF) {
++		if (p[i] == '\n')
++			i++;
++		break;
++	  }
+ 
+       i++;
+     }
+-- 
+2.20.1
+

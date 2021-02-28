@@ -1,0 +1,1101 @@
+#  liblnewlib Makefile.uk
+#
+#  Authors: Felipe Huici <felipe.huici@neclab.eu>
+#           Florian Schmidt <florian.schmidt@neclab.eu>
+#
+#  Copyright (c) 2017, NEC Europe Ltd., NEC Corporation. All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#  3. Neither the name of the copyright holder nor the names of its
+#     contributors may be used to endorse or promote products derived from
+#     this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+#
+#  THIS HEADER MAY NOT BE EXTRACTED OR MODIFIED IN ANY WAY.
+#
+
+################################################################################
+# Library registration
+################################################################################
+# We have two libraries with newlib: libc and libm
+# We are going to register both but fetch the sources of both into libc's
+# build dir.
+$(eval $(call addlib_s,libnewlibc,$(CONFIG_LIBNEWLIBC)))
+$(eval $(call addlib_s,libnewlibm,$(CONFIG_LIBNEWLIBM)))
+# Additionally, build glue code. This is put into a separate library so that we
+# can apply a thick helping of warning suppressions to newlib, which throws
+# lots of compilation warnings, but keep our glue code up to our standards.
+$(eval $(call addlib_s,libnewlibglue,$(CONFIG_LIBNEWLIBC)))
+
+################################################################################
+# Sources
+################################################################################
+LIBNEWLIB_VERSION=2.5.0.20170922
+LIBNEWLIB_URL=http://sourceware.org/pub/newlib/newlib-$(LIBNEWLIB_VERSION).tar.gz
+LIBNEWLIB_PATCHDIR=$(LIBNEWLIBC_BASE)/patches
+$(eval $(call fetch,libnewlibc,$(LIBNEWLIB_URL)))
+$(eval $(call patch,libnewlibc,$(LIBNEWLIB_PATCHDIR),newlib-$(LIBNEWLIB_VERSION)))
+
+################################################################################
+# Helpers
+################################################################################
+LIBNEWLIB_SUBDIR=newlib-$(LIBNEWLIB_VERSION)
+LIBNEWLIB_LIBC = $(LIBNEWLIBC_ORIGIN)/$(LIBNEWLIB_SUBDIR)/newlib/libc
+LIBNEWLIB_LIBM = $(LIBNEWLIBC_ORIGIN)/$(LIBNEWLIB_SUBDIR)/newlib/libm
+
+################################################################################
+# Library includes
+################################################################################
+LIBNEWLIBC_COMMON_INCLUDES-y     += -I$(LIBNEWLIBC_BASE)/include
+LIBNEWLIBC_COMMON_INCLUDES-y     += -I$(LIBNEWLIBC_BASE)/musl-imported/include
+LIBNEWLIBC_COMMON_INCLUDES-y     += -I$(LIBNEWLIBC_BASE)/musl-imported/arch/generic
+LIBNEWLIBGLUE_CINCLUDES-y        += -I$(LIBNEWLIBC_BASE)/musl-imported/src/include
+LIBNEWLIBC_COMMON_INCLUDES-$(CONFIG_ARCH_X86_64) += -I$(LIBNEWLIBC_BASE)/musl-imported/arch/x86_64
+LIBNEWLIBC_COMMON_INCLUDES-y     += -I$(LIBNEWLIB_LIBC)/include
+
+CINCLUDES-$(CONFIG_LIBNEWLIBC)   += $(LIBNEWLIBC_COMMON_INCLUDES-y)
+CXXINCLUDES-$(CONFIG_LIBNEWLIBC) += $(LIBNEWLIBC_COMMON_INCLUDES-y)
+
+LIBNEWLIBM_CINCLUDES   += -I$(LIBNEWLIB_LIBM)/common
+LIBNEWLIBM_CXXINCLUDES += -I$(LIBNEWLIB_LIBM)/common
+
+################################################################################
+# Global flags
+################################################################################
+LIBNEWLIB_GLOBAL_FLAGS-y  += -DMISSING_SYSCALL_NAMES -DMALLOC_PROVIDED
+LIBNEWLIB_GLOBAL_FLAGS-y  += -D_POSIX_REALTIME_SIGNALS
+LIBNEWLIB_GLOBAL_FLAGS-$(CONFIG_LIBNEWLIBC_WANT_IO_C99_FORMATS) += -D_WANT_IO_C99_FORMATS
+LIBNEWLIB_GLOBAL_FLAGS-$(CONFIG_LIBNEWLIBC_LINUX_ERRNO_EXTENSIONS) += -D__LINUX_ERRNO_EXTENSIONS__
+ifeq ($(CONFIG_ARCH_ARM_64),y)
+LIBNEWLIB_GLOBAL_FLAGS-y  += -D_LDBL_EQ_DBL
+LIBNEWLIB_GLOBAL_FLAGS-y  += -D_HAVE_LONG_DOUBLE
+endif
+ifeq ($(CONFIG_ARCH_X86_64),y)
+LIBNEWLIB_GLOBAL_FLAGS-y  += -D_LDBL_EQ_DBL
+LIBNEWLIB_GLOBAL_FLAGS-y  += -D_HAVE_LONG_DOUBLE
+endif
+
+CFLAGS-$(CONFIG_LIBNEWLIBC)   += $(LIBNEWLIB_GLOBAL_FLAGS-y)
+CXXFLAGS-$(CONFIG_LIBNEWLIBC) += $(LIBNEWLIB_GLOBAL_FLAGS-y)
+
+# Suppress some warnings to make the build process look neater
+LIBNEWLIB_SUPPRESS_FLAGS-y += \
+-Wno-unused-parameter -Wno-unused-variable -Wno-nonnull				\
+-Wno-unused-but-set-variable -Wno-unused-label 					\
+-Wno-unused-function -Wno-missing-field-initializers -Wno-uninitialized		\
+-Wno-array-bounds -Wno-maybe-uninitialized -Wno-pointer-sign -Wno-unused-value	\
+-Wno-unused-macros -Wno-parentheses -Wno-implicit-function-declaration		\
+-Wno-missing-braces -Wno-endif-labels -Wno-unused-but-set-variable		\
+-Wno-type-limits -Wno-sign-compare
+LIBNEWLIB_SUPPRESS_FLAGS-$(call gcc_version_ge,6,0) += -Wno-misleading-indentation
+LIBNEWLIB_SUPPRESS_FLAGS-$(call gcc_version_ge,6,0) += -Wno-shift-negative-value
+LIBNEWLIB_SUPPRESS_FLAGS-$(call gcc_version_ge,7,0) += -Wno-implicit-fallthrough
+
+LIBNEWLIB_NO_BUILTINS		+= -D__NO_SYSCALLS__ -fno-builtin
+
+LIBNEWLIBC_CFLAGS-y   += $(LIBNEWLIB_SUPPRESS_FLAGS-y) $(LIBNEWLIB_NO_BUILTINS)
+LIBNEWLIBM_CFLAGS-y   += $(LIBNEWLIB_SUPPRESS_FLAGS-y) $(LIBNEWLIB_NO_BUILTINS)
+LIBNEWLIBC_CXXFLAGS-y += $(LIBNEWLIB_SUPPRESS_FLAGS-y) $(LIBNEWLIB_NO_BUILTINS)
+LIBNEWLIBM_CXXFLAGS-y += $(LIBNEWLIB_SUPPRESS_FLAGS-y) $(LIBNEWLIB_NO_BUILTINS)
+
+LIBNEWLIBGLUE_SUPPRESS_FLAGS-y += -Wno-unused-parameter
+LIBNEWLIBGLUE_CFLAGS-y   += $(LIBNEWLIBGLUE_SUPPRESS_FLAGS-y)
+LIBNEWLIBGLUE_CXXFLAGS-y += $(LIBNEWLIBGLUE_SUPPRESS_FLAGS-y)
+
+LIBNEWLIB_GLOBAL_SUPPRESS_FLAGS-y += -Wno-char-subscripts
+CFLAGS-$(CONFIG_LIBNEWLIBC)   += $(LIBNEWLIB_GLOBAL_SUPPRESS_FLAGS-y)
+CXXFLAGS-$(CONFIG_LIBNEWLIBC) += $(LIBNEWLIB_GLOBAL_SUPPRESS_FLAGS-y)
+
+################################################################################
+# OS dependencies code - Glue between Unicore and newlib
+################################################################################
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/console.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/plat.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/file.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/mem.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/resource.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/pty.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/locale.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/dev.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/signal.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/link.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/mntent.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/syscall.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/misc/syslog.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/termios/tcsetattr.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/termios/tcgetattr.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/math/sincosl.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/exit/assert.c
+
+ifeq ($(CONFIG_LIBNEWLIBC_CRYPT),y)
+LIBNEWLIBGLUE_CFLAGS-y   += -Wno-missing-braces -Wno-sign-compare -Wno-char-subscripts
+LIBNEWLIBGLUE_CFLAGS-y   += -Dhidden=
+
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/crypt/crypt_blowfish.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/crypt/crypt.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/crypt/crypt_des.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/crypt/crypt_md5.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/crypt/crypt_r.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/crypt/crypt_sha256.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/crypt/crypt_sha512.c
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/musl-imported/src/crypt/encrypt.c
+endif
+LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/fnmatch.c
+#LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/mmap.c
+#LIBNEWLIBGLUE_SRCS-y += $(LIBNEWLIBC_BASE)/ssetugid-stub.c
+
+################################################################################
+# Newlib/libc code -- argz
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/argz_add.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/argz_add_sep.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/argz_append.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/argz_count.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/argz_create.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/argz_create_sep.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/argz_delete.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/argz_extract.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/argz_insert.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/argz_next.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/argz_replace.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/argz_stringify.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/buf_findstr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/envz_entry.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/envz_get.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/envz_add.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/envz_remove.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/envz_merge.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/argz/envz_strip.c
+
+################################################################################
+# Newlib/libc code -- ctype
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/ctype_.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isalnum.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isalpha.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iscntrl.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isdigit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/islower.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isupper.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isprint.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/ispunct.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isspace.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isxdigit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/tolower.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/toupper.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isalnum_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isalpha_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isascii.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isascii_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isblank.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isblank_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iscntrl_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isdigit_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/islower_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isupper_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isprint_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/ispunct_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isspace_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswalnum.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswalnum_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswalpha.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswalpha_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswblank.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswblank_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswcntrl.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswcntrl_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswctype.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswctype_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswdigit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswdigit_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswgraph.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswgraph_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswlower.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswlower_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswprint.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswprint_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswpunct.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswpunct_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswspace.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswspace_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswupper.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswupper_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswxdigit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/iswxdigit_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/isxdigit_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/jp2uc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/toascii.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/toascii_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/tolower_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/toupper_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/towctrans.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/towctrans_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/towlower.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/towlower_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/towupper.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/towupper_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/wctrans.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/wctrans_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/wctype.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/ctype/wctype_l.c
+
+################################################################################
+# Newlib/libc code -- errno
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/errno/errno.c
+
+################################################################################
+# Newlib/libc code -- iconv
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/lib/aliasesi.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/lib/ucsconv.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/lib/nullconv.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/lib/iconv.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/lib/aliasesbi.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/lib/iconvnls.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ces/utf-8.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ces/utf-16.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ces/ucs-2.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ces/us-ascii.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ces/ucs-4.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ces/ucs-2-internal.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ces/ucs-4-internal.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ces/cesbi.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ces/table.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ces/table-pcs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ces/euc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/ccsbi.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_10.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_13.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_14.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_15.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_1.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_2.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_3.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_4.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_5.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_6.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_7.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_8.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_9.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_8859_11.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/win_1250.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/win_1252.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/win_1254.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/win_1256.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/win_1258.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/win_1251.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/win_1253.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/win_1255.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/win_1257.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/koi8_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/koi8_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/koi8_ru.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/koi8_uni.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/iso_ir_111.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/big5.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/cp775.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/cp850.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/cp852.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/cp855.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/cp866.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/jis_x0212_1990.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/jis_x0201_1976.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/jis_x0208_1990.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/ksx1001.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/cns11643_plane1.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/cns11643_plane2.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/iconv/ccs/cns11643_plane14.c
+
+################################################################################
+# Newlib/libc code -- locale
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/locale/locale.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/locale/localeconv.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/locale/duplocale.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/locale/freelocale.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/locale/lctype.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/locale/lmessages.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/locale/lnumeric.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/locale/lmonetary.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/locale/newlocale.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/locale/nl_langinfo.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/locale/timelocal.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/locale/uselocale.c
+
+################################################################################
+# Newlib/libc code -- misc
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/misc/__dprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/misc/unctrl.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/misc/ffs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/misc/init.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/misc/fini.c
+
+################################################################################
+# Newlib/libc code -- posix
+################################################################################
+LIBNEWLIBC_COLLATE_INCLUDES += -I$(LIBNEWLIB_LIBC)/posix
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/posix/collate.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/posix/collcmp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/posix/glob.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/posix/regcomp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/posix/regerror.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/posix/regexec.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/posix/regfree.c
+
+################################################################################
+# Newlib/libc code -- reent
+################################################################################
+ifeq ($(CONFIG_HAVE_SCHED),y)
+# if scheduling enabled, then Unikraft provides __getreent()
+CFLAGS-$(CONFIG_LIBNEWLIBC) += -D__DYNAMIC_REENT__
+CXXFLAGS-$(CONFIG_LIBNEWLIBC) += -D__DYNAMIC_REENT__
+else
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/getreent.c
+endif
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/closer.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/reent.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/impure.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/fcntlr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/fstatr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/gettimeofdayr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/isattyr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/linkr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/lseekr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/mkdirr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/openr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/readr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/renamer.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/signalr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/signgam.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/statr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/timesr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/unlinkr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/reent/writer.c
+
+################################################################################
+# Newlib/libc code -- search
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/bsearch.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/qsort.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/hash.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/hash_bigkey.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/hash_buf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/hash_func.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/hash_log2.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/hash_page.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/hcreate.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/hcreate_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/tdelete.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/tdestroy.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/tfind.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/tsearch.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/twalk.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/qsort_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/search/bsd_qsort_r.c
+
+################################################################################
+# Newlib/libc code -- signal
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/signal/psignal.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/signal/raise.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/signal/signal.c
+
+################################################################################
+# Newlib/libc code -- stdio
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/printf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfprintf.c|integer
+LIBNEWLIBC_VFPRINTF_INTEGER_FLAGS-y += -DINTEGER_ONLY
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfprintf.c|string
+LIBNEWLIBC_VFPRINTF_STRING_FLAGS-y += -DSTRING_ONLY
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfprintf.c|stringinteger
+LIBNEWLIBC_VFPRINTF_STRINGINTEGER_FLAGS-y += -DSTRING_ONLY -DINTEGER_ONLY
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfwprintf.c|dummy
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfwprintf.c|integer
+LIBNEWLIBC_VFWPRINTF_INTEGER_FLAGS-y += -DINTEGER_ONLY
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfwprintf.c|string
+LIBNEWLIBC_VFWPRINTF_STRING_FLAGS-y += -DSTRING_ONLY
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfwprintf.c|stringinteger
+LIBNEWLIBC_VFWPRINTF_STRINGINTEGER_FLAGS-y += -DSTRING_ONLY -DINTEGER_ONLY
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfscanf.c|integer
+LIBNEWLIBC_VFSCANF_INTEGER_FLAGS-y += -DINTEGER_ONLY
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfscanf.c|string
+LIBNEWLIBC_VFSCANF_STRING_FLAGS-y += -DSTRING_ONLY
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfscanf.c|stringinteger
+LIBNEWLIBC_VFSCANF_STRINGINTEGER_FLAGS-y += -DSTRING_ONLY -DINTEGER_ONLY
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfwscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfwscanf.c|integer
+LIBNEWLIBC_VFWSCANF_INTEGER_FLAGS-y += -DINTEGER_ONLY
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfwscanf.c|string
+LIBNEWLIBC_VFWSCANF_STRING_FLAGS-y += -DSTRING_ONLY
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vfwscanf.c|stringinteger
+LIBNEWLIBC_VFWSCANF_STRINGINTEGER_FLAGS-y += -DSTRING_ONLY -DINTEGER_ONLY
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/findfp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fputc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fclose.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/wsetup.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/clearerr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fdopen.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/feof.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/ferror.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fflush.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fgetc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fgetpos.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fgets.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fileno.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/flags.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fopen.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fputs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fread.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/freopen.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fseek.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fsetpos.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/ftell.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fvwrite.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fwalk.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fwrite.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/getc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/getchar.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/getc_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/getchar_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/getdelim.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/getline.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/gets.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/makebuf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/perror.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/putc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/putchar.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/putc_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/putchar_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/puts.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/refill.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/remove.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/rewind.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/rget.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/scanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/sccl.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/setbuf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/setbuffer.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/setlinebuf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/setvbuf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/snprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/sprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/sscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/stdio.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/swprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/tmpfile.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/tmpnam.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/ungetc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vdprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vsnprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vsprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vsscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/wbuf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/asprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fcloseall.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fseeko.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/ftello.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/getw.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/mktemp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/putw.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vasprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fiprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fiscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/iprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/iscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/siprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/siscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/sniprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vdiprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/viprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/viscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vsiprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vsiscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vsniprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vasnprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/asniprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/diprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vasniprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/asnprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/clearerr_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/dprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/feof_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/ferror_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fflush_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fgetc_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fgets_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fgetwc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fgetwc_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fgetws.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fgetws_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fileno_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fmemopen.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fopencookie.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fpurge.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fputc_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fputs_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fputwc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fputwc_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fputws.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fputws_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fread_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fsetlocking.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/funopen.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fwide.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fwprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fwrite_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/fwscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/getwc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/getwc_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/getwchar.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/getwchar_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/open_memstream.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/putwc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/putwc_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/putwchar.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/putwchar_u.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/stdio_ext.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/swscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/ungetwc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vswprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vswscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vwprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/vwscanf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/wprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio/wscanf.c
+
+################################################################################
+# Newlib/libc code -- stdio64
+################################################################################
+LIBNEWLIBC_STDIO64_INCLUDES += -I$(LIBNEWLIB_LIBC)/stdio
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio64/stdio64.c
+LIBNEWLIBC_FDOPEN64_LARGEFILES_FLAGS-y += -D__LARGE64_FILES
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio64/fgetpos64.c
+LIBNEWLIBC_FOPEN64_INCLUDES += -I$(LIBNEWLIB_LIBC)/stdio
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio64/fopen64.c
+LIBNEWLIBC_FREOPEN64_INCLUDES += -I$(LIBNEWLIB_LIBC)/stdio
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio64/freopen64.c
+LIBNEWLIBC_FSEEKO64_INCLUDES += -I$(LIBNEWLIB_LIBC)/stdio
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio64/fseeko64.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio64/fsetpos64.c
+LIBNEWLIBC_FTELLO64_INCLUDES += -I$(LIBNEWLIB_LIBC)/stdio
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio64/ftello64.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdio64/tmpfile64.c
+
+################################################################################
+# Newlib/libc code -- stdlib
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/__adjust.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/__atexit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/__call_atexit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/__exp10.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/__ten_mu.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/_Exit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/abs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/aligned_alloc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/assert.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/atexit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/atof.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/atoff.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/atoi.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/atol.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/div.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/dtoa.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/dtoastub.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/environ.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/envlock.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/eprintf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/exit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/gdtoa-gethex.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/gdtoa-hexnan.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/getenv.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/getenv_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/imaxabs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/imaxdiv.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/itoa.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/labs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/ldiv.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/ldtoa.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mblen.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mblen_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mbstowcs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mbstowcs_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mbtowc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mbtowc_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mprec.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/on_exit_args.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/quick_exit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/rand.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/rand_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/random.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/reallocarray.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/reallocf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/sb_charsets.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/strtod.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/strtodg.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/strtoimax.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/strtol.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/strtold.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/strtorx.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/strtoul.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/strtoumax.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/utoa.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcstod.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcstoimax.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcstol.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcstoul.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcstoumax.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcstombs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcstombs_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wctomb.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wctomb_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/arc4random.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/arc4random_uniform.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/cxa_atexit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/cxa_finalize.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/drand48.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/ecvtbuf.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/efgcvt.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/erand48.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/jrand48.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/lcong48.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/lrand48.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mrand48.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/nrand48.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/rand48.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/seed48.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/srand48.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/strtoll.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/strtoll_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/strtoull.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/strtoull_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcstoll.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcstoll_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcstold.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcstoull.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcstoull_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/atoll.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/llabs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/lldiv.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/putenv.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/putenv_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/setenv.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/setenv_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/rpmatch.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/a64l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/btowc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/getopt.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/getsubopt.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/l64a.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mbrlen.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mbrtowc.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mbsinit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mbsnrtowcs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/mbsrtowcs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/on_exit.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcrtomb.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcsnrtombs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wcsrtombs.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/stdlib/wctob.c
+
+################################################################################
+# Newlib/libc code -- string
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/bcopy.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/bzero.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/explicit_bzero.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/ffsl.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/ffsll.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/fls.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/flsl.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/flsll.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/index.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/memchr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/memrchr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/memcmp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/memcpy.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/memmove.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/memset.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/memmem.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/rindex.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strcasecmp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strcat.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBNEWLIB_LIBC)/string/strchr.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBNEWLIB_LIBC)/machine/aarch64/strchr.S
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBNEWLIB_LIBC)/string/strcmp.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBNEWLIB_LIBC)/machine/aarch64/strcmp.S
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strcoll.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBNEWLIB_LIBC)/string/strcpy.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBNEWLIB_LIBC)/machine/aarch64/strcpy.S
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strcspn.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strdup.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strdup_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strerror.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strerror_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strlcat.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strlcpy.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBNEWLIB_LIBC)/string/strlen.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBNEWLIB_LIBC)/machine/aarch64/strlen.S
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strlwr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strncasecmp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strncasecmp_l.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strncat.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBNEWLIB_LIBC)/string/strncmp.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBNEWLIB_LIBC)/machine/aarch64/strncmp.S
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strncpy.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBNEWLIB_LIBC)/string/strnlen.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBNEWLIB_LIBC)/machine/aarch64/strnlen.S
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strnstr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strpbrk.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBNEWLIB_LIBC)/string/strrchr.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBNEWLIB_LIBC)/machine/aarch64/strrchr.S
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strsep.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strsignal.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strspn.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strtok.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strtok_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strupr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strxfrm.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strstr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/swab.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/timingsafe_bcmp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/timingsafe_memcmp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/u_strerr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcscat.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcschr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcscmp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcscoll.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcscpy.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcscspn.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcslcat.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcslcpy.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcslen.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcsncat.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcsncmp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcsncpy.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcsnlen.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcspbrk.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcsrchr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcsspn.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcsstr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcstok.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcswidth.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcsxfrm.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcwidth.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wmemchr.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wmemcmp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wmemcpy.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wmemmove.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wmemset.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/xpg_strerror_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/bcmp.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/memccpy.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/mempcpy.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBNEWLIB_LIBC)/string/stpcpy.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBNEWLIB_LIBC)/machine/aarch64/stpcpy.S
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/stpncpy.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strndup.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strcasestr.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBNEWLIB_LIBC)/string/strchrnul.c
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBNEWLIB_LIBC)/machine/aarch64/strchrnul.S
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/strndup_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcpcpy.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcpncpy.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcsdup.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/string/wcscasecmp.c
+
+################################################################################
+# Newlib/libc code -- syscalls
+################################################################################
+#LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/syscalls/sysfcntl.c
+
+################################################################################
+# Newlib/libc code -- time
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/asctime.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/asctime_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/clock.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/ctime.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/ctime_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/difftime.c
+LIBNEWLIBC_GETTZINFO_INCLUDES += -I$(LIBNEWLIB_LIBC)/time
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/gettzinfo.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/gmtime.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/gmtime_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/lcltime.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/lcltime_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/mktime.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/month_lengths.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/strftime.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/strptime.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/time.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/tzcalc_limits.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/tzlock.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/tzset.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/tzset_r.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/tzvars.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/wcsftime.c
+
+################################################################################
+# Newlib/libc code -- setjmp, longjmp
+################################################################################
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBNEWLIB_LIBC)/machine/x86_64/setjmp.S
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_ARM_32) += $(LIBNEWLIB_LIBC)/machine/arm/setjmp.S
+LIBNEWLIBC_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBNEWLIB_LIBC)/machine/aarch64/setjmp.S
+
+################################################################################
+# Newlib/libm code -- math
+################################################################################
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_acos.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_acosh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_asin.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_atan2.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_atanh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_cosh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_exp.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_acos.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_acosh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_asin.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_atan2.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_atanh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_cosh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_exp.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_fmod.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_hypot.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_j0.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_j1.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_jn.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_log10.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_log.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_fmod.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_pow.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_remainder.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_rem_pio2.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_scalb.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_sinh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/ef_sqrt.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_hypot.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_j0.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_j1.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_jn.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/el_hypot.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_log10.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_log.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_pow.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_remainder.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_rem_pio2.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/erf_gamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/erf_lgamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/er_gamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/er_lgamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_scalb.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_sinh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/e_sqrt.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/k_cos.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/kf_cos.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/kf_rem_pio2.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/kf_sin.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/kf_tan.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/k_rem_pio2.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/k_sin.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/k_standard.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/k_tan.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_asinh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_atan.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_ceil.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_cos.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_erf.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_fabs.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_asinh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_atan.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_ceil.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_cos.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_erf.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_fabs.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_floor.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_frexp.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_ldexp.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_floor.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_frexp.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_signif.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_sin.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_tan.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/sf_tanh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_ldexp.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_signif.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_sin.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_tan.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/s_tanh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_acos.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_acosh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_asin.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_atan2.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_atanh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_cosh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_drem.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_exp2.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_exp.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_acos.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_acosh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_asin.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_atan2.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_atanh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_cosh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_drem.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_exp2.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_exp.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_fmod.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_gamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_hypot.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_j0.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_j1.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_jn.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_lgamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_log10.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_log.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_fmod.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_pow.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_remainder.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_scalb.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_sincos.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_sinh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_sqrt.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wf_tgamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_gamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_hypot.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_j0.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_j1.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_jn.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_lgamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_log10.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_log.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_pow.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_remainder.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wrf_gamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wrf_lgamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wr_gamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/wr_lgamma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_scalb.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_sincos.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_sinh.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_sqrt.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/math/w_tgamma.c
+
+################################################################################
+# Newlib/libm code -- common
+################################################################################
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/lroundl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/llroundl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/logl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/expl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/ceill.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/floorl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/ldexpl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/frexpl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/powl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/cosl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sinl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/atanl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/tanl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/fmodl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sinhl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/coshl.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_finite.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_copysign.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_modf.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_scalbn.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_cbrt.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_exp10.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_expm1.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_ilogb.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_infinity.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_isinf.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_isinfd.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_isnan.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_isnand.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_log1p.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_nan.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_nextafter.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_pow10.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_rint.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_logb.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_log2.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_matherr.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_lib_ver.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_fdim.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_fma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_fmax.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_fmin.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_fpclassify.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_lrint.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_llrint.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_lround.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_llround.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_nearbyint.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_remquo.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_round.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_scalbln.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_signbit.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/s_trunc.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_finite.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_copysign.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_modf.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_scalbn.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_cbrt.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_exp10.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_expm1.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_ilogb.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_infinity.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_isinf.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_isinff.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_isnan.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_isnanf.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_log1p.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_nan.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_nextafter.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_pow10.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_rint.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_logb.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_log2.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_fdim.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_fma.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_fmax.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_fmin.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_fpclassify.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_lrint.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_llrint.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_lround.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_llround.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_nearbyint.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_remquo.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_round.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_scalbln.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sf_trunc.c
+LIBNEWLIBM_SRCS-y += $(LIBNEWLIB_LIBM)/common/sqrtl.c

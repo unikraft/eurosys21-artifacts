@@ -1,0 +1,4 @@
+$(eval $(call adddpdklib,$(DPDK_SRC_BASE),libuk_pmd))
+
+SRCS-y += uk_pmd.c
+SRCS-y += uk_netbuf_ring.c

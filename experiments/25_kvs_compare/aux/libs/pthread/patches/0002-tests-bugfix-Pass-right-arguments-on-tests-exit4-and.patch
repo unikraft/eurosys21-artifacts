@@ -1,0 +1,54 @@
+From 1bcadf3d3de5b2ef1417216e3ee56b7ec12eddec Mon Sep 17 00:00:00 2001
+From: Costin Lupu <costin.lup@gmail.com>
+Date: Sat, 9 Mar 2019 19:27:16 +0200
+Subject: [PATCH 2/5] tests bugfix Pass right arguments on tests exit4 and
+ exit5
+
+
+diff --git a/tests/exit4.c b/tests/exit4.c
+index 6d3e9ad..2645246 100644
+--- a/tests/exit4.c
++++ b/tests/exit4.c
+@@ -105,7 +105,7 @@ static bag_t threadbag[NUMTHREADS + 1];
+ static int osThread(void * arg)
+ {
+   int result = 1;
+-  bag_t * bag = *((bag_t **) arg);
++  bag_t * bag = arg;
+ 
+   assert(bag == &threadbag[bag->threadnum]);
+   assert(bag->started == 0);
+@@ -142,7 +142,7 @@ int pthread_test_exit4()
+       ptr = &(threadbag[i]);
+ 
+       pte_osThreadCreate(osThread, 4096, 10,
+-                         &ptr,
++                         ptr,
+                          &h[i]);
+ 
+       pte_osThreadStart(h[i]);
+diff --git a/tests/exit5.c b/tests/exit5.c
+index 5e09c0f..bcad6e9 100644
+--- a/tests/exit5.c
++++ b/tests/exit5.c
+@@ -103,7 +103,7 @@ static bag_t threadbag[NUMTHREADS + 1];
+ static int osThread(void * arg)
+ {
+   int result = 1;
+-  bag_t * bag = *((bag_t **) arg);
++  bag_t * bag = arg;
+ 
+   assert(bag == &threadbag[bag->threadnum]);
+   assert(bag->started == 0);
+@@ -138,7 +138,7 @@ int pthread_test_exit5()
+       ptr = &(threadbag[i]);
+ 
+       pte_osThreadCreate(osThread, 4096, 10,
+-                         &ptr,
++                         ptr,
+                          &h[i]);
+ 
+       pte_osThreadStart(h[i]);
+-- 
+2.11.0
+

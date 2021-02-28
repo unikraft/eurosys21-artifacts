@@ -1,0 +1,58 @@
+$(eval $(call addlib_s,libukdpdkbuild,$(CONFIG_UKDPDK)))
+
+
+DPDK_VERSION := 19.08
+DPDK_NAME := dpdk-$(DPDK_VERSION)
+DPDK_URL = https://git.dpdk.org/dpdk/snapshot/$(DPDK_NAME).tar.xz
+$(eval $(call fetch,libukdpdkbuild,$(DPDK_URL)))
+UK_DPDK_PREPARE:=
+UK_DPDK_PREPARE-y:=
+
+## These common build flags are shared across all the dpdk library.
+LIBUKDPDKBUILD_CFLAGS-y += -I$(LIBUKDPDKBUILD_BASE)/include/
+LIBUKDPDKBUILD_CFLAGS-y += -I$(LIBUKDPDKBUILD_BUILD)/include/
+LIBUKDPDKBUILD_CFLAGS-$(CONFIG_ARCH_X86_64) += -I$(LIBUKDPDKBUILD_BASE)/arch/x86/include
+LIBUKDPDKBUILD_CFLAGS-$(CONFIG_NET_STD_HDR) += \
+		-I$(LIBUKDPDKBUILD_BASE)/net/include
+ifeq ($(CONFIG_UK_ARCH),x86_64)
+	RTE_ARCH:=x86
+	LIBUKDPDKBUILD_CFLAGS-y+=-mmmx -msse4.2 -msse4.1 -mpclmul
+	LIBUKDPDKBUILD_CFLAGS-$(CONFIG_NET_STD_HDR) += \
+		-I$(LIBUKDPDKBUILD_BASE)/net/arch/x86_64
+else
+ifdef $(filter arm,$(CONFIG_UK_ARCH))
+	RTE_ARCH:=arm
+else
+$(error Unsupported Architecture)
+endif
+endif
+CFLAGS-y += $(LIBUKDPDKBUILD_CFLAGS-y)
+
+## TODO
+## Add a way to pass the information on DPDK Version and release to the
+## application.
+
+##DPDK Source variables
+DPDK_SRC_BASE:=$(LIBUKDPDKBUILD_ORIGIN)/$(DPDK_NAME)/
+RTE_SDK:=$(DPDK_SRC_BASE)
+LIBUKDPDKBUILD_CPUFLAGS := SSE SSE2 SSE3 SSE4_1 SSE4_2 AES PCLMULQDQ AVX\
+		 RDRAND FSGSBASE F16C AVX2 AVX512F NEON CRC32 AES\
+		 PMULL SHA1 SHA2
+
+include $(LIBUKDPDKBUILD_BASE)/Makefile.rules
+RTE_COMPILE_TIME_CPUFLAGS:=
+DPDK_SRC_CONFIG:=$(DPDK_SRC_BASE)/config/rte_config.h
+DPDK_TAR_CONFIG:=$(LIBUKDPDKBUILD_BUILD)/include/_rte_config.h
+$(eval $(call dpdk_config_fetch,$(DPDK_TAR_CONFIG),$(DPDK_SRC_CONFIG)))
+
+
+##Fetch the Makefile from dpdk
+$(eval $(call _import_dpdk_lib,librte_kvargs,$(LIBUKDPDKBUILD_BASE)/libs/librte_kvargs))
+$(eval $(call _import_dpdk_lib,librte_eal,$(LIBUKDPDKBUILD_BASE)/libs/librte_eal))
+$(eval $(call _import_dpdk_lib,librte_ring,$(LIBUKDPDKBUILD_BASE)/libs/librte_ring))
+$(eval $(call _import_dpdk_lib,librte_mempool,$(LIBUKDPDKBUILD_BASE)/libs/librte_mempool))
+$(eval $(call _import_dpdk_lib,librte_mbuf,$(LIBUKDPDKBUILD_BASE)/libs/librte_mbuf))
+$(eval $(call _import_dpdk_lib,librte_net,$(LIBUKDPDKBUILD_BASE)/libs/librte_net))
+$(eval $(call  _import_dpdk_lib,librte_meter,$(LIBUKDPDKBUILD_BASE)/libs/librte_meter))
+$(eval $(call  _import_dpdk_lib,librte_ethdev,$(LIBUKDPDKBUILD_BASE)/libs/librte_ethdev))
+$(eval $(call  _import_dpdk_lib,libuk_pmd,$(LIBUKDPDKBUILD_BASE)/libs/libuk_pmd))

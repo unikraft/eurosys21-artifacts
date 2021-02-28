@@ -1,0 +1,29 @@
+From 1397a510f17b71e0184ce7fad64c937684baa872 Mon Sep 17 00:00:00 2001
+From: Yuri Volchkov <yuri.volchkov@neclab.eu>
+Date: Sun, 10 Jun 2018 20:21:52 +0200
+Subject: [PATCH] set default _READ_WRITE_RETURN_TYPE to _ssize_t
+
+Why it was ever int, on the first place? This modification fixes
+conflict with correct definitions of write() and read()
+
+Signed-off-by: Yuri Volchkov <yuri.volchkov@neclab.eu>
+---
+ newlib/libc/include/sys/config.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/newlib/libc/include/sys/config.h b/newlib/libc/include/sys/config.h
+index 2082dfd..89326b9 100644
+--- a/newlib/libc/include/sys/config.h
++++ b/newlib/libc/include/sys/config.h
+@@ -254,7 +254,7 @@
+    for read()/write() is "ssize_t" but legacy newlib code has been using
+    "int" for some time.  If not specified, "int" is defaulted.  */
+ #ifndef _READ_WRITE_RETURN_TYPE
+-#define _READ_WRITE_RETURN_TYPE int
++#define _READ_WRITE_RETURN_TYPE _ssize_t
+ #endif
+ /* Define `count' parameter of read/write routines.  In POSIX, the `count'
+    parameter is "size_t" but legacy newlib code has been using "int" for some
+-- 
+2.17.0
+

@@ -1,0 +1,62 @@
+From e0cf6be2cec87542be01bb127413f31a05ec161b Mon Sep 17 00:00:00 2001
+From: Costin Lupu <costin.lup@gmail.com>
+Date: Wed, 3 Apr 2019 18:54:21 +0300
+Subject: [PATCH 1/2] Use atomic operations as macros
+
+We use atomic operations as macros because pte uses them for both int
+and long types (see next patch).
+
+Signed-off-by: Costin Lupu <costin.lupu@cs.pub.ro>
+---
+ pte_generic_osal.h | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+
+diff --git a/pte_generic_osal.h b/pte_generic_osal.h
+index de1ea5f..6b1f439 100644
+--- a/pte_generic_osal.h
++++ b/pte_generic_osal.h
+@@ -378,6 +378,7 @@ pte_osResult pte_osTlsFree(unsigned int key);
+ //@}
+ 
+ /** @name Atomic operations */
++#if 0
+ //@{
+ 
+ /**
+@@ -455,6 +456,33 @@ int pte_osAtomicDecrement(int *pdest);
+  * return origVal;
+  */
+ int pte_osAtomicIncrement(int *pdest);
++#else
++
++#include <uk/arch/atomic.h>
++
++#define pte_osAtomicExchange(ptarg, val) \
++	ukarch_exchange_n(ptarg, val)
++
++#define pte_osAtomicCompareExchange(pdest, exchange, comp) \
++({ \
++	__typeof__(*pdest) __orig = *pdest; \
++	ukarch_compare_exchange_sync(pdest, comp, exchange); \
++	__orig; \
++})
++
++#define pte_osAtomicExchangeAdd(paddend, value) \
++	ukarch_fetch_add(paddend, value)
++
++#define atomic_add(ptarg, val) \
++	__atomic_add_fetch(ptarg, val, __ATOMIC_SEQ_CST)
++
++#define pte_osAtomicDecrement(pdest) \
++	atomic_add(pdest, -1)
++
++#define pte_osAtomicIncrement(pdest) \
++	atomic_add(pdest, 1)
++
++#endif
+ //@}
+ 
+ struct timeb;
+-- 
+2.11.0
+

@@ -1,0 +1,9 @@
+$(eval $(call adddpdklib,$(DPDK_SRC_BASE),librte_ethdev))
+
+## Library upstream sources
+
+## EAL library sources
+#LIBRTE_EAL_SRCS-y += $(LIBRTE_EAL_BASE)/uk_eal.c
+#LIBRTE_EAL_SRCS-y += $(LIBRTE_EAL_BASE)/eal_lcore.c
+#LIBRTE_EAL_SRCS-y += $(LIBRTE_EAL_BASE)/eal_memory.c
+#LIBRTE_EAL_SRCS-y += $(LIBRTE_EAL_BASE)/eal_alarm.c

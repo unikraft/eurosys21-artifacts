@@ -1,0 +1,25 @@
+menuconfig LIBINTEL_INTRINSICS
+    bool "Intel Intrinsics - C style functions that provide access Intel instructions"
+    default n
+
+if LIBINTEL_INTRINSICS
+config SIMD_SSE
+    bool "Enable SSE support"
+    default n
+
+config SIMD_SSE2
+    bool "Enable SSE2 support"
+    default n
+
+config SIMD_SSE3
+    bool "Enable SSE3 support"
+    default n
+
+config SIMD_SSE4
+    bool "Enable SSE4 support"
+    default n
+
+config SIMD_AVX
+    bool "Enable AVX support"
+    default n
+endif

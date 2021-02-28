@@ -1,0 +1,40 @@
+From 8ca957ddc2285469fdb4137a9b37ffd0cbc064ec Mon Sep 17 00:00:00 2001
+From: Costin Lupu <costin.lup@gmail.com>
+Date: Mon, 11 Mar 2019 10:01:15 +0200
+Subject: [PATCH] Separate header inclusions for functions from header
+ inclusion for types
+
+Including time.h before defining pthread_t type generates "unknown type name
+‘pthread_t’" compiling errors with Newlib because of some circular inclusions.
+Thus we adopt a more generic approach, separating the inclusions needed for
+defining types from the inclusions needed for declaring functions, moving the
+latter just before declaring the function prototypes.
+
+diff --git a/pthread.h b/pthread.h
+index 5b69053..33df446 100644
+--- a/pthread.h
++++ b/pthread.h
+@@ -174,9 +174,6 @@
+  * -------------------------------------------------------------
+  */
+ 
+-#include <time.h>
+-
+-#include <setjmp.h>
+ #include <limits.h>
+ 
+ /*
+@@ -653,6 +650,10 @@ enum
+ 
+ #endif /* PTE_CLEANUP_C */
+ 
++#include <time.h>
++
++#include <setjmp.h>
++
+     /*
+      * ===============
+      * ===============
+-- 
+2.11.0
+

@@ -1,0 +1,22 @@
+From 52ccf3222da946d2ea11a4f3ecba8e31e7165562 Mon Sep 17 00:00:00 2001
+From: Costin Lupu <costin.lup@gmail.com>
+Date: Sat, 9 Mar 2019 19:37:04 +0200
+Subject: [PATCH 5/5] Use Unikraft yield function
+
+
+diff --git a/pte_generic_osal.h b/pte_generic_osal.h
+index 4db1f52..de1ea5f 100644
+--- a/pte_generic_osal.h
++++ b/pte_generic_osal.h
+@@ -241,7 +241,7 @@ static inline void pte_osYield(void)
+  */
+ static inline void pte_osYield(void)
+ {
+-	pte_osThreadSleep(1);
++	uk_sched_yield();
+ }
+ #endif
+ 
+-- 
+2.11.0
+

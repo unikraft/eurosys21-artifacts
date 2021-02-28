@@ -1,0 +1,62 @@
+$(eval $(call adddpdklib,$(DPDK_SRC_BASE),librte_eal))
+$(eval $(call __cpu_flags_fetch,librte_eal))
+
+CINCLUDES-$(CONFIG_RTE_LIBRTE_EAL) += -I$(LIBRTE_EAL_BASE)/include/
+
+LIBRTE_EAL_CFLAGS-$(CONFIG_RTE_LIBRTE_EAL_DEBUG) += -DUK_DEBUG
+## Use DPDK principle to include the sources.
+LIBRTE_EAL_CFLAGS-y += -I$(LIBRTE_EAL_DPDK_SRCS_BASE)/common
+SRCS-y += rte_cpuflags.c
+SRCS-y += eal_common_options.c
+SRCS-y += rte_option.c
+SRCS-y += eal_common_cpuflags.c
+SRCS-y += uk_eal_thread.c
+SRCS-y += uk_eal.c
+SRCS-y += eal_lcore.c
+SRCS-y += eal_common_class.c
+SRCS-y += uk_eal_debug.c
+SRCS-y += eal_common_lcore.c
+SRCS-y += eal_common_log.c
+SRCS-y += eal_log.c
+SRCS-y += eal_common_dev.c
+SRCS-y += hotplug_mp.c
+SRCS-y += uk_eal_alarm.c
+SRCS-y += eal_common_devargs.c
+SRCS-y += eal_common_errno.c
+SRCS-y += eal_common_hexdump.c
+SRCS-y += eal_common_hypervisor.c
+SRCS-y += eal_common_launch.c
+SRCS-y += eal_hugepage_info.c
+SRCS-y += eal_common_mcfg.c
+SRCS-y += eal_common_memory.c
+SRCS-y += uk_eal_common_memalloc.c
+SRCS-y += eal_common_memalloc.c
+SRCS-y += eal_common_memzone.c
+SRCS-y += eal_common_thread.c
+SRCS-y += uk_eal_common_proc.c
+SRCS-y += eal_common_string_fns.c
+SRCS-y += eal_common_tailqs.c
+SRCS-y += eal_common_timer.c
+SRCS-y += eal_common_uuid.c
+SRCS-y += uk_eal_timer.c
+SRCS-y += rte_cycles.c
+SRCS-y += rte_random.c
+SRCS-y += eal_uk_fbarray.c
+SRCS-y += uk_fbarray.c
+SRCS-y += rte_malloc.c
+SRCS-y += uk_eal_memory.c
+SRCS-y += uk_eal_memalloc.c
+SRCS-y += malloc_elem.c
+SRCS-y += malloc_heap.c
+SRCS-y += malloc_mp.c
+SRCS-y += rte_keepalive.c
+SRCS-y += rte_reciprocal.c
+SRCS-y += rte_service.c
+SRCS-y += uk_eal_bus.c
+SRCS-y += uk_eal_interrupts.c
+SRCS-$(CONFIG_NET_STD_HDR) += htons.c
+
+## EAL library sources
+#LIBRTE_EAL_SRCS-y += $(LIBRTE_EAL_BASE)/uk_eal.c
+#LIBRTE_EAL_SRCS-y += $(LIBRTE_EAL_BASE)/eal_lcore.c
+#LIBRTE_EAL_SRCS-y += $(LIBRTE_EAL_BASE)/eal_memory.c

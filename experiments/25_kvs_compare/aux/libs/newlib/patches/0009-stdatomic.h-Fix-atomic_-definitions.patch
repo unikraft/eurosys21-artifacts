@@ -1,0 +1,93 @@
+From 2886f7e1f6546ef85778589cdfe65b8d0fb99002 Mon Sep 17 00:00:00 2001
+From: Vlad-Andrei Badoiu <vlad_andrei.badoiu@stud.acs.upb.ro>
+Date: Tue, 17 Dec 2019 18:50:03 +0200
+Subject: [PATCH 1/1] stdatomic.h: Fix atomic_* definitions
+
+The current atomic_* do not compile under GCC, we adapt the
+implementation to follow the existing ones from gcc.
+
+Signed-off-by: Vlad-Andrei Badoiu <vlad_andrei.badoiu@stud.acs.upb.ro>
+---
+ newlib/libc/include/stdatomic.h | 58 ++++++++++++++++++++++++---------
+ 1 file changed, 42 insertions(+), 16 deletions(-)
+
+diff --git a/newlib/libc/include/stdatomic.h b/newlib/libc/include/stdatomic.h
+index 09c0cf7..daa1969 100644
+--- a/newlib/libc/include/stdatomic.h
++++ b/newlib/libc/include/stdatomic.h
+@@ -258,30 +258,56 @@ typedef _Atomic(uintmax_t)		atomic_uintmax_t;
+ #define	atomic_store_explicit(object, desired, order)			\
+ 	__c11_atomic_store(object, desired, order)
+ #elif defined(__GNUC_ATOMICS)
+-#define	atomic_compare_exchange_strong_explicit(object, expected,	\
+-    desired, success, failure)						\
+-	__atomic_compare_exchange_n(&(object)->__val, expected,		\
+-	    desired, 0, success, failure)
+-#define	atomic_compare_exchange_weak_explicit(object, expected,		\
+-    desired, success, failure)						\
+-	__atomic_compare_exchange_n(&(object)->__val, expected,		\
+-	    desired, 1, success, failure)
++#define	atomic_compare_exchange_strong_explicit(object, expected,			\
++    desired, success, failure)								\
++__extension__										\
++({											\
++	__auto_type __atomic_compare_exchange_ptr = (object);				\
++	__typeof__ (*__atomic_compare_exchange_ptr) __atomic_compare_exchange_tmp 	\
++	= (desired);									\
++	__atomic_compare_exchange (__atomic_compare_exchange_ptr, (expected),		\
++		&__atomic_compare_exchange_tmp,						\
++		0, (success), (failure));						\
++  })
++#define	atomic_compare_exchange_weak_explicit(object, expected,				\
++    desired, success, failure)								\
++__extension__										\
++({											\
++	__auto_type __atomic_compare_exchange_ptr = (object);				\
++	__typeof__ (*__atomic_compare_exchange_ptr) __atomic_compare_exchange_tmp 	\
++	= (desired);									\
++	__atomic_compare_exchange (__atomic_compare_exchange_ptr, (expected),		\
++		&__atomic_compare_exchange_tmp,						\
++		1, (success), (failure));						\
++  })
+ #define	atomic_exchange_explicit(object, desired, order)		\
+-	__atomic_exchange_n(&(object)->__val, desired, order)
++	__atomic_exchange_n((object), (desired), (order))
+ #define	atomic_fetch_add_explicit(object, operand, order)		\
+-	__atomic_fetch_add(&(object)->__val, operand, order)
++	__atomic_fetch_add((object), (operand), (order))
+ #define	atomic_fetch_and_explicit(object, operand, order)		\
+-	__atomic_fetch_and(&(object)->__val, operand, order)
++	__atomic_fetch_and((object), (operand), (order))
+ #define	atomic_fetch_or_explicit(object, operand, order)		\
+-	__atomic_fetch_or(&(object)->__val, operand, order)
++	__atomic_fetch_or((object), (operand), (order))
+ #define	atomic_fetch_sub_explicit(object, operand, order)		\
+-	__atomic_fetch_sub(&(object)->__val, operand, order)
++	__atomic_fetch_sub((object), (operand), (order))
+ #define	atomic_fetch_xor_explicit(object, operand, order)		\
+-	__atomic_fetch_xor(&(object)->__val, operand, order)
++	__atomic_fetch_xor((object), (operand), (order))
+ #define	atomic_load_explicit(object, order)				\
+-	__atomic_load_n(&(object)->__val, order)
++__extension__								\
++({									\
++	__auto_type __atomic_load_ptr = (object);				\
++	__typeof__ (*__atomic_load_ptr) __atomic_load_tmp;			\
++	__atomic_load (__atomic_load_ptr, &__atomic_load_tmp, (order));	\
++	__atomic_load_tmp;							\
++})
+ #define	atomic_store_explicit(object, desired, order)			\
+-	__atomic_store_n(&(object)->__val, desired, order)
++__extension__								\
++({									\
++	__auto_type __atomic_store_ptr = (object);				\
++	__typeof__ (*__atomic_store_ptr) __atomic_store_tmp = (desired);	\
++	__atomic_store (__atomic_store_ptr, &__atomic_store_tmp, (order));	\
++})
++
+ #else
+ #define	__atomic_apply_stride(object, operand) \
+ 	(((__typeof__((object)->__val))0) + (operand))
+-- 
+2.20.1
+

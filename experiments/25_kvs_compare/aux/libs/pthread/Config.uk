@@ -1,0 +1,36 @@
+menuconfig LIBPTHREAD_EMBEDDED
+	bool "libpthread-embedded - An embedded pthread library"
+	default n
+	select LIBNOLIBC if !HAVE_LIBC
+	select LIBUKDEBUG
+	select LIBUKALLOC
+	select LIBUKSCHED
+	select LIBUKLOCK
+	select LIBUKLOCK_MUTEX
+	select LIBUKLOCK_SEMAPHORE
+
+if LIBPTHREAD_EMBEDDED
+config LIBPTHREAD_EMBEDDED_MAX_SIMUL_THREADS
+	int "Maximum number of simultaneous threads"
+	default 32
+	help
+		Maximum number of simultaneous threads.
+
+config LIBPTHREAD_EMBEDDED_MAX_TLS
+	int "Maximum number of TLS values"
+	default 32
+	help
+		Maximum number of supported TLS values.
+
+config LIBPTHREAD_EMBEDDED_UTEST
+	bool "Build unit tests"
+	default n
+	help
+		Builds the unit tests for running them from an external application.
+
+config LIBPTHREAD_CPUSET_OPS
+	bool "Enable CPU Set operations"
+	default n
+	help
+		Helper macro to operate cpu_set
+endif

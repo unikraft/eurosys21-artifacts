@@ -1,0 +1,26 @@
+From a73ec52fac6847dcb16a4aa458a11d33cf3cceb5 Mon Sep 17 00:00:00 2001
+From: Costin Lupu <costin.lup@gmail.com>
+Date: Sat, 17 Aug 2019 00:13:48 +0200
+Subject: [PATCH] Add forward declaration in order to avoid warnings because of
+ circular inclusion
+
+Signed-off-by: Costin Lupu <costin.lupu@cs.pub.ro>
+---
+ newlib/libc/include/time.h | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/newlib/libc/include/time.h b/newlib/libc/include/time.h
+index 8806b98..32baed9 100644
+--- a/newlib/libc/include/time.h
++++ b/newlib/libc/include/time.h
+@@ -189,6 +189,7 @@ int _EXFUN(clock_getres,  (clockid_t clock_id, struct timespec *res));
+ 
+ /* Create a Per-Process Timer, P1003.1b-1993, p. 264 */
+ 
++struct sigevent;
+ int _EXFUN(timer_create,
+   	(clockid_t clock_id,
+  	struct sigevent *__restrict evp,
+-- 
+2.20.1
+

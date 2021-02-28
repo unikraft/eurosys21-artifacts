@@ -1,0 +1,264 @@
+##Import the dpdk library.
+##import_dpdk_lib $(LIB) $(PATH)
+define _import_dpdk_lib =
+$(call _init_dpdk_lib,)
+$(eval $(call uc,$(1))_CFLAGS-y := $(LIBUKDPDKBUILD_CFLAGS-y))
+$(eval $(call _import_lib,$(2)))
+$(eval $(call uc,$(1))_UK_DIRS-y += $($(call uc,$(1)_BASE)))
+$(eval $(call uc,$(1))_DPDK_DIRS-y += .)
+$(if $(strip $(ARCH_DIR)),$(eval $(call uc,$(1))_DPDK_DIRS-y += $(ARCH_DIR)))
+$(call _cp_dpdk_vars,$(1))
+$(call fetch_dpdk_subdir,$(1),$(DIRS-y))
+UK_MAKEFILE-y += $$($(call uc,$(1))_MAKEFILE-y)
+$(call transform_headers,$(1))
+$(call _finalize_dpdk_lib,$(1))
+endef
+
+define dpdk_config_fetch =
+$(2):  $(LIBUKDPDKBUILD_BUILD)/.origin
+
+$(dir $(1))/rte_build_config.h: | $(LIBUKDPDKBUILD_BUILD)/.origin
+	$(call verbose_cmd,MKDIR,$(notdir $(1)),mkdir -p $(dir $(1)))
+	$(call verbose_cmd,TOUCH,$$(@),touch $$(@))
+
+$(1):$(2) | $(dir $(1))/rte_build_config.h $(LIBUKDPDKBUILD_BUILD)/.origin
+	 $(call verbose_cmd,CP,$(1),cp $(2) $(1))
+
+UK_FETCH-y+=$(1)
+endef
+
+## Need a default Configuration script.
+
+##Configure the rte_config
+define config_dpdk_header =
+endef
+
+##Import finalize the dpdk rules
+##_finalize_dpdk_lib,$(LIB)
+define _finalize_dpdk_lib =
+.PHONY: fetch-dpdk fetch-$(call uc,$(1))-header
+.PHONY: prepare-dpdk prepare-$(call uc,$(1))-header prepare-$(call uc,$(1))-src
+
+prepare-$(call uc,$(1))-header : fetch  $$(wildcard $$($(call uc,$(1))_INCLUDES-y))
+
+prepare-$(call uc,$(1))-src : fetch  $$($(call uc,$(1))_SRCS-y)
+
+prepare-dpdk: fetch $$(UK_MAKEFILES-y) $$(UK_MAKEFILES) | \
+							$$(UK_DPDK_PREPARE) $$(UK_DPDK_PREPARE-y)
+
+prepare-$(call uc,$(1))-header : $$(wildcard $$($(call uc,$(1))_SRC_INCLUDES-y))
+
+fetch-dpdk: fetch-$(call uc,$(1))-header
+
+UK_DPDK_PREPARE-y += prepare-$(call uc,$(1))-header
+
+UK_PREPARE-y += prepare-dpdk
+
+UK_FETCH-y += fetch-dpdk
+
+$(eval CINCLUDES-$(CONFIG_RTE_$(call uc,$(1))) += \
+			-I$($(call uc,$(1))_BUILD)/include)
+$(eval CINCLUDES-$(CONFIG_RTE_$(call uc,$(1))) += \
+			-I$($(call uc,$(1))_BUILD)/include/generic)
+endef
+
+## Get the cpu flag from the environment
+##__cpu_flag_get,flag,config(optional)
+define __cpu_flag_get =
+$$(if $$($(addsuffix __,$(addprefix __,$(1)))),$$(eval RTE_COMPILE_TIME_CPUFLAGS+=$(addprefix RTE_CPUFLAG_,$(1))))
+endef
+
+## Fetch the cpu flags for the architecture.
+##__cpu_flag_fetch,$(flag)
+define __cpu_flag_fetch =
+.PHONY: fetch-$(1)-flag
+
+get-$(1)-flag : compilerenv $$(call __cpu_flag_get,$(1))
+
+fetch-$(1)-flag : compilerenv get-$(1)-flag
+
+CPU_FETCH-y += fetch-$(1)-flag
+endef
+
+define __cpu_flags_fetch =
+$(foreach flag,$(LIBUKDPDKBUILD_CPUFLAGS),\
+	$(eval $(call __cpu_flag_fetch,$(flag))))
+
+fetch-cpu-flags: compilerenv $$(CPU_FETCH-y) | set-cpu-flags
+
+set-cpu-compile-flags:
+	$$(eval $(call uc,$(1))_CFLAGS-y +=-DRTE_COMPILE_TIME_CPUFLAGS=$$(subst $$(space),$$(comma),$$(strip $$(RTE_COMPILE_TIME_CPUFLAGS))))
+
+set-cpu-flags: compilerenv $$(CPU_FETCH-y) | set-cpu-compile-flags
+
+
+UK_FETCH-y += fetch-cpu-flags
+endef
+
+##Retrieve the dpdk subdirectory
+##fetch_dpdk_subdir,$(dpdk_lib),$(dirname)
+define fetch_dpdk_subdir =
+$(eval CURR=$(2))
+$(if $(strip $(CURR)),\
+	$(eval DIRS-y=)
+	$(foreach D,$(CURR),\
+		$(eval $(call uc,$(1))_DPDK_DIRS-y += $(D))
+		$(eval $(call fetch_submake,$(1),$(D)))
+	)\
+	$(if $(strip $(ARCH_DIR)),$(eval $(call uc,$(1))_DPDK_DIRS-y += $(ARCH_DIR)))
+)
+endef
+
+## tranform header from dpdk repo to unikraft
+## tranform_headers,$(LIB)
+define transform_headers =
+.PHONY: fetch-$(call uc,$(1))-includes prepare-$(call uc,$(1))-includes  clean-$(call uc,$(1))-includes
+
+$$($(call uc,$(1))_GEN_SRC_INCLUDES-y) $$($(call uc,$(1))_SRC_INCLUDES-y): $(BUILD_DIR)/libukdpdkbuild/.origin
+
+fetch-$(call uc,$(1))-header: $$($(call uc,$(1))_SRC_INCLUDES-y)\
+	       	$$($(call uc,$(1))_GEN_SRC_INCLUDES-y)
+
+$$($(call uc,$(1))_INCLUDES-y): $$($(call uc,$(1))_SRC_INCLUDES-y)
+	$(call verbose_cmd,MKDIR,$$(@D),[[ ! -d $$(@D) ]] && mkdir -p $$(@D) || exit 0)
+	$(call verbose_cmd,CP,$$(@),cp $$(filter %/$$(notdir $$(@)),$$(?)) $$(@))
+
+$$($(call uc,$(1))_GEN_INCLUDES-y): $$($(call uc,$(1))_GEN_SRC_INCLUDES-y)
+	$(call verbose_cmd,MKDIR,$$(@D),[[ ! -d $$(@D) ]] && mkdir -p $$(@D) || exit 0)
+	$(call verbose_cmd,CP,$$(@),cp $$(sort $$(?D))/$$(@F) $$(@))
+
+prepare-$(call uc,$(1))-includes: $$($(call uc,$(1))_INCLUDES-y) \
+		$$($(call uc,$(1))_GEN_INCLUDES-y)| fetch
+
+clean-$(call uc,$(1))-includes:
+	$(call verbose_cmd,TEST, $($(call uc,$(1))_BUILD)/include,\
+		[[ -d $($(call uc,$(1))_BUILD)/include ]] && \
+		rm -r $($(call uc,$(1))_BUILD)/include) || exit 0;
+
+clean-$(1) :  clean-$(call uc,$(1))-includes
+
+UK_DPDK_PREPARE-y += prepare-$(call uc,$(1))-includes
+UK_DPDK_CLEAN-y += clean-$(1)
+endef
+
+## Initialize the dpdk library global variables
+define _init_dpdk_lib =
+ARCH_DIR-y:=
+DIRS-y :=
+SRCS-y:=
+SYMLINK-y-include:=
+SYMLINK-y-include/generic:=
+endef
+
+##_fetch_file - Gets the valid file
+##_fetch_file,$(LIB),$(DIR),$(SRCS)
+define _fetch_files =
+$(foreach d,$(2), \
+	$(if $(strip $(d)),\
+	$(if $(filter %.c,$(wildcard $(addprefix \
+	$($(call uc,$(1))_DPDK_SRCS_BASE)/,$(d)/$(strip $(3))))),\
+	$(eval $(call uc,$(1))_TMP_SRCS-y:= $(d)/$(3)) \
+	$(if $(filter $(addprefix $($(call uc,$(1))_DPDK_SRCS_BASE)/,$($(call uc,$(1))_TMP_SRCS-y)),$($(call uc,$(1))_SRCS-y)),,\
+	$(eval $(call uc,$(1))_SRCS-y += $(addprefix \
+	$($(call uc,$(1))_DPDK_SRCS_BASE)/,$($(call uc,$(1))_TMP_SRCS-y)))\
+	$(eval $(call uc,$(1))_DPDK_SRCS-y := $(filter-out \
+				$(d),$($(call uc,$(1))_DPDK_SRCS-y)))),\
+	$(if $(filter %.c,$(wildcard $($(call uc,$(1))_UK_DIRS-y)/$(d)/$(3))), \
+	$(eval $(call uc,$(1))_SRCS-y += \
+		$($(call uc,$(1))_UK_DIRS-y)/$(d)/$(3)) \
+	$(eval $(call uc,$(1))_DPDK_SRCS-y := $(filter-out \
+				$(3),$($(call uc,$(1))_DPDK_SRCS-y))),\
+	))))
+endef
+
+## Copy the global variables to per library
+##_cp_dpdk_vars,$(LIBS),$(DIR)
+define _cp_dpdk_vars =
+$(eval $(call uc,$(1))_DPDK_SRCS-y+=$(SRCS-y))
+$(if $(strip $(ARCH_DIR)),$(eval $(call uc,$(1))_DPDK_DIRS-y+=$(2)/arch/$(ARCH_DIR)))
+
+$(foreach src,$($(call uc,$(1))_DPDK_SRCS-y),\
+	$(if $(strip $(src)),$(call _fetch_files,$(1),\
+			       $($(call uc,$(1))_DPDK_DIRS-y),$(src))))
+$(eval $(call uc,$(1))_INCLUDES-y += $(addprefix \
+		$($(call uc,$(1))_BUILD)/include/,$(notdir $(SYMLINK-y-include))))
+$(eval $(call uc,$(1))_GEN_INCLUDES-y += $(addprefix \
+		$($(call uc,$(1))_BUILD)/include/generic/,$(notdir \
+					$(SYMLINK-y-include/generic))))
+$(eval $(call uc,$(1))_SRC_INCLUDES-y += $(addprefix \
+			$($(call uc,$(1))_DPDK_SRCS_BASE)/$(2)/,$(SYMLINK-y-include)))
+
+$(eval $(call uc,$(1))_GEN_SRC_INCLUDES-y += $(addprefix \
+			$($(call uc,$(1))_DPDK_SRCS_BASE)/$(2)/,$(SYMLINK-y-include/generic)))
+endef
+
+## Setup rules to fetch submake file.
+## fetch_submake
+define fetch_submake =
+$(strip $($(call uc,$(1))_DPDK_SRCS_BASE)/$(2)/Makefile) : \
+		fetch | $(BUILD_DIR)/libukdpdkbuild/.origin
+
+$($(call uc,$(1))_BUILD)/$(2)/Makefile.uk : \
+		 $($(call uc,$(1))_DPDK_SRCS_BASE)/$(2)/Makefile | fetch
+	if [ ! -d $$(@D) ];\
+	then\
+		mkdir -p $$(@D);\
+	fi;
+	$(call verbose_cmd,EGREP,$$(<), egrep -v "^#|^include" $$(<) >> $$(@))
+ifneq ($(wildcard $($(call uc,$(1))_BUILD)/$(2)/Makefile.uk),)
+$(eval $(call _init_dpdk_lib))
+$(eval include $($(call uc,$(1))_BUILD)/$(2)/Makefile.uk)
+$(eval $(call _cp_dpdk_vars,$(1),$(2)))
+ifneq ($(DIRS-y),)
+	$(eval $(call fetch_dpdk_subdir,$(1),$(DIRS-y)))
+endif
+endif
+
+$(call uc,$(1))_MAKEFILE-y += $($(call uc,$(1))_BUILD)/$(2)/Makefile.uk
+endef
+
+##Prepare the Makefile from the DPDK Source to Unikraft
+##fetch_make $(DPDK_LIB_SRC) $(LIBNAME)
+define fetch_make =
+$(strip $($(call uc,$(2))_DPDK_SRCS_BASE))/Makefile:  \
+		fetch $(BUILD_DIR)/libukdpdkbuild/.origin | fetch
+
+$($(call uc,$(2))_BUILD)/Makefile.uk: $($(call uc,$(2))_DPDK_SRCS_BASE)/Makefile\
+				| fetch
+	$(call verbose_cmd,EGREP,$$(<), egrep -v "^#|^include" $$(<) > $$(@))
+ifneq ($(wildcard $($(call uc,$(2))_BUILD)/Makefile.uk),)
+$(eval $(call _init_dpdk_lib))
+$(eval include $($(call uc,$(2))_BUILD)/Makefile.uk)
+$(eval $(call _cp_dpdk_vars,$(2)))
+endif
+
+$(call uc,$(2))_MAKEFILE-y := $($(call uc,$(2))_BUILD)/Makefile.uk
+endef
+
+##prepare dpdk library conversion
+##prepare_dpdk_rule $(LIBNAME)
+define prepare_dpdk_rule =
+endef
+
+##Include a DPDK Library Library build
+##adddpdklib $(DPDKSRC) $(DPDK_LIBNAME)
+define adddpdklib =
+$(call uc,$(1))_DPDK_DIRS-y =
+$(call uc,$(1))_SRCS-y =
+$(call uc,$(1))_INCLUDES-y =
+$(eval $(call addlib_s,$(2),$(CONFIG_RTE_$(call uc,$(2)))))
+$(eval $(call uc,$(2))_DPDK_SRCS_BASE := $(1)/lib/$(2)/)
+$(if $(wildcard $($(call uc,$(2))_DPDK_SRCS_BASE)),$(eval $(call fetch_make,$(1),$(2))))
+endef
+
+##DEPDIRS
+
+##LIB
+
+##LDLIB
+
+##EXPORT_MAP
+
+##CFLAGS_(SRC_FILE_NAME)
+
+##GEN_INC -- Add these to generic includes

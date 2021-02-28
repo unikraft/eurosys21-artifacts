@@ -1,0 +1,66 @@
+From 1465fc0bcb52860d6077ae72a8e2364890485fd1 Mon Sep 17 00:00:00 2001
+From: Teodora Serbanescu <teo.serbanescu16@gmail.com>
+Date: Wed, 5 Jun 2019 10:45:36 +0300
+Subject: [UNIKRAFT/PTHREAD-EMBEDDED] Make pte_handle a C++ structure
+
+This patch changes the pte_handle structure to a C++ structure, also adding the
+overloaded operators needed by the cxx library.
+
+Signed-off-by: Teodora Serbanescu <teo.serbanescu16@gmail.com>
+---
+ pthread.h | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+
+diff --git a/pthread.h b/pthread.h
+index 33df446..48625a4 100644
+--- a/pthread.h
++++ b/pthread.h
+@@ -388,10 +388,25 @@ enum
+      * that available with a simple pointer. It should scale for either
+      * IA-32 or IA-64.
+      */
++
++#ifdef __cplusplus
++    typedef struct pte_handle
++#else
+     typedef struct
++#endif
+       {
+         void * p;                   /* Pointer to actual object */
+         unsigned int x;             /* Extra information - reuse count etc */
++
++#ifdef __cplusplus
++        pte_handle() {};
++        pte_handle(int ptr_value)
++        {
++        	this->p = reinterpret_cast <void *>(ptr_value);
++        }
++        inline struct pte_handle& operator=(unsigned int ptr_value);
++        inline bool operator==(int ptr_value);
++#endif
+       } pte_handle_t;
+ 
+     typedef pte_handle_t pthread_t;
+@@ -994,6 +1009,19 @@ enum
+     {
+         return ((size_t) l.p) == ((size_t) r.p);
+     }
++
++    /* Operator to compare the thread pointer with a given value */
++    bool pte_handle_t::operator==(int ptr_value)
++    {
++        return ((size_t) this->p) == ((size_t) (reinterpret_cast <void *>(ptr_value)));
++    }
++
++    /* Operator to assign a given value to the thread pointer */
++    pte_handle_t& pte_handle_t::operator=(unsigned int ptr_value)
++    {
++		this->p = reinterpret_cast <void *>(ptr_value);
++		return *this;
++    }
+ #endif
+ 
+ 
+-- 
+2.20.1
+

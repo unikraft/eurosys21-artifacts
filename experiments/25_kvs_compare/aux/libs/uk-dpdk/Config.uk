@@ -1,0 +1,64 @@
+config UKDPDK
+	bool "dpdk: Unikraft application for DPDK"
+	default n
+
+if UKDPDK
+	config NET_STD_HDR
+		bool "Libc: Standard network header"
+		default y if !LIBLWIP
+
+	config RTE_LIBRTE_EAL
+		bool "dpdk: Common library function"
+		default y if UKDPDK
+		select LIBUKALLOC_IFSTATS
+
+	if RTE_LIBRTE_EAL
+		config RTE_LIBRTE_EAL_DEBUG
+			bool "dpdk: Enable debug message"
+			default n
+	endif
+
+	config RTE_LIBRTE_ETHDEV
+		bool "dpdk: Ethernet interface in dpdk"
+		default y if UKDPDK
+
+	config RTE_LIBRTE_KVARGS
+		bool "dpdk: kvargs"
+		default y if UKDPDK
+
+	config RTE_LIBRTE_RING
+		bool "dpdk: rte_ring"
+		default y if RTE_LIBRTE_EAL
+
+	config RTE_LIBRTE_MEMPOOL
+		bool "dpdk: rte_mempool"
+		default y if RTE_LIBRTE_RING && RTE_LIBRTE_EAL
+
+	config RTE_LIBRTE_MBUF
+		bool "dpdk: rte_membuf"
+		default y if RTE_LIBRTE_RING && RTE_LIBRTE_EAL && RTE_LIBRTE_MEMPOOL
+
+	config RTE_LIBRTE_NET
+		bool "dpdk: rte_net"
+		default y if RTE_LIBRTE_MBUF && RTE_LIBRTE_EAL && RTE_LIBRTE_MEMPOOL
+
+	config RTE_LIBRTE_METER
+		bool "dpdk: rte_meter import"
+		default y if RTE_LIBRTE_EAL
+
+	config RTE_LIBRTE_ETHDEV
+		bool "dpdk: rte ethdev"
+		default y if RTE_LIBRTE_NET && RTE_LIBRTE_METER && RTE_LIBRTE_MBUF && RTE_LIBRTE_EAL && RTE_LIBRTE_MEMPOOL
+
+	if RTE_LIBRTE_ETHDEV
+		config RTE_MAX_ETHPORTS
+			int "rte_ethdev: Max number of ethernet port"
+			default 32
+	endif
+
+	config RTE_LIBUK_PMD
+		bool "dpdk: PMD Unikraft driver"
+		default y
+
+endif
+

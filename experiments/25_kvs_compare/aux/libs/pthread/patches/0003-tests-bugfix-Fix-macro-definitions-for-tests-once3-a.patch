@@ -1,0 +1,36 @@
+From 27575f2559b6a01501c40705026eca83aa511f31 Mon Sep 17 00:00:00 2001
+From: Costin Lupu <costin.lup@gmail.com>
+Date: Sat, 9 Mar 2019 19:30:17 +0200
+Subject: [PATCH 3/5] tests bugfix Fix macro definitions for tests once3 and
+ once4
+
+
+diff --git a/tests/once3.c b/tests/once3.c
+index 505374c..ac28e6d 100644
+--- a/tests/once3.c
++++ b/tests/once3.c
+@@ -55,7 +55,7 @@
+ 
+ #include "test.h"
+ 
+-#define NUM_THREADS OS_MAX_SIMUL_THREADS / 5 /* Targeting each once control */
++#define NUM_THREADS (OS_MAX_SIMUL_THREADS / 5) /* Targeting each once control */
+ #define NUM_ONCE    5
+ 
+ 
+diff --git a/tests/once4.c b/tests/once4.c
+index 027bdaa..da4a44c 100644
+--- a/tests/once4.c
++++ b/tests/once4.c
+@@ -53,7 +53,7 @@
+ 
+ #include "test.h"
+ 
+-#define NUM_THREADS OS_MAX_SIMUL_THREADS / 5 /* Targeting each once control */
++#define NUM_THREADS (OS_MAX_SIMUL_THREADS / 5) /* Targeting each once control */
+ #define NUM_ONCE    5
+ 
+ static pthread_once_t o = PTHREAD_ONCE_INIT;
+-- 
+2.11.0
+

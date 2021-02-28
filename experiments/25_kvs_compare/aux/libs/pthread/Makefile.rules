@@ -1,0 +1,14 @@
+#link the source header file to include
+#link_hdr,libname,src_file,target_file
+define link_hdr =
+$(2): $($(call uc,$(1))_BUILD)/.origin
+	@:
+
+$(dir $(3)):
+	mkdir -p $$@
+
+$(3): $(2) | $(dir $(3))
+	$(call build_cmd,LN,$(1),$$@,ln -sf $$< $$@)
+
+UK_PREPARE-y +=$(3)
+endef

@@ -1,0 +1,29 @@
+# hidden
+config LIBNEWLIBM
+	bool
+	default n
+
+menuconfig LIBNEWLIBC
+	bool "libnewlib - A C standard library"
+	default n
+	select HAVE_LIBC
+	select LIBNEWLIBM if LIBNEWLIBC
+	select LIBUKALLOC
+	select LIBUKTIME
+	select LIBVFSCORE
+	select LIBPOSIX_PROCESS
+	select LIBPOSIX_USER
+
+if LIBNEWLIBC
+	config LIBNEWLIBC_WANT_IO_C99_FORMATS
+		bool "Use C99 IO formats"
+		default n
+
+	config LIBNEWLIBC_LINUX_ERRNO_EXTENSIONS
+		bool "Use Linux errno extensions"
+		default n
+
+	config LIBNEWLIBC_CRYPT
+		bool "Enable crypt() and crypt_r() functions"
+		default y
+endif
