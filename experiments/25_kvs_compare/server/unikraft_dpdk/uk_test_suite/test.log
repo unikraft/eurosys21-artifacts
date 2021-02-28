@@ -1,0 +1,366 @@
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/../../libs/pthread:/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/../../libs/newlib:/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/../../libs/intel-intrinsics:/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/../../libs/uk-dpdk
+make[1]: warning: -jN forced in submake: disabling jobserver mode.
+make[1]: Entering directory '/root/Storage/Project/Unikraft/Unikraft_dpdk/unikraft'
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:50: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_kvargs/include/rte_kvargs.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:52: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ring/include/rte_ring.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:52: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ring/include/rte_ring_generic.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:52: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ring/include/rte_ring_c11_mem.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:53: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mempool/include/rte_mempool.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:54: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mbuf/include/rte_mbuf.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:54: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mbuf/include/rte_mbuf_ptype.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:54: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mbuf/include/rte_mbuf_pool_ops.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_ip.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_tcp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_udp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_esp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_sctp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_icmp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_arp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_ether.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_gre.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_net.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_net_crc.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_mpls.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:56: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_meter/include/rte_meter.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev_driver.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev_core.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev_pci.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev_vdev.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_eth_ctrl.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_dev_info.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_flow.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_flow_driver.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_tm.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_tm_driver.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_mtr.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_mtr_driver.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/Makefile:682: warning: overriding recipe for target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/include/uk/_compile.h'
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/Makefile:670: warning: ignoring old recipe for target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/include/uk/_compile.h'
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/Makefile:692: prepare: /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/include/uk/_config.h /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/config   prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk
+make[2]: Nothing to be done for 'fetch'.
+make[1]: Leaving directory '/root/Storage/Project/Unikraft/Unikraft_dpdk/unikraft'
+make[1]: warning: -jN forced in submake: disabling jobserver mode.
+make[1]: Entering directory '/root/Storage/Project/Unikraft/Unikraft_dpdk/unikraft'
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:50: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_kvargs/include/rte_kvargs.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:52: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ring/include/rte_ring.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:52: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ring/include/rte_ring_generic.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:52: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ring/include/rte_ring_c11_mem.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:53: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mempool/include/rte_mempool.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:54: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mbuf/include/rte_mbuf.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:54: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mbuf/include/rte_mbuf_ptype.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:54: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mbuf/include/rte_mbuf_pool_ops.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_ip.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_tcp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_udp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_esp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_sctp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_icmp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_arp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_ether.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_gre.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_net.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_net_crc.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_mpls.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:56: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_meter/include/rte_meter.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev_driver.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev_core.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev_pci.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev_vdev.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_eth_ctrl.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_dev_info.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_flow.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_flow_driver.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_tm.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_tm_driver.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_mtr.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_mtr_driver.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/Makefile:682: warning: overriding recipe for target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/include/uk/_compile.h'
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/Makefile:670: warning: ignoring old recipe for target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/include/uk/_compile.h'
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/Makefile:692: prepare: /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/include/uk/_config.h /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/config   prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk
+make[2]: Nothing to be done for 'prepare'.
+make[1]: Leaving directory '/root/Storage/Project/Unikraft/Unikraft_dpdk/unikraft'
+make[1]: Entering directory '/root/Storage/Project/Unikraft/Unikraft_dpdk/unikraft'
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:50: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_kvargs/include/rte_kvargs.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:52: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ring/include/rte_ring.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:52: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ring/include/rte_ring_generic.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:52: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ring/include/rte_ring_c11_mem.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:53: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mempool/include/rte_mempool.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:54: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mbuf/include/rte_mbuf.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:54: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mbuf/include/rte_mbuf_ptype.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:54: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mbuf/include/rte_mbuf_pool_ops.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_ip.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_tcp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_udp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_esp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_sctp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_icmp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_arp.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_ether.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_gre.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_net.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_net_crc.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:55: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_mpls.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:56: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_meter/include/rte_meter.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev_driver.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev_core.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev_pci.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev_vdev.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_eth_ctrl.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_dev_info.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_flow.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_flow_driver.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_tm.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_tm_driver.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_mtr.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/Makefile.uk:57: target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_mtr_driver.h' given more than once in the same rule
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/Makefile:682: warning: overriding recipe for target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/include/uk/_compile.h'
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/Makefile:670: warning: ignoring old recipe for target '/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/include/uk/_compile.h'
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/Makefile:692: prepare: /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/include/uk/_config.h /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/config   prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk prepare-dpdk
+  CC      apptestsuite: cl_tx_rx.o
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:14:0: warning: "RTE_EAL_PMD_PATH" redefined
+ #define RTE_EAL_PMD_PATH ""
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/_rte_config.h:19:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:5,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/rte_build_config.h:26:0: note: this is the location of the previous definition
+ #define RTE_EAL_PMD_PATH "/usr/local/lib/x86_64-linux-gnu/dpdk/pmds-19.08"
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:15:0: warning: "RTE_MAX_NUMA_NODES" redefined
+ #define RTE_MAX_NUMA_NODES 1
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/_rte_config.h:19:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:5,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/rte_build_config.h:334:0: note: this is the location of the previous definition
+ #define RTE_MAX_NUMA_NODES 4
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:16:0: warning: "RTE_MAX_LCORE" redefined
+ #define RTE_MAX_LCORE 1
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/_rte_config.h:19:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:5,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/rte_build_config.h:332:0: note: this is the location of the previous definition
+ #define RTE_MAX_LCORE 128
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:18:0: warning: "RTE_MAX_ETHPORTS" redefined
+ #define RTE_MAX_ETHPORTS CONFIG_RTE_MAX_ETHPORTS
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/_rte_config.h:19:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:5,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/rte_build_config.h:330:0: note: this is the location of the previous definition
+ #define RTE_MAX_ETHPORTS 32
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:26:0: warning: "RTE_VER_MINOR" redefined
+ #define RTE_VER_MINOR 0
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/_rte_config.h:19:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:5,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/rte_build_config.h:342:0: note: this is the location of the previous definition
+ #define RTE_VER_MINOR 2
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:28:0: warning: "RTE_VER_RELEASE" redefined
+ #define RTE_VER_RELEASE 0
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/_rte_config.h:19:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:5,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/rte_build_config.h:346:0: note: this is the location of the previous definition
+ #define RTE_VER_RELEASE 99
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:30:0: warning: "RTE_LOG_DP_LEVEL" redefined
+ #define RTE_LOG_DP_LEVEL RTE_LOG_DEBUG
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/include/rte_config.h:5:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_eal.h:18,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:4:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/libukdpdkbuild/include/_rte_config.h:47:0: note: this is the location of the previous definition
+ #define RTE_LOG_DP_LEVEL RTE_LOG_INFO
+ 
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/xmmintrin.h:48:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/emmintrin.h:27,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/arch/x86/include/x86intrin.h:18,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_vect.h:28,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_memcpy.h:17,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_ether.h:21,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev.h:160,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:5:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/mm_malloc.h:47:1: warning: ‘__nodebug__’ attribute directive ignored [-Wattributes]
+ {
+ ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/mm_malloc.h:70:1: warning: ‘__nodebug__’ attribute directive ignored [-Wattributes]
+ {
+ ^
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/wmmintrin.h:29:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/libs/uk-dpdk/arch/x86/include/x86intrin.h:20,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_vect.h:28,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_eal/include/rte_memcpy.h:17,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_ether.h:21,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev.h:160,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:5:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/__wmmintrin_aes.h:50:1: warning: ‘__nodebug__’ attribute directive ignored [-Wattributes]
+ {
+ ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/__wmmintrin_aes.h:50:1: warning: ‘__min_vector_width__’ attribute directive ignored [-Wattributes]
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/__wmmintrin_aes.h:70:1: warning: ‘__nodebug__’ attribute directive ignored [-Wattributes]
+ {
+ ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/__wmmintrin_aes.h:70:1: warning: ‘__min_vector_width__’ attribute directive ignored [-Wattributes]
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/__wmmintrin_aes.h:90:1: warning: ‘__nodebug__’ attribute directive ignored [-Wattributes]
+ {
+ ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/__wmmintrin_aes.h:90:1: warning: ‘__min_vector_width__’ attribute directive ignored [-Wattributes]
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/__wmmintrin_aes.h:110:1: warning: ‘__nodebug__’ attribute directive ignored [-Wattributes]
+ {
+ ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/__wmmintrin_aes.h:110:1: warning: ‘__min_vector_width__’ attribute directive ignored [-Wattributes]
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/__wmmintrin_aes.h:127:1: warning: ‘__nodebug__’ attribute directive ignored [-Wattributes]
+ {
+ ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/libs/intel-intrinsics/include/__wmmintrin_aes.h:127:1: warning: ‘__min_vector_width__’ attribute directive ignored [-Wattributes]
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c: In function ‘dump_stats’:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:44:14: warning: format ‘%llu’ expects argument of type ‘long long unsigned int’, but argument 2 has type ‘uint64_t {aka long unsigned int}’ [-Wformat=]
+   printf("%llu,%llu,%llu,%llu\n", pkt_stats.latency[i],
+              ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:44:19: warning: format ‘%llu’ expects argument of type ‘long long unsigned int’, but argument 3 has type ‘uint64_t {aka long unsigned int}’ [-Wformat=]
+   printf("%llu,%llu,%llu,%llu\n", pkt_stats.latency[i],
+                   ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:44:24: warning: format ‘%llu’ expects argument of type ‘long long unsigned int’, but argument 4 has type ‘uint64_t {aka long unsigned int}’ [-Wformat=]
+   printf("%llu,%llu,%llu,%llu\n", pkt_stats.latency[i],
+                        ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:44:29: warning: format ‘%llu’ expects argument of type ‘long long unsigned int’, but argument 5 has type ‘uint64_t {aka long unsigned int}’ [-Wformat=]
+   printf("%llu,%llu,%llu,%llu\n", pkt_stats.latency[i],
+                             ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:52:46: warning: format ‘%llu’ expects argument of type ‘long long unsigned int’, but argument 2 has type ‘uint64_t {aka long unsigned int}’ [-Wformat=]
+  printf("The count of packet to received: %llu\n",
+                                              ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:83:14: warning: format ‘%llu’ expects argument of type ‘long long unsigned int’, but argument 2 has type ‘uint64_t {aka long unsigned int}’ [-Wformat=]
+   printf("%llu/%llu/%llu/%llu\n",
+              ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:83:19: warning: format ‘%llu’ expects argument of type ‘long long unsigned int’, but argument 3 has type ‘uint64_t {aka long unsigned int}’ [-Wformat=]
+   printf("%llu/%llu/%llu/%llu\n",
+                   ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:83:24: warning: format ‘%llu’ expects argument of type ‘long long unsigned int’, but argument 4 has type ‘uint64_t {aka long unsigned int}’ [-Wformat=]
+   printf("%llu/%llu/%llu/%llu\n",
+                        ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:83:29: warning: format ‘%llu’ expects argument of type ‘long long unsigned int’, but argument 5 has type ‘uint64_t {aka long unsigned int}’ [-Wformat=]
+   printf("%llu/%llu/%llu/%llu\n",
+                             ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c: In function ‘process_arpreply’:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:112:14: warning: unused variable ‘cksum’ [-Wunused-variable]
+     uint32_t cksum;
+              ^~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:111:14: warning: unused variable ‘udp_port’ [-Wunused-variable]
+     uint16_t udp_port;
+              ^~~~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:108:14: warning: unused variable ‘vlan_id’ [-Wunused-variable]
+     uint16_t vlan_id;
+              ^~~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:106:14: warning: unused variable ‘nb_replies’ [-Wunused-variable]
+     uint16_t nb_replies;
+              ^~~~~~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:105:14: warning: unused variable ‘nb_tx’ [-Wunused-variable]
+     uint16_t nb_tx;
+              ^~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:104:14: warning: unused variable ‘nb_rx’ [-Wunused-variable]
+     uint16_t nb_rx;
+              ^~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:102:14: warning: unused variable ‘retry’ [-Wunused-variable]
+     uint32_t retry;
+              ^~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:100:25: warning: unused variable ‘udp_h’ [-Wunused-variable]
+     struct rte_udp_hdr *udp_h = NULL;
+                         ^~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:99:26: warning: unused variable ‘icmp_h’ [-Wunused-variable]
+     struct rte_icmp_hdr *icmp_h = NULL;
+                          ^~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:98:26: warning: unused variable ‘ip_h’ [-Wunused-variable]
+     struct rte_ipv4_hdr *ip_h;
+                          ^~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:96:26: warning: unused variable ‘vlan_h’ [-Wunused-variable]
+     struct rte_vlan_hdr *vlan_h;
+                          ^~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:93:22: warning: unused variable ‘pkts_burst’ [-Wunused-variable]
+     struct rte_mbuf *pkts_burst[MAX_PKT_BURST];
+                      ^~~~~~~~~~
+In file included from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_net/include/rte_ether.h:23:0,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_ethdev/include/rte_ethdev.h:160,
+                 from /root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:5:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c: In function ‘process_packet’:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/build/librte_mbuf/include/rte_mbuf.h:2044:2: warning: initialization from incompatible pointer type [-Wincompatible-pointer-types]
+  ((t)((char *)(m)->buf_addr + (m)->data_off + (o)))
+  ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:225:24: note: in expansion of macro ‘rte_pktmbuf_mtod_offset’
+   uint64_t *sent_tsc = rte_pktmbuf_mtod_offset(mbuf,
+                        ^~~~~~~~~~~~~~~~~~~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c: In function ‘pkt_burst_transmit_cnt’:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:338:13: warning: implicit declaration of function ‘pkt_burst_transmit_data’ [-Wimplicit-function-declaration]
+   tx_cnt  = pkt_burst_transmit_data(port_id, mp, itr, burst, data, size);
+             ^~~~~~~~~~~~~~~~~~~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c: In function ‘test_tx_rx’:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:403:6: warning: unused variable ‘rc’ [-Wunused-variable]
+  int rc = pkt_burst_receive_arp(first_portid, mbuf_pool, 0);
+      ^~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:401:34: warning: unused variable ‘exp_curr’ [-Wunused-variable]
+  uint64_t exp_start = start_tsc, exp_curr, dur = 0;
+                                  ^~~~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:398:11: warning: unused variable ‘latency’ [-Wunused-variable]
+  uint64_t latency;
+           ^~~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:395:20: warning: unused variable ‘total_rx_count’ [-Wunused-variable]
+  int rx_count = 0, total_rx_count = 0;
+                    ^~~~~~~~~~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:394:20: warning: unused variable ‘total_tx_count’ [-Wunused-variable]
+  int tx_count = 0, total_tx_count = 0;
+                    ^~~~~~~~~~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:351:6: warning: unused variable ‘pkt_in_flight’ [-Wunused-variable]
+  int pkt_in_flight = CONFIG_INPIPELINE;
+      ^~~~~~~~~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:350:6: warning: variable ‘i’ set but not used [-Wunused-but-set-variable]
+  int i;
+      ^
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c: In function ‘pkt_burst_receive_arp’:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:267:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+At top level:
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:30:13: warning: ‘burst_cnt’ defined but not used [-Wunused-variable]
+ static int  burst_cnt = DEF_PKT_BURST;
+             ^~~~~~~~~
+/root/Storage/Project/Unikraft/Unikraft_dpdk/apps/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c:22:17: warning: ‘arg_time_out’ defined but not used [-Wunused-variable]
+ static uint64_t arg_time_out = 100 * TIMER_MILLISECOND; /* default period is ~ 10 seconds */
+                 ^~~~~~~~~~~~
+  LD      apptestsuite.ld.o
+  OBJCOPY apptestsuite.o
+  LD      uk_test_suite_kvm-x86_64.ld.o
+  OBJCOPY uk_test_suite_kvm-x86_64.o
+  LD      uk_test_suite_kvm-x86_64.dbg
+  SCSTRIP uk_test_suite_kvm-x86_64
+  GZ      uk_test_suite_kvm-x86_64.gz
+make[1]: Leaving directory '/root/Storage/Project/Unikraft/Unikraft_dpdk/unikraft'
