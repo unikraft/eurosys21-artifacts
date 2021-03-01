@@ -9,4 +9,5 @@ echo "Unzip the experiments..."
 unzip table2-experiments.zip
 cd abi
 cp "$CURRENT_FOLDER/README.md" .
-echo "All is setup. Please refer to the README.md for the tests"
+echo "All is setup. Please refer to the README.md for the tests. Be sure that you are in the /tmp/abi folder"
+cd /tmp
