@@ -4,8 +4,6 @@ set -x
 
 modprobe tun
 
-WRK=wrk
-
 BASEIP=172.190.0
 
 function run_dhcp {
