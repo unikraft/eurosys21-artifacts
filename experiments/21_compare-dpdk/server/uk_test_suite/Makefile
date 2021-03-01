@@ -1,5 +1,5 @@
-UK_ROOT ?= $(PWD)/../aux/unikraft
-UK_LIBS ?= $(PWD)/../aux/libs/
+UK_ROOT ?= $(PWD)/../../aux/unikraft
+UK_LIBS ?= $(PWD)/../../aux/libs/
 UK_PLATS ?= $(PWD)/../../plats
 empty:=
 SPACE:=$(empty) $(empty)
