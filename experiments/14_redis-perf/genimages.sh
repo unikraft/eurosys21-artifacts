@@ -171,7 +171,8 @@ docker exec -it $CONTAINER bash -c \
 		bin/redis-server.img ./bin/redis-server"
 
 mkdir -p ${IMAGES}/rump/root/
-docker cp ${CONTAINER}:/root/rump/ ${IMAGES}/rump/root/
+docker cp ${CONTAINER}:/root/rumprun/ ${IMAGES}/rump/root/
+docker cp ${CONTAINER}:/root/rumprun-packages/ ${IMAGES}/rump/root/
 docker container stop $CONTAINER
 docker rm -f $CONTAINER
 
