@@ -7,8 +7,6 @@ IMAGES=$(pwd)/images/
 FIRECRACKER_PATH=$(pwd)/.firecracker
 VMMSOCKET=$(pwd)/.firecracker.socket
 
-apt install gawk
-
 function cleanup {
   # kill all children (evil)
   pkill -P $$

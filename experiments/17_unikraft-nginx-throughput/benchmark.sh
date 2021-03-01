@@ -61,7 +61,7 @@ do
 			tail -n 1 | awk  '{print $3}'`
 
 		# benchmark
-		taskset -c ${CPU3},${CPU4} /root/hle/pub/wrk/wrk -t 14 -d20s -c 30 \
+		taskset -c ${CPU3},${CPU4} wrk -t 14 -d20s -c 30 \
 				http://${ip}/index.html | tee -a $LOG
 		#curl http://${BASEIP}.2/index.html --noproxy ${BASEIP}.2 --output -
 
