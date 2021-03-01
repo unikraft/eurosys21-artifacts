@@ -4,9 +4,10 @@
 ../common/setup-host.sh
 
 # run benchmarks
-./impl/hermitux-uhyve-redis.sh
-./impl/rump-qemu-redis.sh
+#./impl/hermitux-uhyve-redis.sh
+#./impl/rump-qemu-redis.sh
 ./impl/osv-qemu-redis.sh
+exit 1
 ./impl/lupine-fc-redis.sh
 ./impl/lupine-qemu-redis.sh
 ./impl/microvm-fc-redis.sh
