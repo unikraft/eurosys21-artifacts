@@ -48,9 +48,6 @@ function dichotomic_search {
   echo "$4	$max" >> results/${3}.csv
 }
 
-dichotomic_search 1 32 "rump" nginx
-exit 1
-
 for vm in "unikraft" "lupine" "rump" "microvm" "docker" "osv" "hermitux"
 do
   echo "running $vm / hello"
