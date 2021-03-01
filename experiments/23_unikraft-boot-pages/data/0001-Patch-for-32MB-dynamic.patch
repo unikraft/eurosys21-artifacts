@@ -1,0 +1,35 @@
+From 7074a131e487b6ccb0aa386804d01a902f618d46 Mon Sep 17 00:00:00 2001
+From: Stefan Teodorescu <stefanl.teodorescu@gmail.com>
+Date: Sun, 28 Feb 2021 01:02:01 +0200
+Subject: [PATCH] Patch for 32MB dynamic
+
+---
+ include/uk/mem_layout.h | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/include/uk/mem_layout.h b/include/uk/mem_layout.h
+index a42bdebc..8ad2048a 100644
+--- a/include/uk/mem_layout.h
++++ b/include/uk/mem_layout.h
+@@ -81,14 +81,16 @@
+  * for now to 16MB. TODO: figure out a way to dynamically alloc this.
+  */
+ #define BOOKKEEP_AREA_START	(1UL << 32) /* 4GB */
+-#define BOOKKEEP_AREA_END	(BOOKKEEP_AREA_START + 0x1000000) /* 16MB */
++// #define BOOKKEEP_AREA_END	(BOOKKEEP_AREA_START + 0x1000000) /* 16MB */
++#define BOOKKEEP_AREA_END	(BOOKKEEP_AREA_START + 0x100000) /* 16MB */
+ #define BOOKKEEP_AREA_SIZE	(BOOKKEEP_AREA_END - BOOKKEEP_AREA_START)
+ 
+ /*
+  * TODO this number has depends on how much memory we have
+  * On Xen it can't be too high because not much memory is initially mapped.
+  */
+-#define PAGETABLES_AREA_START	(BOOKKEEP_AREA_START + 0x200000) /* 2MB */
++// #define PAGETABLES_AREA_START	(BOOKKEEP_AREA_START + 0x200000) /* 2MB */
++#define PAGETABLES_AREA_START	(BOOKKEEP_AREA_START + 0x80000) /* 2MB */
+ #define PAGETABLES_AREA_END	BOOKKEEP_AREA_END
+ #define PAGETABLES_AREA_SIZE	(PAGETABLES_AREA_END - PAGETABLES_AREA_START)
+ 
+-- 
+2.30.0
+
