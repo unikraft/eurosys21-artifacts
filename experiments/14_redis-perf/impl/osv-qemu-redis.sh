@@ -46,7 +46,7 @@ do
 	taskset -c ${CPU1} qemu-guest \
 		-q ${IMAGES}/osv-qemu.img.disposible \
                 -m 1024 -p ${CPU2} \
-		-b ${NETIF}
+		-b ${NETIF} -x
 
 	# make sure that the server has properly started
 	sleep 6
