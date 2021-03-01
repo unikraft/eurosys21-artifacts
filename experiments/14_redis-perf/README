@@ -1,0 +1,8 @@
+TODO: generate plot!
+
+This experiment provides data for Fig. 14, without Unikraft
+(see Fig. 20).
+
+Run instructions:
+ - cd experiments/14_redis-perf
+ - ./benchmark.sh
