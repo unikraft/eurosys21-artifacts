@@ -1,0 +1,47 @@
+IMPORTANT: connect to the server using `ssh -X` to enable X11 forwarding
+(otherwise rumprun experiments will fail!).
+
+IMPORTANT: always run scripts in their own directory!
+
+# System requirements
+
+```
+apt install python3 python3-click python3-tabulate \
+		git python3-numpy python3-matplotlib \
+		texlive-fonts-recommended texlive-fonts-extra \
+		dvipng qemu-system-x86
+```
+
+The docker daemon has to be up and running (instructions [here](https://docs.docker.com/engine/install/debian/)).
+
+qemu-guest has to be installed:
+
+```
+wget https://raw.githubusercontent.com/unikraft/kraft/6217d48668cbdf0847c7864bc6368a6adb94f6a6/scripts/qemu-guest
+chmod a+x qemu-guest
+mv qemu-guest /usr/local/bin
+```
+
+firectl has to be installed:
+
+```
+wget https://github.com/firecracker-microvm/firectl/archive/v0.1.0.tar.gz
+tar -xf v0.1.0.tar.gz
+rm v0.1.0.tar.gz
+pushd firectl-0.1.0
+make && cp firectl /usr/local/bin/
+popd
+```
+
+Unikraft scripts have to be installed:
+
+```
+mkdir -p unikraft-scripts
+pushd unikraft-scripts
+git clone https://github.com/unikraft/unikraft.git
+pushd unikraft
+git checkout 7fd6797bd5917acc515ef6ddbfa85621f4aacf5f
+popd
+popd
+echo "source $(pwd)/unikraft-scripts/unikraft/support/scripts/uk-gdb.py" >> ~/.gdbinit
+```
