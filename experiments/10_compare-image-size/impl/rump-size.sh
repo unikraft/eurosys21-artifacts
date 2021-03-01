@@ -31,7 +31,7 @@ SQLITE_TOTAL_SIZE=`(docker exec -it $CONTAINER du --block-size=1 \
 docker container stop $CONTAINER
 docker rm -f $CONTAINER
 
-echo ${TOTAL_HELLO_SIZE} > results/rump-hello.csv
-echo ${TOTAL_SQLITE_SIZE} > results/rump-sqlite.csv
-echo ${TOTAL_NGINX_SIZE} > results/rump-nginx.csv
-echo ${TOTAL_REDIS_SIZE} > results/rump-redis.csv
+echo ${HELLO_TOTAL_SIZE} > results/rump-hello.csv
+echo ${SQLITE_TOTAL_SIZE} > results/rump-sqlite.csv
+echo ${NGINX_TOTAL_SIZE} > results/rump-nginx.csv
+echo ${REDIS_TOTAL_SIZE} > results/rump-redis.csv
