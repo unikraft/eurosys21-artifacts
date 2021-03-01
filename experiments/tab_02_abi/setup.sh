@@ -4,7 +4,7 @@ CURRENT_FOLDER=$PWD
 echo "Go to /tmp folder"
 cd /tmp
 echo "Download the experiments archive from remote server"
-wget https://people.montefiore.uliege.be/gain/unikraft/table2-experiments.zip
+curl -LO https://people.montefiore.uliege.be/gain/unikraft/table2-experiments.zip
 echo "Unzip the experiments..."
 unzip table2-experiments.zip
 cd abi

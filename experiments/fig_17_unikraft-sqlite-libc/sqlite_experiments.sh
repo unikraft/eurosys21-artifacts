@@ -28,6 +28,8 @@ obtain() {
 [ -s "$(command -v qemu-system-x86_64)" ] \
     || die "qemu-system-x86_64 is needed, install qemu-system-x86 first."
 
+script_folder="$(dirname "$(readlink -f "$0")")"
+
 root_folder="$(mktemp --tmpdir --directory sqlite_experiments.XXX)"
 echo "Experiments are going to be built and run in $root_folder."
 echo "This will require about 2 GB of disk space."
@@ -117,6 +119,11 @@ for app in app-sqlite-*; do
     cp perf.dat "../../results/$app.dat"
     cd ..
 done
+
+echo "\n======  Generating Figure  ======\n"
+
+cd ../results
+"$script_folder/gen_fig.py" .
 
 echo "\n======  Experiments Finished!  ======\n
 You can now:
