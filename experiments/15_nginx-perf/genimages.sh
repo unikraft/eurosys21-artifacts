@@ -5,7 +5,7 @@ set -x
 BUILDDIR=..
 IMAGES=$(pwd)/images
 BASEIP=172.190.0
-GUESTSTART=$(pwd)/guest_start.sh
+GUESTSTART=$(pwd)/data/guest_start.sh
 
 source ../common/build.sh
 
