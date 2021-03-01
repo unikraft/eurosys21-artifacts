@@ -43,7 +43,7 @@ do
 		${IMAGES}/osv-qemu.img.disposible \
 		"--rootfs=zfs /redis-server redis.conf"
 
-	taskset -c ${CPU1} ../tools/qemu-guest \
+	taskset -c ${CPU1} qemu-guest \
 		-q ${IMAGES}/osv-qemu.img.disposible \
                 -m 1024 -p ${CPU2} \
 		-b ${NETIF} -x

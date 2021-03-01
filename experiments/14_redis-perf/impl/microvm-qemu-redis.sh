@@ -33,7 +33,7 @@ for j in {1..5}
 do
 	cp ${IMAGES}/redis.ext2 ${IMAGES}/redis.ext2.disposible
 
-	taskset -c ${CPU1} ../tools/qemu-guest \
+	taskset -c ${CPU1} qemu-guest \
 		-k ${IMAGES}/generic-qemu.kernel \
 		-d ${IMAGES}/redis.ext2.disposible \
 		-a "root=/dev/vda rw console=ttyS0 init=/guest_start.sh redis-server" \

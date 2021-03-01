@@ -4,3 +4,4 @@ Run instructions:
  - cd experiments/20_unikraft-redis-alloc
  - ./genimages.sh
  - ./benchmark.sh
+ - ./plot.py

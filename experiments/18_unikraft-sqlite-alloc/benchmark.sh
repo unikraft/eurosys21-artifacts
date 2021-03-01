@@ -35,7 +35,7 @@ do
 				killall -9 qemu-system-x86
 			} &
 
-			script .out -c "taskset -c ${CPU1} ../tools/qemu-guest \
+			script .out -c "taskset -c ${CPU1} qemu-guest \
 				-i sqlitebenchmark.cpio \
 				-k ${IMAGES}/${queries}/unikraft+${alloc}.kernel \
 				-a '' -m 1024 -p ${CPU2}"
