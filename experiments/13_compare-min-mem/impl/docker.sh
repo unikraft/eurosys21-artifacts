@@ -9,16 +9,16 @@ source ../common/redis.sh
 
 function hello_docker_with_mem {
     IMAGES=$(pwd)/images
-    # minimal docker:
+    CONTAINER="docker-hello-ram-usage"
 
     {
       sleep 4
-      docker kill alhello 2> /dev/null
-      docker rm -f alhello 2> /dev/null
+      docker kill $CONTAINER 2> /dev/null
+      docker rm -f $CONTAINER 2> /dev/null
     } &
 
     docker pull hello-world
-    docker run -m ${1}M --privileged --name="alhello" \
+    docker run -m ${1}M --privileged --name="$CONTAINER" \
 			hello-world > .out 2> /dev/null
     wait
 
@@ -31,7 +31,7 @@ function hello_docker_with_mem {
 
 function sqlite_docker_with_mem {
     IMAGES=$(pwd)/images
-    CONTAINER="alpine-sqlite"
+    CONTAINER="docker-sqlite-ram-usage"
 
     {
       sleep 5
@@ -71,7 +71,7 @@ function redis_docker_with_mem {
 
     grep -q "Server initialized" .out
     up=$?
-    #rm .out
+    rm .out
 
     exit $up
 }
