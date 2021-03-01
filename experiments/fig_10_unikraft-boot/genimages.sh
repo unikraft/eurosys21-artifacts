@@ -6,21 +6,35 @@ IMAGES=$(pwd)/images
 
 source ../common/build.sh
 
-BUILDDIR=..
-LUPINEDIR=${BUILDDIR}/.lupine
-FIRECRACKER_PATH=.firecracker
-SOLO5_PATH=.solo5
-
-rm -rf $SOLO5_PATH $FIRECRACKER_PATH $IMAGES
+rm -rf $IMAGES
 mkdir -p $IMAGES
 
 # ========================================================================
 # Firecracker binary
 # ========================================================================
 
-if [ ! -f "$FIRECRACKER_PATH" ]; then
-	ln -s ${LUPINEDIR}/Lupine-Linux/firecracker $FIRECRACKER_PATH
-fi
+CONTAINER=instvmm-tmp
+# kill zombies
+docker container stop $CONTAINER
+docker rm -f $CONTAINER
+sleep 3
+docker pull hlefeuvre/instrumented-vmms:latest
+docker run --rm --privileged --name=$CONTAINER \
+    		-dt hlefeuvre/instrumented-vmms
+docker cp ${CONTAINER}:/root/firecracker ${IMAGES}/firecracker
+docker cp ${CONTAINER}:/root/qemu ${IMAGES}/qemu
+docker container stop $CONTAINER
+docker rm -f $CONTAINER
+
+# create firecracker disk image (not used, but seems to be required)
+qemu-img create -f raw /tmp/fcdisk.img 1K
+
+# create firecracker configuration
+cp data/firecracker.config.in data/firecracker.config
+sed -i "s|{{KERNELIMAGE}}|${IMAGES}/unikraft+firecracker.kernel|g" \
+	data/firecracker.config
+sed -i "s|{{LOGS}}|$(pwd)/logs.fifo|g" data/firecracker.config
+sed -i "s|{{METRICS}}|$(pwd)/metrics.fifo|g" data/firecracker.config
 
 # ========================================================================
 # Generate KVM images

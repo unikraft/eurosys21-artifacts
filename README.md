@@ -10,7 +10,8 @@ apt install -y  curl python3 python3-click python3-tabulate \
 		git python3-numpy python3-matplotlib musl-tools \
 		texlive-fonts-recommended texlive-fonts-extra \
 		dvipng qemu-system-x86 redis-utils socat \
-		uuid-runtime bridge-utils net-tools gawk
+		uuid-runtime bridge-utils net-tools gawk \
+		qemu-utils
 ```
 
 The docker daemon has to be up and running (instructions [here](https://docs.docker.com/engine/install/debian/)).

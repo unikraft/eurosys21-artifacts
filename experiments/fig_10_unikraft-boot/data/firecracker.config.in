@@ -1,0 +1,26 @@
+{
+  "boot-source": {
+    "kernel_image_path": "{{KERNELIMAGE}}",
+    "boot_args": ""
+  },
+  "drives": [
+    {
+      "drive_id": "rootfs",
+      "path_on_host": "/tmp/fcdisk.img",
+      "is_root_device": true,
+      "is_read_only": false
+    }
+  ],
+  "logger": {
+    "log_fifo": "{{LOGS}}",
+    "metrics_fifo": "{{METRICS}}",
+    "level": "Debug",
+    "show_level": true,
+    "show_log_origin": true
+  },
+  "machine-config": {
+    "vcpu_count": 1,
+    "mem_size_mib": 2,
+    "ht_enabled": false
+  }
+}
