@@ -61,6 +61,10 @@ build_lupine() {
 }
 
 unikraft_eurosys21_build() {
+    unikraft_eurosys21_build_wvmm $1 $2 $3 kvm
+}
+
+unikraft_eurosys21_build_wvmm() {
     CONTAINER=uk-tmp-nginx
     # kill zombies
     docker container stop $CONTAINER
@@ -73,8 +77,13 @@ unikraft_eurosys21_build() {
 	"cd app-${1} && cp configs/${2}.conf .config"
     docker exec -it $CONTAINER bash -c \
 	"cd app-${1} && make prepare && make -j"
-    docker cp ${CONTAINER}:/root/workspace/apps/app-${1}/build/app-${1}_kvm-x86_64 \
+    docker cp ${CONTAINER}:/root/workspace/apps/app-${1}/build/app-${1}_${4}-x86_64 \
 		${3}/unikraft+${2}.kernel
+    # special case: for solo5, also copy hvt
+    if [ "$4" = "solo5" ]; then
+        docker cp ${CONTAINER}:/root/workspace/apps/app-${1}/build/solo5-hvt \
+            ${IMAGES}/solo5_hvt
+    fi
     docker container stop $CONTAINER
     docker rm -f $CONTAINER
     sleep 6
