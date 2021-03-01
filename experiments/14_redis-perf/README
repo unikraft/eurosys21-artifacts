@@ -5,4 +5,5 @@ This experiment provides data for Fig. 14, without Unikraft
 
 Run instructions:
  - cd experiments/14_redis-perf
+ - ./genimages.sh
  - ./benchmark.sh
