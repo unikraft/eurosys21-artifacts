@@ -13,7 +13,6 @@ echo "Download unikraft from git and checkout to specific commit"
 git clone git@github.com:unikraft/unikraft.git
 git checkout 7fd6797bd5917acc515ef6ddbfa85621f4aacf5f
 echo "Generate random file for the unikraft read"
-cd apps/
 cd apps/lib-readfile/test
 head -c 1G </dev/urandom > randomfile
 cd $CURRENT_FOLDER
