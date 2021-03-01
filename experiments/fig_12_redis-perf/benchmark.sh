@@ -13,3 +13,4 @@
 ./impl/microvm-qemu-redis.sh
 ./impl/docker-redis.sh
 ./impl/native-redis.sh
+./impl/unikraft-qemu-redis.sh
