@@ -29,7 +29,7 @@ do
 	sleep 2
 
 	# benchmark
-	benchmark_server localhost 6379
+	benchmark_redis_server localhost 6379
 
 	# stop server
 	killall -9 redis-server

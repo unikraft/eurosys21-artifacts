@@ -10,7 +10,7 @@
 [[ -z "${PIPELINING}" ]] && PIPELINING=16
 [[ -z "${QUERIES}" ]] && QUERIES=get,set
 
-function benchmark_server {
+function benchmark_redis_server {
 	taskset -c ${CPU3},${CPU4} redis-benchmark --csv -q \
 			-n ${REPS} -c ${CONCURRENT_CONNS} \
 			-h ${1} -p $2 -d ${PAYLOAD_SIZE} \

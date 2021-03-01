@@ -52,7 +52,7 @@ do
 				     tail -n 1 | awk  '{print $3}'`
 
 	# benchmark
-	benchmark_server ${ip} 6379
+	benchmark_redis_server ${ip} 6379
 
 	# stop server
 	killall -9 qemu-system-x86

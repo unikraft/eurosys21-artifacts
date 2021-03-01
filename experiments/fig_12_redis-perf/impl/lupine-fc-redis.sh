@@ -41,7 +41,7 @@ do
 	sleep 3
 
 	# benchmark
-	benchmark_server ${BASEIP}.2 6379
+	benchmark_redis_server ${BASEIP}.2 6379
 
 	# stop server
 	killall -9 firecracker firectl .firecracker

@@ -54,7 +54,7 @@ do
 
 	# benchmark, limit to 10 conns otherwise it sends RSTs
 	CONCURRENT_CONNS=10
-	benchmark_server ${HERMITUX_IP} 8000
+	benchmark_redis_server ${HERMITUX_IP} 8000
 
 	# stop server
 	kill -9 $child_pid
