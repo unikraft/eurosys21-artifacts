@@ -1,0 +1,70 @@
+diff --git a/.gitignore b/.gitignore
+index 5cdb8bf..175f6cf 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,4 +1,3 @@
+-config.mk
+ php/images/data/www
+ pkgs/*
+ includes/*
+diff --git a/nginx/images/data/www/50x.html b/nginx/images/data/www/50x.html
+new file mode 100644
+index 0000000..9071e0a
+--- /dev/null
++++ b/nginx/images/data/www/50x.html
+@@ -0,0 +1,21 @@
++<!DOCTYPE html>
++<html>
++<head>
++<title>Error</title>
++<style>
++    body {
++        width: 35em;
++        margin: 0 auto;
++        font-family: Tahoma, Verdana, Arial, sans-serif;
++    }
++</style>
++</head>
++<body>
++<h1>An error occurred.</h1>
++<p>Sorry, the page you are looking for is currently unavailable.<br/>
++Please try again later.</p>
++<p>If you are the system administrator of this resource then you should check
++the error log for details.</p>
++<p><em>Faithfully yours, nginx.</em></p>
++</body>
++</html>
+diff --git a/nginx/images/data/www/index.html b/nginx/images/data/www/index.html
+index faaaf0f..2ca3b95 100644
+--- a/nginx/images/data/www/index.html
++++ b/nginx/images/data/www/index.html
+@@ -1,7 +1,25 @@
++<!DOCTYPE html>
+ <html>
+-<body style="font-size: 14pt;">
+-    <img src="logo150.png"/>
+-    Served to you by <a href="http://nginx.org/">nginx</a>, running on a
+-    <a href="http://rumpkernel.org">rump kernel</a>...
++<head>
++<title>Welcome to nginx!</title>
++<style>
++    body {
++        width: 35em;
++        margin: 0 auto;
++        font-family: Tahoma, Verdana, Arial, sans-serif;
++    }
++</style>
++</head>
++<body>
++<h1>Welcome to nginx!</h1>
++<p>If you see this page, the nginx web server is successfully installed and
++working. Further configuration is required.</p>
++
++<p>For online documentation and support please refer to
++<a href="http://nginx.org/">nginx.org</a>.<br/>
++Commercial support is available at
++<a href="http://nginx.com/">nginx.com</a>.</p>
++
++<p><em>Thank you for using nginx.</em></p>
+ </body>
+ </html>
