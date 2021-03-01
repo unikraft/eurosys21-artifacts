@@ -5,6 +5,7 @@ set -x
 
 source ../common/set-cpus.sh
 source ../common/network.sh
+source ../common/nginx.sh
 
 apt install -y nginx
 
@@ -28,8 +29,7 @@ do
 	sleep 2
 
 	# benchmark
-	taskset -c ${CPU3},${CPU4} $WRK -t 14 -d1m -c 30 \
-			http://localhost/index.html >> $LOG
+	benchmark_nginx_server localhost $LOG
 
 	# stop server
 	killall -9 nginx

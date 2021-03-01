@@ -5,6 +5,7 @@ set -x
 
 source ../common/set-cpus.sh
 source ../common/network.sh
+source ../common/nginx.sh
 
 IMAGES=$(pwd)/images/
 BASEIP=172.190.0
@@ -68,11 +69,11 @@ do
 	# make sure that the server has properly started
 	sleep 15
 
-	ip=`cat $(pwd)/dnsmasq.log | grep "dnsmasq-dhcp: DHCPACK(${NETIF})" | tail -n 1 | awk  '{print $3}'`
+	ip=`cat $(pwd)/dnsmasq.log | grep "dnsmasq-dhcp: DHCPACK(${NETIF})" | \
+		tail -n 1 | awk  '{print $3}'`
 
 	# benchmark
-	taskset -c ${CPU3},${CPU4} $WRK -t 14 -d1m -c 30 \
-			http://${ip}/index.html >> $LOG
+	benchmark_nginx_server $ip $LOG
 	#curl http://${ip}/index.html --noproxy ${ip} --output -
 
 	# stop server

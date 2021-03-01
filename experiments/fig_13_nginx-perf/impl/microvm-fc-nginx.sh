@@ -5,6 +5,7 @@ set -x
 
 source ../common/set-cpus.sh
 source ../common/network.sh
+source ../common/nginx.sh
 
 IMAGES=images/
 BASEIP=172.190.0
@@ -57,8 +58,7 @@ do
 	sleep 3
 
 	# benchmark
-	taskset -c ${CPU3},${CPU4} $WRK -t 14 -d1m -c 30 \
-			http://${BASEIP}.2/index.html >> $LOG
+	benchmark_nginx_server ${BASEIP}.2 $LOG
 	#curl http://${BASEIP}.2/index.html --noproxy ${BASEIP}.2 --output -	
 
 	# stop server
