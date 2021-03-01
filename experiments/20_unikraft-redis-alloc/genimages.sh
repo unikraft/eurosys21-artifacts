@@ -17,9 +17,9 @@ function build_for {
     docker container stop $CONTAINER
     docker rm -f $CONTAINER
     sleep 6
-    #docker pull hlefeuvre/unikraft-nwbench:latest
+    docker pull hlefeuvre/unikraft-eurosys21:latest
     docker run --rm --privileged --name=$CONTAINER \
-			-dt unikraft-nwbench:latest
+			-dt hlefeuvre/unikraft-eurosys21
     docker exec -it $CONTAINER bash -c \
 	"cd app-${1} && cp configs/${2}.conf .config"
     docker exec -it $CONTAINER bash -c \

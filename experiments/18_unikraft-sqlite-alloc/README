@@ -1,0 +1,6 @@
+This experiment provides data for Fig. 18.
+
+Run instructions:
+ - cd experiments/18_unikraft-sqlite-alloc
+ - ./genimages.sh
+ - ./benchmark.sh
