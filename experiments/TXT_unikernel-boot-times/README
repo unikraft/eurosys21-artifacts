@@ -1,0 +1,9 @@
+TODO: calculate average, variance, output to an easily readable txt file!
+
+This experiment provides data for unikernel boot times (not a plot, in
+the paper's text).
+
+Run instructions:
+ - cd experiments/TXT_unikernel-boot-times
+ - ./genimages.sh
+ - ./benchmark.sh
