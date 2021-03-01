@@ -3,14 +3,7 @@
     "kernel_image_path": "{{KERNELIMAGE}}",
     "boot_args": ""
   },
-  "drives": [
-    {
-      "drive_id": "rootfs",
-      "path_on_host": "/tmp/fcdisk.img",
-      "is_root_device": true,
-      "is_read_only": false
-    }
-  ],
+  "drives": [],
   "logger": {
     "log_fifo": "{{LOGS}}",
     "metrics_fifo": "{{METRICS}}",

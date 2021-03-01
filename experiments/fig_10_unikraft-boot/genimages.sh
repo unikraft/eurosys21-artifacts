@@ -26,9 +26,6 @@ docker cp ${CONTAINER}:/root/qemu ${IMAGES}/qemu
 docker container stop $CONTAINER
 docker rm -f $CONTAINER
 
-# create firecracker disk image (not used, but seems to be required)
-qemu-img create -f raw /tmp/fcdisk.img 1K
-
 # create firecracker configuration
 cp data/firecracker.config.in data/firecracker.config
 sed -i "s|{{KERNELIMAGE}}|${IMAGES}/unikraft+firecracker.kernel|g" \
