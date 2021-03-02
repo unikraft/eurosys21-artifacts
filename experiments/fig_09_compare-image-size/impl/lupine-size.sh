@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 source ../common/build.sh
 
 # build lupine kernels
@@ -33,7 +35,6 @@ SQLITE_SIZE=`(docker exec -it $CONTAINER du --block-size=1 ${SQLITE_LOCATION}) |
 	tail -n 1 | awk '{ print $1 }'`
 docker container stop $CONTAINER
 docker rm -f $CONTAINER
-CONTAINER=hermitux
 
 CONTAINER=nginx-tmp
 docker pull nginx:1.15.6-alpine
@@ -51,24 +52,24 @@ KERNELBUILD="${LUPINEDIR}/Lupine-Linux/kernelbuild/"
 KERNEL_PATH="${KERNELBUILD}/lupine-djw-kml-tiny++hello-world/vmlinux"
 strip ${KERNEL_PATH}
 KERNEL_SIZE=`du --block-size=1 $KERNEL_PATH | tail -n 1 | awk '{ print $1 }'`
-TOTAL_SIZE=$((${KERNEL_SIZE} + ${HELLO_SIZE}))
+TOTAL_SIZE=$(( ${KERNEL_SIZE} + ${HELLO_SIZE} ))
 echo ${TOTAL_SIZE} > results/lupine-hello.csv
 
 KERNEL_PATH="${KERNELBUILD}/lupine-djw-kml-tiny++nginx/vmlinux"
 strip ${KERNEL_PATH}
 KERNEL_SIZE=`du --block-size=1 $KERNEL_PATH | tail -n 1 | awk '{ print $1 }'`
-TOTAL_SIZE=$((${KERNEL_SIZE} + ${NGINX_SIZE}))
+TOTAL_SIZE=$(( ${KERNEL_SIZE} + ${NGINX_SIZE} ))
 echo ${TOTAL_SIZE} > results/lupine-nginx.csv
 
 KERNEL_PATH="${KERNELBUILD}/lupine-djw-kml-tiny++redis/vmlinux"
 strip ${KERNEL_PATH}
 KERNEL_SIZE=`du --block-size=1 $KERNEL_PATH | tail -n 1 | awk '{ print $1 }'`
-TOTAL_SIZE=$((${KERNEL_SIZE} + ${REDIS_SIZE}))
+TOTAL_SIZE=$(( ${KERNEL_SIZE} + ${REDIS_SIZE} ))
 echo ${TOTAL_SIZE} > results/lupine-redis.csv
 
 # reuse redis kernel for sqlite
 KERNEL_PATH="${KERNELBUILD}/lupine-djw-kml-tiny++redis/vmlinux"
 strip ${KERNEL_PATH}
 KERNEL_SIZE=`du --block-size=1 $KERNEL_PATH | tail -n 1 | awk '{ print $1 }'`
-TOTAL_SIZE=$((${KERNEL_SIZE} + ${SQLITE_SIZE}))
+TOTAL_SIZE=$(( ${KERNEL_SIZE} + ${SQLITE_SIZE} ))
 echo ${TOTAL_SIZE} > results/lupine-sqlite.csv
