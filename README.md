@@ -54,11 +54,11 @@ environment. In the paper, we used three different set ups:
  
  2. A Linux host with a recent Linux kernel (5.??) used as a DPDK packet     generator (Fig 19). In addition, we patch the kernel with these patches [1] to conduct syscall overhead experiments (Tab 1).
  
- 3. A Xen host used for Xen boot experiments (Fig 10). 
+ 3. A Xen host used for Xen 9pfs experiments.). 
 
 A single server can be used for almost all experiments, though it would require installing different Linux kernel versions, or the Xen hypervisor and rebooting to switch from one set up to another. The exception is the DPDK experiment, which requires two servers connected to each other via a 10Gb link.
 
-All of our results were run on inexpensive (roughly EUR 800) [Shuttle SH370R6](http://global.shuttle.com/products/productsDetail?productId=2265) boxes with an Intel i7 9700K 3.6 GHz (4.9 Ghz with Turbo Boost, 8 cores) and 32GB of RAM. For the DPDK experiment we used [Intel X540-AT2](https://ark.intel.com/content/www/us/en/ark/products/60020/intel-ethernet-controller-x540-at2.html) cards with the 82599EB chipset.
+All of our results were run on inexpensive (roughly EUR 800) [Shuttle SH370R6](http://global.shuttle.com/products/productsDetail?productId=2265) boxes with an Intel i7 9700K 3.6 GHz (4.9 Ghz with Turbo Boost, 8 cores) and 32GB of RAM. For the DPDK experiment we used [Intel X520-T2](https://ark.intel.com/content/www/de/de/ark/products/69655/intel-ethernet-converged-network-adapter-x520-t2.html) cards with the 82599EB chipset.
 
 For all set ups, we disabled Hyper-Threading and isolated 4 CPU cores for the host with the following kernel boot parameters:
 
