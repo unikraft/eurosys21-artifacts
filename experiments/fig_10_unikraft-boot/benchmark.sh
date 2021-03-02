@@ -8,21 +8,32 @@ source ../common/qemu.sh
 
 IMAGES=$(pwd)/images
 QEMU_GUEST=../tools/qemu-guest
+REPS=10
 
 suffix=`date '+%d%m%Y%H%M%S'`
 mkdir -p rawdata/ results
 
+RESULTS=results/solo5.csv
+echo "vmm_us	guest_us" > $RESULTS
+
 LOG=rawdata/solo5-${suffix}.csv
 touch $LOG
 
-for j in {1..1}
+for j in $( eval echo {0..$REPS} )
 do
 	${IMAGES}/solo5_hvt --mem=2 ${IMAGES}/unikraft+solo5.kernel &> $LOG
+
+	vmm_us=`cat $LOG | awk -e '$0 ~ /solo5 startup/ {print $5}'`
+	guest_vmm=`cat $LOG | awk -e '$0 ~ /guest startup/ {print $4}'`
+	echo "${vmm_us::-2}	${guest_vmm::-2}" >> $RESULTS
 done
+
+RESULTS=results/firecracker.csv
+echo "vmm_us	guest_us" > $RESULTS
 
 LOG=rawdata/firecracker-${suffix}.csv
 touch $LOG
-for j in {1..1}
+for j in $( eval echo {0..$REPS} )
 do
 	# Create Firecracker FIFOs
 	mkfifo logs.fifo
@@ -43,14 +54,21 @@ do
 
 	wait $checker_pid
 
+	vmm_us=`cat $LOG | awk -e '$0 ~ /FC-boot-time/ {print $9}'`
+	guest_vmm=`cat $LOG | awk -e '$0 ~ /Guest-boot-time/ {print $9}'`
+	echo "$vmm_us	$guest_vmm" >> $RESULTS
+
 	rm firecracker.socket
 	rm logs.fifo metrics.fifo
 done
 
+RESULTS=results/qemumicrovm.csv
+echo "vmm_us	guest_us" > $RESULTS
+
 QEMU_PATH=${IMAGES}/qemu/build/x86_64-softmmu/qemu-system-x86_64
 LOG=rawdata/qemumicrovm-${suffix}.csv
 touch $LOG
-for j in {1..1}
+for j in $( eval echo {0..$REPS} )
 do
 	{
 		sleep 3
@@ -69,11 +87,22 @@ do
 		-overcommit mem-lock=on &> $LOG
 
 	wait $checker_pid
+
+	vmm_us=`cat $LOG | grep "QEMU  startup" | \
+		rev | awk -e '$0 {print $3}' | rev`
+	bios_us=`cat $LOG | grep "Pre-platentry" | \
+		rev | awk -e '$0 {print $3}' | rev`
+	guest_vmm=`cat $LOG | grep "Guest startup" | \
+		rev | awk -e '$0 {print $3}' | rev`
+	echo "${vmm_us::-2}	${guest_vmm::-2}" >> $RESULTS
 done
+
+RESULTS=results/qemu.csv
+echo "vmm_us	guest_us" > $RESULTS
 
 LOG=rawdata/qemu-${suffix}.csv
 touch $LOG
-for j in {1..1}
+for j in $( eval echo {0..$REPS} )
 do
 	{
 		sleep 3
@@ -90,11 +119,22 @@ do
 		-cpu host,migratable=no,+invtsc -no-reboot &> $LOG
 
 	wait $checker_pid
+
+	vmm_us=`cat $LOG | grep "QEMU  startup" | \
+		rev | awk -e '$0 {print $3}' | rev`
+	bios_us=`cat $LOG | grep "Pre-platentry" | \
+		rev | awk -e '$0 {print $3}' | rev`
+	guest_vmm=`cat $LOG | grep "Guest startup" | \
+		rev | awk -e '$0 {print $3}' | rev`
+	echo "${vmm_us::-2}	${guest_vmm::-2}" >> $RESULTS
 done
+
+RESULTS=results/qemu1nic.csv
+echo "vmm_us	guest_us" > $RESULTS
 
 LOG=rawdata/qemu1nic-${suffix}.csv
 touch $LOG
-for j in {1..1}
+for j in $( eval echo {0..$REPS} )
 do
 	{
 		sleep 3
@@ -113,4 +153,12 @@ do
 		-device virtio-net-pci,netdev=uknetdev,mac=aa:bb:cc:00:01:01 &> $LOG
 
 	wait $checker_pid
+
+	vmm_us=`cat $LOG | grep "QEMU  startup" | \
+		rev | awk -e '$0 {print $3}' | rev`
+	bios_us=`cat $LOG | grep "Pre-platentry" | \
+		rev | awk -e '$0 {print $3}' | rev`
+	guest_vmm=`cat $LOG | grep "Guest startup" | \
+		rev | awk -e '$0 {print $3}' | rev`
+	echo "${vmm_us::-2}	${guest_vmm::-2}" >> $RESULTS
 done
