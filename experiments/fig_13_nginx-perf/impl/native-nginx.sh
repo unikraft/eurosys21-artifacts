@@ -8,6 +8,9 @@ source ../common/network.sh
 source ../common/nginx.sh
 
 apt install -y nginx
+update-rc.d -f nginx disable
+# this might be a bug in the Debian package...
+mkdir -p /var/log/nginx/
 
 LOG=rawdata/native-nginx.txt
 mkdir -p rawdata

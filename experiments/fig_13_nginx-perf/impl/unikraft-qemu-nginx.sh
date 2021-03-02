@@ -44,7 +44,7 @@ touch $LOG
 for j in {1..5}
 do
 	taskset -c ${CPU1} qemu-guest \
-		-i nginx.cpio \
+		-i data/nginx.cpio \
 		-k ${IMAGES}/unikraft+mimalloc.kernel \
 		-a "" -m 1024 -p ${CPU2} \
 		-b ${NETIF} -x
