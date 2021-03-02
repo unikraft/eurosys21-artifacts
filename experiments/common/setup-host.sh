@@ -16,3 +16,6 @@ sysctl -w net.ipv4.neigh.default.gc_thresh3=4096
 
 echo 1024 > /proc/sys/net/core/somaxconn
 echo never > /sys/kernel/mm/transparent_hugepage/enabled
+
+# CPU frequency
+cpupower frequency-set -g performance
