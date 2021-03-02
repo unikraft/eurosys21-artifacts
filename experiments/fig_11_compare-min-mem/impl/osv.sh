@@ -91,7 +91,7 @@ function redis_osv_with_mem {
 
     checker_id=$!
 
-    taskset -c ${CPU1} ../tools/qemu-guest \
+    taskset -c ${CPU1} qemu-guest \
 	    -q ${IMAGES}/osv-qemu.img.disposible \
 	    -m ${1} -p ${CPU2} \
 	    -b ${NETIF} -x
@@ -138,7 +138,7 @@ function nginx_osv_with_mem {
 
     checker_id=$!
 
-    taskset -c ${CPU1} ../tools/qemu-guest \
+    taskset -c ${CPU1} qemu-guest \
 	    -q ${IMAGES}/osv-qemu.img.disposible \
 	    -m $1 -p ${CPU2} \
 	    -b ${NETIF} -x

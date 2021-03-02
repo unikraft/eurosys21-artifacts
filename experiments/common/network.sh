@@ -7,7 +7,6 @@ modprobe tun
 BASEIP=172.190.0
 
 function run_dhcp {
-    apt install dnsmasq
     dnsmasq -d \
         --log-queries \
         --bind-dynamic \
