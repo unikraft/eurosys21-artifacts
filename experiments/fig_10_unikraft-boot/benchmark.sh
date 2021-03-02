@@ -92,9 +92,10 @@ do
 		rev | awk -e '$0 {print $3}' | rev`
 	bios_us=`cat $LOG | grep "Pre-platentry" | \
 		rev | awk -e '$0 {print $3}' | rev`
+	sum=$(( ${vmm_us::-2} + ${bios_us::-2} ))
 	guest_vmm=`cat $LOG | grep "Guest startup" | \
 		rev | awk -e '$0 {print $3}' | rev`
-	echo "${vmm_us::-2}	${guest_vmm::-2}" >> $RESULTS
+	echo "${sum}	${guest_vmm::-2}" >> $RESULTS
 done
 
 RESULTS=results/qemu.csv
@@ -124,9 +125,10 @@ do
 		rev | awk -e '$0 {print $3}' | rev`
 	bios_us=`cat $LOG | grep "Pre-platentry" | \
 		rev | awk -e '$0 {print $3}' | rev`
+	sum=$(( ${vmm_us::-2} + ${bios_us::-2} ))
 	guest_vmm=`cat $LOG | grep "Guest startup" | \
 		rev | awk -e '$0 {print $3}' | rev`
-	echo "${vmm_us::-2}	${guest_vmm::-2}" >> $RESULTS
+	echo "${sum}	${guest_vmm::-2}" >> $RESULTS
 done
 
 RESULTS=results/qemu1nic.csv
@@ -158,7 +160,8 @@ do
 		rev | awk -e '$0 {print $3}' | rev`
 	bios_us=`cat $LOG | grep "Pre-platentry" | \
 		rev | awk -e '$0 {print $3}' | rev`
+	sum=$(( ${vmm_us::-2} + ${bios_us::-2} ))
 	guest_vmm=`cat $LOG | grep "Guest startup" | \
 		rev | awk -e '$0 {print $3}' | rev`
-	echo "${vmm_us::-2}	${guest_vmm::-2}" >> $RESULTS
+	echo "${sum}	${guest_vmm::-2}" >> $RESULTS
 done
