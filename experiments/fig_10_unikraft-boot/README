@@ -4,3 +4,5 @@ Run instructions:
  - cd experiments/fig_10_unikraft-boot
  - ./genimages.sh
  - ./benchmark.sh
+
+./benchmark.sh takes about 6m30s in average.

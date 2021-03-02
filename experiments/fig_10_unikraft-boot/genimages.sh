@@ -26,13 +26,6 @@ docker cp ${CONTAINER}:/root/qemu ${IMAGES}/qemu
 docker container stop $CONTAINER
 docker rm -f $CONTAINER
 
-# create firecracker configuration
-cp data/firecracker.config.in data/firecracker.config
-sed -i "s|{{KERNELIMAGE}}|${IMAGES}/unikraft+firecracker.kernel|g" \
-	data/firecracker.config
-sed -i "s|{{LOGS}}|$(pwd)/logs.fifo|g" data/firecracker.config
-sed -i "s|{{METRICS}}|$(pwd)/metrics.fifo|g" data/firecracker.config
-
 # ========================================================================
 # Generate KVM images
 # ========================================================================
