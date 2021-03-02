@@ -35,7 +35,7 @@ touch $LOG
 for j in {1..5}
 do
 	taskset -c ${CPU1} qemu-guest \
-		-i redis.cpio \
+		-i data/redis.cpio \
 		-k ${IMAGES}/unikraft+mimalloc.kernel \
 		-a "/redis.conf" -m 1024 -p ${CPU2} \
 		-b ${NETIF} -x
