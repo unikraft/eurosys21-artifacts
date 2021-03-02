@@ -10,6 +10,8 @@ source ../common/redis.sh
 apt install -y redis-server
 
 LOG=rawdata/native-redis.txt
+RESULTS=results/native-redis.csv
+echo "operation	throughput" > $RESULTS
 mkdir -p rawdata
 touch $LOG
 
@@ -30,6 +32,8 @@ do
 
 	# benchmark
 	benchmark_redis_server localhost 6379
+
+	parse_redis_results $LOG $RESULTS
 
 	# stop server
 	killall -9 redis-server

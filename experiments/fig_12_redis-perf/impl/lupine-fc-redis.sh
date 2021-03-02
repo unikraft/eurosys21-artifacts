@@ -5,6 +5,8 @@ set -x
 
 NETIF=tap100
 LOG=rawdata/lupine-fc-redis.txt
+RESULTS=results/lupine-fc.csv
+echo "operation	throughput" > $RESULTS
 mkdir -p rawdata
 touch $LOG
 
@@ -42,6 +44,8 @@ do
 
 	# benchmark
 	benchmark_redis_server ${BASEIP}.2 6379
+
+	parse_redis_results $LOG $RESULTS
 
 	# stop server
 	killall -9 firecracker firectl .firecracker

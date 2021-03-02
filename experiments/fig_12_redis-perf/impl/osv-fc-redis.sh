@@ -5,6 +5,8 @@ set -x
 
 NETIF=osv0
 LOG=rawdata/osv-fc-redis.txt
+RESULTS=results/osv-fc.csv
+echo "operation	throughput" > $RESULTS
 
 IMAGES=$(pwd)/images
 
@@ -52,6 +54,8 @@ do
 
 	# benchmark
 	benchmark_redis_server ${ip} 6379
+
+	parse_redis_results $LOG $RESULTS
 
 	# stop server
 	killall -9 firecracker firectl .firecracker firecracker-x86

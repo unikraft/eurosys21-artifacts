@@ -30,6 +30,8 @@ function cleanup {
 trap "cleanup" EXIT
 
 LOG=rawdata/unikraft-qemu-redis.txt
+RESULTS=results/unikraft-qemu.csv
+echo "operation	throughput" > $RESULTS
 touch $LOG
 
 for j in {1..5}
@@ -49,6 +51,8 @@ do
 
 	# benchmark
 	benchmark_redis_server ${ip} 6379
+
+	parse_redis_results $LOG $RESULTS
 
 	# stop server
 	kill_qemu

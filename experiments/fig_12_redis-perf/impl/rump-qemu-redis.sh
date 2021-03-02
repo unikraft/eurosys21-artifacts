@@ -5,6 +5,8 @@ set -x
 
 NETIF=tap10
 LOG=rawdata/rump-qemu-redis.txt
+RESULTS=results/rump-qemu.csv
+echo "operation	throughput" > $RESULTS
 mkdir -p rawdata
 touch $LOG
 
@@ -53,6 +55,8 @@ do
 
 	# benchmark
 	benchmark_redis_server ${ip} 6379
+
+	parse_redis_results $LOG $RESULTS
 
 	# stop server
 	killall -9 qemu-system-x86

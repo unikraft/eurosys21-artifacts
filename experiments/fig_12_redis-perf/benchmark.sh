@@ -3,6 +3,8 @@
 # makes sure to run host setup
 ../common/setup-host.sh
 
+mkdir rawdata results
+
 # run benchmarks
 ./impl/hermitux-uhyve-redis.sh
 ./impl/rump-qemu-redis.sh

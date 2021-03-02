@@ -6,7 +6,9 @@ set -x
 IMAGES=$(pwd)/images/
 BASEIP=172.190.0
 NETIF=hermitux0
-LOG=rawdata/hermitux-qemu-redis.txt
+LOG=rawdata/hermitux-uhyve-redis.txt
+RESULTS=results/hermitux-uhyve.csv
+echo "operation	throughput" > $RESULTS
 mkdir -p rawdata
 touch $LOG
 
@@ -55,6 +57,8 @@ do
 	# benchmark, limit to 10 conns otherwise it sends RSTs
 	CONCURRENT_CONNS=10
 	benchmark_redis_server ${HERMITUX_IP} 8000
+
+	parse_redis_results $LOG $RESULTS
 
 	# stop server
 	kill -9 $child_pid

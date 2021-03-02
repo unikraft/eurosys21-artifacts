@@ -10,6 +10,9 @@ source ../common/redis.sh
 IMAGES=$(pwd)/images
 
 LOG=rawdata/docker-redis.txt
+RESULTS=results/docker.csv
+echo "operation	throughput" > $RESULTS
+
 mkdir -p rawdata
 touch $LOG
 
@@ -38,6 +41,8 @@ do
 
 	# benchmark
 	benchmark_redis_server localhost 6379
+
+	parse_redis_results $LOG $RESULTS
 
 	# stop server
         docker container stop $CONTAINER
