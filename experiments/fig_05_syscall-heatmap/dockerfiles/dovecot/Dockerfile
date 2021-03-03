@@ -1,7 +1,7 @@
 FROM debian_env as dovecot
 
 ENV APP_NAME dovecot
-RUN apt update && apt-get install ca-certificates
+RUN apt-get update && apt-get install ca-certificates
 
 # Disable Dovecot TLS during installation to prevent key from being pregenerated
 RUN mkdir -p /etc/dovecot && echo "ssl = no" > /etc/dovecot/local.conf
@@ -37,8 +37,8 @@ VOLUME /var/lib/mail /etc/ssl/dovecot /run/dovecot
 
 WORKDIR /home/
 RUN echo "#!/bin/bash" >> run.sh
-RUN echo "./tools --dep -p dovecot -o \" -F\"  -w 20 " >> run.sh
-RUN echo "cat /root/${APP_NAME}_output/${APP_NAME}.json &> out.txt " >> run.sh
+RUN echo "./tools --dep -p dovecot -o \" -F\"  -w 20 &> out.txt " >> run.sh
+RUN echo "cat /root/${APP_NAME}_output/${APP_NAME}.json " >> run.sh
 RUN chmod +x run.sh
 
 CMD ["./run.sh"]

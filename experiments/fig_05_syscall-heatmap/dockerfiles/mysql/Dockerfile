@@ -14,15 +14,10 @@ RUN apt-get update \
  && rm -rf ${MYSQL_DATA_DIR} \
  && rm -rf /var/lib/apt/lists/*
 
-COPY entrypoint.sh /sbin/entrypoint.sh
-
-RUN chmod 755 /sbin/entrypoint.sh
-ENTRYPOINT ["/sbin/entrypoint.sh"]
-
 WORKDIR /home/
 RUN echo "#!/bin/bash" >> run.sh
-RUN echo "./tools --dep -p /usr/bin/mysqld_safe -t /home/testfiles/test_mysql.json &> out.txt " >> run.sh
-RUN echo "cat /root/mysqld_safe_output/mysqld_safe.json" >> run.sh
+RUN echo "./tools --dep -p /usr/sbin/mysqld -t /home/testfiles/test_mysql.json &> out.txt " >> run.sh
+RUN echo "cat /root/mysqld_output/mysqld.json" >> run.sh
 RUN chmod +x run.sh
 
 CMD ["./run.sh"]

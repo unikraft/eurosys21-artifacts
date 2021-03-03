@@ -1,7 +1,7 @@
 FROM debian_env as mongoose
 
 # INSTALL MONGOOSE
-ENV APP_NAME mongoose
+ENV APP_NAME mongoose_linux
 RUN apt-get update && apt-get install -y procps
 RUN curl -O https://vcon.io/downloads/mws/mongoose_linux
 RUN chmod +x mongoose_linux
