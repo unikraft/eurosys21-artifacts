@@ -7,3 +7,5 @@ This experiment provides data for Fig. 10, without Unikraft
 Run instructions:
  - cd experiments/10_compare-image-size
  - ./imgsize.sh
+
+./imgsize.sh takes about 5 minutes in average.

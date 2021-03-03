@@ -5,3 +5,5 @@ Run instructions:
  - ./genimages.sh
  - ./benchmark.sh
  - ./plot.py
+
+./benchmark.sh takes about 20-25 minutes in average.
