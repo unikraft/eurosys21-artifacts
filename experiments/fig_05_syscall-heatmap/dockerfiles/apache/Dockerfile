@@ -1,4 +1,4 @@
-FROM debian_env as apache_local
+FROM debian_env as apache
 
 # INSTALL APACHE
 ENV APP_NAME apache

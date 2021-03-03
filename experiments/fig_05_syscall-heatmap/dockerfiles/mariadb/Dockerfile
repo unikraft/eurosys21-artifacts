@@ -1,4 +1,4 @@
-FROM debian_env as mariadb_local
+FROM debian_env as mariadb
 
 # INSTALL MARIADB
 ENV APP_NAME mariadb
