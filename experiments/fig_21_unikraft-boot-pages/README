@@ -5,3 +5,5 @@ Run instructions:
  - ./genimages.sh
  - ./benchmark.sh
  - ./plot.py
+
+./benchmark.sh takes less than a minute in average.
