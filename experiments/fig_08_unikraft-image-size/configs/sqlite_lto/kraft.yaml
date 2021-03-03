@@ -1,0 +1,34 @@
+---
+specification: '0.5'
+name: app
+unikraft:
+  version: '0.4'
+  kconfig:
+    - CONFIG_LIBUK9P=y
+    - CONFIG_LIB9PFS=y
+    - CONFIG_LIBDEVFS=y
+    - CONFIG_LIBDEVFS_AUTOMOUNT=y
+    - CONFIG_LIBVFSCORE_AUTOMOUNT_ROOTFS=y
+    - CONFIG_LIBVFSCORE_ROOTFS_9PFS=y
+    - CONFIG_LIBUKLIBPARAM=y
+    - CONFIG_LIBVFSCORE_ROOTDEV="fs0"
+    - CONFIG_LIBUKMMAP=y
+    - CONFIG_LIBPOSIX_SYSINFO=y
+    - CONFIG_OPTIMIZE_LTO=y
+    - CONFIG_OPTIMIZE_SIZE=y
+targets:
+  - architecture: x86_64
+    platform: kvm
+libraries:
+  pthread-embedded:
+    version: '0.4'
+  newlib:
+    version: '0.4'
+    kconfig:
+      - CONFIG_LIBNEWLIBC=y
+  sqlite:
+    version: '0.4'
+    kconfig:
+      - CONFIG_LIBSQLITE_MAIN_FUNCTION=y
+volumes: {}
+networks: {}

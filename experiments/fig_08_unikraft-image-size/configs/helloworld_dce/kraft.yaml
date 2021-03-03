@@ -1,0 +1,26 @@
+---
+specification: '0.5'
+name: app
+unikraft:
+  version: '0.4'
+  kconfig:
+    - CONFIG_KVM_KERNEL_SERIAL_CONSOLE=n
+    - CONFIG_KVM_KERNEL_VGA_CONSOLE=n
+    - CONFIG_KVM_DEBUG_SERIAL_CONSOLE=n
+    - CONFIG_KVM_DEBUG_VGA_CONSOLE=n
+    - CONFIG_LIBUKDEBUG=n
+    - CONFIG_LIBUKDEBUG_PRINTK_ERR=n
+    - CONFIG_LIBUKDEBUG_PRINT_TIME=n
+    - CONFIG_LIBUKDEBUG_ENABLE_ASSERT=n
+    - CONFIG_LIBUKBUS=n
+    - CONFIG_KVM_PCI=n
+    - CONFIG_LIBNOLIBC_UKDEBUG_ASSERT=n
+    - CONFIG_LIBUKARGPARSE=n
+    - CONFIG_OPTIMIZE_DEADELIM=y
+    - CONFIG_OPTIMIZE_SIZE=y
+targets:
+  - architecture: x86_64
+    platform: kvm
+libraries: {}
+volumes: {}
+networks: {}
