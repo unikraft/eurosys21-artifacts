@@ -1,10 +1,8 @@
 #!/bin/bash
 mkdir aggregated_dockerfile
-cd dockerfiles
-cd base
+cd dockerfiles/base
 docker build -t debian_env .
-cd ../..
-cd dockerfiles
+cd ../../dockerfiles
 for d in *; do
      if [[ -d $d ]] && [ "${d}" != "base" ]; then
         echo "Enter to $d repository"
