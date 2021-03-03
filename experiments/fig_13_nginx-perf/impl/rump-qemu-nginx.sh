@@ -16,7 +16,7 @@ mkdir -p rawdata
 touch $LOG
 
 kill_qemu
-
+create_tap $NETIF $BASEIP
 dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
 function cleanup {
@@ -29,8 +29,6 @@ function cleanup {
 }
 
 trap "cleanup" EXIT
-
-create_tap $NETIF
 
 for j in {1..5}
 do

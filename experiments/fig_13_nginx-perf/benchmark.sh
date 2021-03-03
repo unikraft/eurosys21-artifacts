@@ -6,6 +6,7 @@
 mkdir -p rawdata results
 
 # run benchmarks
+./impl/rump-qemu-nginx.sh
 ./impl/lupine-fc-nginx.sh
 ./impl/lupine-qemu-nginx.sh
 ./impl/osv-qemu-nginx.sh
