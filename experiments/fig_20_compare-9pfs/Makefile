@@ -2,6 +2,7 @@ all:
 	@./setup.sh
 	@./run_unikraft.sh
 	@./run_vm_linux.sh
+	@./plot.sh
 
 clean:
 	@./clean.sh
