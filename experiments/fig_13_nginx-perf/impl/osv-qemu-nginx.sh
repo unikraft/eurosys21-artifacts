@@ -6,6 +6,7 @@ set -x
 source ../common/set-cpus.sh
 source ../common/network.sh
 source ../common/nginx.sh
+source ../common/qemu.sh
 
 IMAGES=$(pwd)/images/
 BASEIP=172.190.0
@@ -46,8 +47,6 @@ do
                 -m 1024 -p ${CPU2} \
 		-b ${NETIF} -x
 
-	child_pid=$!
-
 	# make sure that the server has properly started
 	sleep 6
 
@@ -59,7 +58,6 @@ do
 	#curl http://${ip}/index.html --noproxy ${ip} --output -
 
 	# stop server
-	kill -9 $child_pid
 	kill_qemu
 	rm ${IMAGES}/osv-qemu.img.disposible
 done
