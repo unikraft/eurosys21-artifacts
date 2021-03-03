@@ -41,7 +41,7 @@ bar_colors = {
 }
 
 labels = {
-  'unikraft-qemu': 'Rhea KVM',
+  'unikraft-qemu': 'Unikraft KVM',
   'docker': 'Docker Native',
   'hermitux-uhyve': 'Hermitux uHyve',
   'osv-qemu': 'OSv KVM',
@@ -90,7 +90,7 @@ for f in os.listdir(RESULTSDIR):
 # General style
 common_style(plt)
 
-throughput_max += 300 # margin above biggest bar
+throughput_max += 600 # margin above biggest bar
 
 # Setup matplotlib axis
 fig = plt.figure(figsize=(8, 5))
