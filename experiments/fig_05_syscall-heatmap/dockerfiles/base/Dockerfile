@@ -14,8 +14,11 @@ ENV GOPATH /go
 ENV PATH="${GOPATH}/bin:${GOROOT}/bin:${PATH}"
 
 RUN mkdir -p ${GOROOT}
-RUN curl -OL https://golang.org/dl/go${GOVERSION}.linux-amd64.tar.gz
-RUN tar -C /usr/local -xzf go${GOVERSION}.linux-amd64.tar.gz
+#RUN curl -OL https://golang.org/dl/go${GOVERSION}.linux-amd64.tar.gz
+#RUN tar -C /usr/local -xzf go${GOVERSION}.linux-amd64.tar.gz
+
+RUN curl -OL https://golang.org/dl/go${GOVERSION}.linux-arm64.tar.gz
+RUN tar -C /usr/local -xzf go${GOVERSION}.linux-arm64.tar.gz
 
 RUN export GOPATH=${GOPATH}
 RUN export GOROOT=${GOROOT}
@@ -32,7 +35,8 @@ RUN make
 
 FROM build-go as debian_env
 
-ENV BUILD_DEPS 'wget curl make ca-certificates zip unzip xz-utils strace binutils ltrace'
+# ltrace TODO
+ENV BUILD_DEPS 'wget curl make ca-certificates zip unzip xz-utils strace binutils'
 RUN apt-get update && apt-get install -y ${BUILD_DEPS} --no-install-recommends
 
 COPY --from=build-go /usr/local/go /usr/local/go
@@ -44,3 +48,12 @@ RUN mkdir /home/testfiles/
 COPY --from=build-go ${GOPATH}/src/tools/testfiles/ /home/testfiles/
 COPY --from=build-go ${GOPATH}/src/tools/srcs/tools /home/
 WORKDIR /home
+
+#REMOVE TODO
+RUN mkdir /home/bin
+WORKDIR /home/bin
+RUN wget https://people.montefiore.uliege.be/gain/unikraft/ltrace
+RUN chmod +x ltrace
+ENV PATH="/home/bin:${PATH}"
+WORKDIR /home
+#REMOVE TOP
