@@ -29,7 +29,7 @@ for j in {1..5}
 do
 	killall -9 nginx
 
-	docker run -v $(pwd)/html:/usr/share/nginx/html:ro \
+	docker run -v $(pwd)/html:/usr/share/nginx/html:ro --cpus=1 \
 		   -v $(pwd)/data:/etc/nginx/ --name=${CONTAINER} \
 		   --rm --cpuset-cpus ${CPU2} --privileged --net=host \
 		   -d nginx:1.15.6-alpine

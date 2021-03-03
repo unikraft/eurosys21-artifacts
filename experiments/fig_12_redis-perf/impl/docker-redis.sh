@@ -16,7 +16,7 @@ echo "operation	throughput" > $RESULTS
 mkdir -p rawdata
 touch $LOG
 
-CONTAINER=redis-bench
+CONTAINER=redis-reqs-bench
 
 function cleanup {
 	# kill all children (evil)
@@ -25,16 +25,21 @@ function cleanup {
 	pkill -P $$
 }
 
+docker pull redis:5.0.4-alpine
+
 trap "cleanup" EXIT
 
 for j in {1..5}
 do
 	killall -9 redis-server
 
-	docker run --rm -d --cpuset-cpus ${CPU2} \
-			--privileged --net=host -it --name=${CONTAINER} \
+	# one core, like other measurements
+	# 5.0.4, same version (or similar) to other measurements
+	docker run --rm -d --cpuset-cpus ${CPU2} --cpus=1 \
+			--privileged --net=host --name=${CONTAINER} \
 			-v $(pwd)/data:/usr/local/etc/redis \
-			redis:alpine redis-server /usr/local/etc/redis/redis.conf
+			redis:5.0.4-alpine redis-server \
+			/usr/local/etc/redis/redis.conf
 
 	# make sure that the server has properly started
 	sleep 2
