@@ -1,13 +1,31 @@
 #!/bin/bash
 #Initializing the setup for abi compatibility
+
 CURRENT_FOLDER=$PWD
-echo "Go to /tmp folder"
-cd /tmp
-echo "Download the experiments archive from remote server"
-curl -LO https://people.montefiore.uliege.be/gain/unikraft/table2-experiments.zip
-echo "Unzip the experiments..."
-unzip table2-experiments.zip
-cd abi
-cp "$CURRENT_FOLDER/README.md" .
-echo "All is setup. Please refer to the README.md for the tests. Be sure that you are in the /tmp/abi folder"
-cd /tmp
+ABI_FOLDER=abi
+
+if [ -d "$ABI_FOLDER" ]; then
+    echo "Directory already exists so skip download process to gain time"
+else
+    echo "Download the archive from remote server (this will take some times...)"
+    curl -LO https://people.montefiore.uliege.be/gain/unikraft/abi.zip
+
+    echo "Unzip the archive..."
+    unzip table2-experiments.zip
+fi
+
+echo "Copy prepare scripts in the abi folder"
+cp script_abi/script_prepare.sh abi/apps_musl/
+cp script_abi/script_prepare.sh abi/apps_newlib/
+
+echo "Prepare musl environment"
+cd $CURRENT_FOLDER/abi/apps_musl/
+./script_prepare.sh
+rm script_prepare.sh
+
+echo "Prepare newlib environment"
+cd $CURRENT_FOLDER/abi/apps_newlib/
+./script_prepare.sh
+rm script_prepare.sh
+
+cd $CURRENT_FOLDER
