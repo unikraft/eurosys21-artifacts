@@ -186,7 +186,7 @@ def plot(data, data_sheet, labels, display_syscall_name, save_heatmap):
 
     for i,t in enumerate(ax.texts): 
         if data_sheet[INDEX_STATUS][i].upper() == "OKAY":
-            print(data_sheet[INDEX_STATUS][i].upper())
+            #print(data_sheet[INDEX_STATUS][i].upper())
             t.set_text(t.get_text())
             #print(str(data_sheet[INDEX_RAX][i]) + ":" + data_sheet[INDEX_NAME][i] + " : " + data_sheet[INDEX_STATUS][i])
         else:
@@ -199,7 +199,7 @@ def plot(data, data_sheet, labels, display_syscall_name, save_heatmap):
             for i,t in enumerate(ax.texts): t.set_text("")
     if save_heatmap:
         plt.savefig("syscall-heatmap.pdf")
-        print("Figure saved into the current repo")
+        print("Figure saved into the current repo with the name syscall-heatmap.pdf")
     else:
         plt.show()
 
