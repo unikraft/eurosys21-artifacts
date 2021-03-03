@@ -1,0 +1,13 @@
+fpathconf
+sysconf
+sysinfo
+confstr
+pathconf
+getpagesize
+uname
+uk_syscall_e_uname
+uk_syscall_r_uname
+gethostname
+uk_syscall_e_sethostname
+uk_syscall_r_sethostname
+sethostname

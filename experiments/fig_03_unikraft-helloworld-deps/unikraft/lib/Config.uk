@@ -1,0 +1,34 @@
+################################################################################
+#
+# Invisible feature flags
+#
+################################################################################
+# set to true when an according feature library was selected
+
+config HAVE_BOOTENTRY
+       bool
+       default n
+
+config HAVE_LIBC
+       bool
+       default n
+
+config HAVE_TIME
+       bool
+       default n
+
+config HAVE_SCHED
+       bool
+       default n
+
+config HAVE_NW_STACK
+       bool
+       default n
+
+config HAVE_SYSCALL
+       bool
+       default n
+
+config HAVE_X86PKU
+	bool
+	default n

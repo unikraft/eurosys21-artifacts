@@ -1,0 +1,16 @@
+menuconfig LIBNOLIBC
+	bool "nolibc: Only neccessary subset of libc functionality"
+	depends on !HAVE_LIBC
+	default y if !HAVE_LIBC
+	imply LIBUKTIME
+
+if LIBNOLIBC
+	config LIBNOLIBC_UKDEBUG_ASSERT
+		bool "Implement assertions with libukdebug"
+		default y if LIBUKDEBUG
+		default n
+		help
+			Assertions (`assert()` defined in `<assert.h>`) are mapped to `UK_ASSERT()`.
+			If selected, please note that libc assertions are also removed from the code
+			when assertions are disabled in libukdebug.
+endif

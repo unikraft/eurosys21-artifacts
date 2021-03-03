@@ -1,0 +1,87 @@
+# asprintf
+asprintf
+vasprintf
+
+# getopt
+opterr
+optind
+optopt
+optreset
+optarg
+getopt
+getopt_long
+getopt_long_only
+
+# malloc
+malloc
+calloc
+realloc
+posix_memalign
+memalign
+free
+
+# sscanf
+vsscanf
+scanf
+sscanf
+
+# stdio
+stdin
+stdout
+stderr
+vsnprintf
+vsprintf
+snprintf
+sprintf
+vfprintf
+fprintf
+vprintf
+printf
+fflush
+
+# stdlib
+strtol
+strtoul
+strtoll
+strtoull
+atoi
+qsort
+
+# string
+memcpy
+memset
+memchr
+memrchr
+memmove
+memcmp
+strnlen
+strlen
+strncpy
+strcpy
+strchr
+strrchr
+strchrnul
+strncmp
+strcmp
+strcspn
+strspn
+strtok
+strtok_r
+strndup
+strdup
+strlcpy
+strlcat
+strerror_r
+strerror
+
+# strsignal
+strsignal
+
+#psignal
+psignal
+
+# ctype
+_nolibc_ctype
+
+# errno
+_nolibc_errno

@@ -1,0 +1,134 @@
+XEN_INTERFACE_VERSION := 0x00030205
+
+##
+## Xen platform registration
+##
+$(eval $(call addplat_s,xen,$(CONFIG_PLAT_XEN)))
+
+##
+## Xen platform library registration
+##
+$(eval $(call addplatlib,xen,libxenplat))
+$(eval $(call addplatlib_s,xen,libxenbus,$(CONFIG_XEN_XENBUS)))
+$(eval $(call addplatlib_s,xen,libxenblkfront,$(CONFIG_XEN_BLKFRONT)))
+$(eval $(call addplatlib_s,xen,libxen9pfront,$(CONFIG_XEN_9PFRONT)))
+
+##
+## Xen platform compilation settings
+##
+LIBXENPLAT_ASFLAGS-y     += -DXENPLAT -D__XEN_INTERFACE_VERSION__=$(XEN_INTERFACE_VERSION)
+LIBXENPLAT_CFLAGS-y      += -DXENPLAT -D__XEN_INTERFACE_VERSION__=$(XEN_INTERFACE_VERSION)
+LIBXENPLAT_CXXFLAGS-y    += -DXENPLAT -D__XEN_INTERFACE_VERSION__=$(XEN_INTERFACE_VERSION)
+
+##
+## Default Linker script
+ifeq ($(CONFIG_ARCH_X86_64),y)
+UK_PLAT_XEN_DEF_LDS            := $(CONFIG_UK_BASE)/plat/xen/x86/link64.lds.S
+else
+ifeq ($(CONFIG_ARCH_ARM_32),y)
+UK_PLAT_XEN_DEF_LDS            := $(CONFIG_UK_BASE)/plat/xen/arm/link32.lds.S
+endif
+endif
+
+##
+## Platform library definitions
+##
+LIBXENPLAT_ASINCLUDES-y        += -I$(LIBXENPLAT_BASE)/include
+LIBXENPLAT_ASINCLUDES-y        += -I$(UK_PLAT_COMMON_BASE)/include
+LIBXENPLAT_CINCLUDES-y         += -I$(LIBXENPLAT_BASE)/include
+LIBXENPLAT_CINCLUDES-y         += -I$(UK_PLAT_COMMON_BASE)/include
+
+LIBXENPLAT_SRCS-y              += $(UK_PLAT_XEN_DEF_LDS)
+LIBXENPLAT_SRCS-y              += $(LIBXENPLAT_BASE)/hypervisor.c
+LIBXENPLAT_SRCS-y              += $(LIBXENPLAT_BASE)/memory.c
+LIBXENPLAT_SRCS-y              += $(LIBXENPLAT_BASE)/io.c
+LIBXENPLAT_SRCS-y              += $(UK_PLAT_COMMON_BASE)/lcpu.c|common
+LIBXENPLAT_SRCS-y              += $(UK_PLAT_COMMON_BASE)/memory.c|common
+
+
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/x86/trace.c|common
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/x86/traps.c|common
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/x86/cpu_features.c|common
+ifeq ($(CONFIG_HAVE_SCHED),y)
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/x86/thread_start.S|common
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/thread.c|common
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/sw_ctx.c|common
+endif
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBXENPLAT_BASE)/x86/setup.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBXENPLAT_BASE)/x86/traps.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBXENPLAT_BASE)/x86/entry64.S
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBXENPLAT_BASE)/x86/mm.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBXENPLAT_BASE)/x86/arch_events.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBXENPLAT_BASE)/x86/arch_time.c
+
+ifneq ($(CONFIG_XEN_HVMLITE),y)
+LIBXENPLAT_ASFLAGS-y           += -DCONFIG_PARAVIRT
+LIBXENPLAT_CFLAGS-y            += -DCONFIG_PARAVIRT
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBXENPLAT_BASE)/x86/cpu_pv.c
+else
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/x86/cpu_native.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_32) += $(UK_PLAT_COMMON_BASE)/arm/cpu_native.c
+endif
+
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_32) += $(LIBXENPLAT_BASE)/arm/setup.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_32) += $(LIBXENPLAT_BASE)/arm/traps.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_32) += $(LIBXENPLAT_BASE)/arm/entry32.S
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_32) += $(LIBXENPLAT_BASE)/arm/arch_events.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_32) += $(LIBXENPLAT_BASE)/arm/arch_time.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_32) += $(LIBXENPLAT_BASE)/arm/hypercalls32.S
+
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBXENPLAT_BASE)/arm/setup.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBXENPLAT_BASE)/arm/traps.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBXENPLAT_BASE)/arm/entry64.S
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBXENPLAT_BASE)/arm/arch_events.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBXENPLAT_BASE)/arm/arch_time.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_ARM_64) += $(LIBXENPLAT_BASE)/arm/hypercalls64.S
+
+LIBXENPLAT_SRCS-y              += $(LIBXENPLAT_BASE)/lcpu.c
+LIBXENPLAT_SRCS-y              += $(LIBXENPLAT_BASE)/console.c
+ifeq ($(findstring y,$(CONFIG_XEN_KERNEL_HV_CONSOLE) $(CONFIG_XEN_DEBUG_HV_CONSOLE)),y)
+LIBXENPLAT_SRCS-y              += $(LIBXENPLAT_BASE)/hv_console.c
+endif
+ifeq ($(findstring y,$(CONFIG_XEN_KERNEL_EMG_CONSOLE) $(CONFIG_XEN_DEBUG_EMG_CONSOLE)),y)
+LIBXENPLAT_SRCS-y              += $(LIBXENPLAT_BASE)/emg_console.c
+endif
+LIBXENPLAT_SRCS-y              += $(LIBXENPLAT_BASE)/shutdown.c
+LIBXENPLAT_SRCS-y              += $(LIBXENPLAT_BASE)/events.c
+
+ifeq ($(CONFIG_XEN_GNTTAB),y)
+LIBXENPLAT_SRCS-y              += $(LIBXENPLAT_BASE)/gnttab.c
+LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBXENPLAT_BASE)/x86/gnttab.c|x86
+endif
+
+ifeq ($(CONFIG_XEN_XENBUS),y)
+LIBXENBUS_EXPORTS               = $(LIBXENPLAT_BASE)/xenbus/exportsyms.uk
+LIBXENBUS_ASFLAGS-y            += $(LIBXENPLAT_ASFLAGS-y)
+LIBXENBUS_ASINCLUDES-y         += $(LIBXENPLAT_ASINCLUDES-y)
+LIBXENBUS_CFLAGS-y             += $(LIBXENPLAT_CFLAGS-y)
+LIBXENBUS_CINCLUDES-y          += $(LIBXENPLAT_CINCLUDES-y)
+LIBXENBUS_SRCS-y               += $(LIBXENPLAT_BASE)/xenbus/xenbus.c
+LIBXENBUS_SRCS-y               += $(LIBXENPLAT_BASE)/xenbus/client.c
+LIBXENBUS_SRCS-y               += $(LIBXENPLAT_BASE)/xenbus/xs_comms.c
+LIBXENBUS_SRCS-y               += $(LIBXENPLAT_BASE)/xenbus/xs_watch.c
+LIBXENBUS_SRCS-y               += $(LIBXENPLAT_BASE)/xenbus/xs.c
+endif
+
+ifeq ($(CONFIG_XEN_BLKFRONT),y)
+LIBXENBLKFRONT_EXPORTS           = $(LIBXENPLAT_BASE)/drivers/blk/exportsyms.uk
+LIBXENBLKFRONT_ASFLAGS-y        += $(LIBXENPLAT_ASFLAGS-y)
+LIBXENBLKFRONT_ASINCLUDES-y     += $(LIBXENPLAT_ASINCLUDES-y)
+LIBXENBLKFRONT_CFLAGS-y         += $(LIBXENPLAT_CFLAGS-y)
+LIBXENBLKFRONT_CINCLUDES-y      += $(LIBXENPLAT_CINCLUDES-y)
+LIBXENBLKFRONT_SRCS-y           += $(LIBXENPLAT_BASE)/drivers/blk/blkfront.c
+LIBXENBLKFRONT_SRCS-y           += $(LIBXENPLAT_BASE)/drivers/blk/blkfront_xs.c
+endif
+
+ifeq ($(CONFIG_XEN_9PFRONT),y)
+LIBXEN9PFRONT_EXPORTS           = $(LIBXENPLAT_BASE)/drivers/9p/exportsyms.uk
+LIBXEN9PFRONT_ASFLAGS-y        += $(LIBXENPLAT_ASFLAGS-y)
+LIBXEN9PFRONT_ASINCLUDES-y     += $(LIBXENPLAT_ASINCLUDES-y)
+LIBXEN9PFRONT_CFLAGS-y         += $(LIBXENPLAT_CFLAGS-y)
+LIBXEN9PFRONT_CINCLUDES-y      += $(LIBXENPLAT_CINCLUDES-y)
+LIBXEN9PFRONT_SRCS-y           += $(LIBXENPLAT_BASE)/drivers/9p/9pfront.c
+LIBXEN9PFRONT_SRCS-y           += $(LIBXENPLAT_BASE)/drivers/9p/9pfront_xs.c
+endif

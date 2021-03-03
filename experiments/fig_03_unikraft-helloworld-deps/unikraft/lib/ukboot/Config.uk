@@ -1,0 +1,104 @@
+menuconfig LIBUKBOOT
+	bool "ukboot: Unikraft bootstrapping"
+	select LIBNOLIBC if !HAVE_LIBC
+	select LIBUKDEBUG
+	select LIBUKARGPARSE
+	select HAVE_BOOTENTRY
+	default y
+
+	# FIXME: binary buddy allocator is hard-coded for now
+
+if LIBUKBOOT
+	choice LIBUKBOOT_BANNER
+	prompt "Unikraft banner"
+	default LIBUKBOOT_BANNER_POWEREDBY
+		config LIBUKBOOT_BANNER_NONE
+		bool "None"
+
+		config LIBUKBOOT_BANNER_MINIMAL
+		bool "One liner"
+
+		config LIBUKBOOT_BANNER_CLASSIC
+		bool "Classic banner"
+
+		config LIBUKBOOT_BANNER_POWEREDBY
+		bool "Powered by Unikraft"
+
+		config LIBUKBOOT_BANNER_POWEREDBY_ANSI
+		bool "Powered by Unikraft (blue, ANSI)"
+		help
+		  Please make sure that your console display supports
+		  ANSI colors
+
+		config LIBUKBOOT_BANNER_POWEREDBY_ANSI2
+		bool "Powered by Unikraft (gray, ANSI)"
+		help
+		  Please make sure that your console display supports
+		  ANSI colors
+
+		config LIBUKBOOT_BANNER_POWEREDBY_EA
+		bool "Powered by Unikraft (ASCII)"
+		help
+		  Please make sure that your console display supports
+		  extended ASCII characters
+
+		config LIBUKBOOT_BANNER_POWEREDBY_EAANSI
+		bool "Powered by Unikraft (ASCII, blue, ANSI)"
+		help
+		  Please make sure that your console display supports
+		  extended ASCII characters and ANSI colors
+
+		config LIBUKBOOT_BANNER_POWEREDBY_EAANSI2
+		bool "Powered by Unikraft (ASCII, gray, ANSI)"
+		help
+		  Please make sure that your console display supports
+		  extended ASCII characters and ANSI colors
+
+		config LIBUKBOOT_BANNER_POWEREDBY_U8
+		bool "Powered by Unikraft (UTF-8)"
+		help
+		  Please make sure that your console display supports
+		  UTF-8
+
+		config LIBUKBOOT_BANNER_POWEREDBY_U8ANSI
+		bool "Powered by Unikraft (UTF-8, blue, ANSI)"
+		help
+		  Please make sure that your console display supports
+		  UTF-8 and ANSI colors
+
+		config LIBUKBOOT_BANNER_POWEREDBY_U8ANSI2
+		bool "Powered by Unikraft (UTF-8, gray, ANSI)"
+		help
+		  Please make sure that your console display supports
+		  UTF-8 and ANSI colors
+	endchoice
+
+	config LIBUKBOOT_MAXNBARGS
+	int "Maximum number of arguments (max. size of argv)"
+	default 60
+
+	choice LIBUKBOOT_INITALLOC
+	prompt "Initialize memory allocator"
+	default LIBUKBOOT_INITBBUDDY
+
+		config LIBUKBOOT_INITBBUDDY
+		bool "Binary buddy allocator"
+		select LIBUKALLOCBBUDDY
+
+		config LIBUKBOOT_INITREGION
+		bool "Region allocator"
+		select LIBUKALLOCREGION
+		help
+		  Satisfy allocation as fast as possible. No support for free().
+		  Refer to help in ukallocregion for more information.
+
+		config LIBUKBOOT_INITTLSF
+		bool "TLSF"
+		depends on LIBTLSF_INCLUDED
+		select LIBTLSF
+
+		config LIBUKBOOT_NOALLOC
+		bool "None"
+
+	endchoice
+endif
