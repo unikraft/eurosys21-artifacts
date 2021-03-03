@@ -3,9 +3,9 @@
 ## Goal
 
 This folder is used for a performance experiment of 9pfs between
-[Unikraft][] and a Linux VM (write and read latency).
-Since these experiments require a large VM, we decided to host the zip
-file which contains the Linux VM on another server.
+[Unikraft][] and a Linux VM (write and read latency). Since these
+experiments require a large VM, we decided to host the zip file which
+contains the Linux VM on another server.
 
 [Unikraft]: https://github.com/unikraft/unikraft
 
@@ -49,7 +49,7 @@ procedure below:
     - Run `./run_all.sh` (wait some times) 
     - Raw results will saved into `rhea-kvm_write.txt`;
     - Formatted results will be saved into `rhea-kvm_write.csv`;
-    - Note that this experiment may take some time.
+    - Note that this experiment takes some time.
 
 ### Test VM Linux with 9pfs (require some manual steps):
 
@@ -67,10 +67,10 @@ procedure below:
     host;
     - The guest VM will be automatically stopped at the end of the
     script;
-    - Note that this experiment may take some time.
+    - Note that this experiment takes some time.
 
 ### Generate the graph
 
-Once all the results are generated, run the `./plot.sh` to generate
-the 9pfs latency plot. This one will be generated in the current
-folder with the following name: `compare_9pfs_lines.pdf`.
+Once all the results are generated, run the `./plot.sh` script to
+generate the 9pfs latency plot. This one will be generated in the
+current folder with the following name: `compare_9pfs_lines.pdf`.
