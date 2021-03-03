@@ -1,0 +1,10 @@
+component	boottime_us
+plat	19.56
+virtio	2.80
+vfscore	5.81
+alloc	343.21
+ukbus	246.68
+pthreads	4.83
+lwip	111.35
+rootfs	107.16
+misc	32.06

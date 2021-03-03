@@ -1,0 +1,660 @@
+running batch tlsf, 1/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x107450: file /root/workspace/unikraft/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft/plat/kvm/shutdown.c
+0000000000001672 trace_boot_time_init: 
+0000000000020045 trace_boot_plat_init: 
+0000000000021072 trace_boot_ctor_beg: libkvmpci_uk_bus_register()
+0000000000023116 trace_boot_ctor_end: libkvmpci_uk_bus_register()
+0000000000023133 trace_boot_ctor_beg: libkvmvirtio_uk_bus_register()
+0000000000023217 trace_boot_ctor_end: libkvmvirtio_uk_bus_register()
+0000000000023231 trace_boot_ctor_beg: libkvmvirtio_pci_register_driver()
+0000000000023675 trace_boot_ctor_end: libkvmvirtio_pci_register_driver()
+0000000000023689 trace_boot_ctor_beg: libkvmvirtionet_virtio_register_driver()
+0000000000023821 trace_boot_ctor_end: libkvmvirtionet_virtio_register_driver()
+0000000000023834 trace_boot_ctor_beg: fdtable_init()
+0000000000026839 trace_boot_ctor_end: fdtable_init()
+0000000000026853 trace_boot_ctor_beg: vfscore_init()
+0000000000029852 trace_boot_ctor_end: vfscore_init()
+0000000000029866 trace_boot_ctor_beg: vfsprocess_arg()
+0000000000031533 trace_boot_ctor_end: vfsprocess_arg()
+0000000000031547 trace_boot_ctor_beg: netdevprocess_arg()
+0000000000031923 trace_boot_ctor_end: netdevprocess_arg()
+0000000000031937 trace_boot_ctor_beg: init_posix_user()
+0000000000032030 trace_boot_ctor_end: init_posix_user()
+0000000000033376 trace_boot_alloc_beg: 
+0000000000057252 trace_boot_alloc_end: 
+0000000000057337 trace_boot_sched_beg: 
+0000000000058936 trace_boot_sched_end: 
+0000000000060117 trace_boot_inittab_beg: uk_bus_init_all()
+0000000000303895 trace_boot_inittab_end: uk_bus_init_all()
+0000000000303909 trace_boot_inittab_beg: _uk_swrand_init()
+0000000000304088 trace_boot_inittab_end: _uk_swrand_init()
+0000000000304102 trace_boot_inittab_beg: pthread_initcall()
+0000000000305211 trace_boot_inittab_end: pthread_initcall()
+0000000000305225 trace_boot_inittab_beg: liblwip_init()
+0000000000405333 trace_boot_inittab_end: liblwip_init()
+0000000000405348 trace_boot_inittab_beg: vfscore_rootfs()
+0000000000494500 trace_boot_inittab_end: vfscore_rootfs()
+0000000000506376 trace_boot_end: 
+Detaching from program: /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch tlsf, 2/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x107450: file /root/workspace/unikraft/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft/plat/kvm/shutdown.c
+0000000000001362 trace_boot_time_init: 
+0000000000019466 trace_boot_plat_init: 
+0000000000020443 trace_boot_ctor_beg: libkvmpci_uk_bus_register()
+0000000000022476 trace_boot_ctor_end: libkvmpci_uk_bus_register()
+0000000000022490 trace_boot_ctor_beg: libkvmvirtio_uk_bus_register()
+0000000000022579 trace_boot_ctor_end: libkvmvirtio_uk_bus_register()
+0000000000022594 trace_boot_ctor_beg: libkvmvirtio_pci_register_driver()
+0000000000023032 trace_boot_ctor_end: libkvmvirtio_pci_register_driver()
+0000000000023046 trace_boot_ctor_beg: libkvmvirtionet_virtio_register_driver()
+0000000000023123 trace_boot_ctor_end: libkvmvirtionet_virtio_register_driver()
+0000000000023137 trace_boot_ctor_beg: fdtable_init()
+0000000000026079 trace_boot_ctor_end: fdtable_init()
+0000000000026093 trace_boot_ctor_beg: vfscore_init()
+0000000000028940 trace_boot_ctor_end: vfscore_init()
+0000000000028954 trace_boot_ctor_beg: vfsprocess_arg()
+0000000000030469 trace_boot_ctor_end: vfsprocess_arg()
+0000000000030483 trace_boot_ctor_beg: netdevprocess_arg()
+0000000000030563 trace_boot_ctor_end: netdevprocess_arg()
+0000000000030577 trace_boot_ctor_beg: init_posix_user()
+0000000000030660 trace_boot_ctor_end: init_posix_user()
+0000000000032065 trace_boot_alloc_beg: 
+0000000000056006 trace_boot_alloc_end: 
+0000000000056091 trace_boot_sched_beg: 
+0000000000058161 trace_boot_sched_end: 
+0000000000059313 trace_boot_inittab_beg: uk_bus_init_all()
+0000000000302441 trace_boot_inittab_end: uk_bus_init_all()
+0000000000302455 trace_boot_inittab_beg: _uk_swrand_init()
+0000000000302636 trace_boot_inittab_end: _uk_swrand_init()
+0000000000302650 trace_boot_inittab_beg: pthread_initcall()
+0000000000303768 trace_boot_inittab_end: pthread_initcall()
+0000000000303782 trace_boot_inittab_beg: liblwip_init()
+0000000000404465 trace_boot_inittab_end: liblwip_init()
+0000000000404480 trace_boot_inittab_beg: vfscore_rootfs()
+0000000000493883 trace_boot_inittab_end: vfscore_rootfs()
+0000000000505839 trace_boot_end: 
+Detaching from program: /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch tlsf, 3/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x107450: file /root/workspace/unikraft/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft/plat/kvm/shutdown.c
+0000000000001366 trace_boot_time_init: 
+0000000000019420 trace_boot_plat_init: 
+0000000000020387 trace_boot_ctor_beg: libkvmpci_uk_bus_register()
+0000000000022426 trace_boot_ctor_end: libkvmpci_uk_bus_register()
+0000000000022444 trace_boot_ctor_beg: libkvmvirtio_uk_bus_register()
+0000000000022521 trace_boot_ctor_end: libkvmvirtio_uk_bus_register()
+0000000000022534 trace_boot_ctor_beg: libkvmvirtio_pci_register_driver()
+0000000000022941 trace_boot_ctor_end: libkvmvirtio_pci_register_driver()
+0000000000022954 trace_boot_ctor_beg: libkvmvirtionet_virtio_register_driver()
+0000000000023032 trace_boot_ctor_end: libkvmvirtionet_virtio_register_driver()
+0000000000023046 trace_boot_ctor_beg: fdtable_init()
+0000000000025960 trace_boot_ctor_end: fdtable_init()
+0000000000025974 trace_boot_ctor_beg: vfscore_init()
+0000000000028827 trace_boot_ctor_end: vfscore_init()
+0000000000028841 trace_boot_ctor_beg: vfsprocess_arg()
+0000000000030438 trace_boot_ctor_end: vfsprocess_arg()
+0000000000030451 trace_boot_ctor_beg: netdevprocess_arg()
+0000000000030533 trace_boot_ctor_end: netdevprocess_arg()
+0000000000030547 trace_boot_ctor_beg: init_posix_user()
+0000000000030637 trace_boot_ctor_end: init_posix_user()
+0000000000031919 trace_boot_alloc_beg: 
+0000000000055210 trace_boot_alloc_end: 
+0000000000055287 trace_boot_sched_beg: 
+0000000000057221 trace_boot_sched_end: 
+0000000000058387 trace_boot_inittab_beg: uk_bus_init_all()
+0000000000304886 trace_boot_inittab_end: uk_bus_init_all()
+0000000000304900 trace_boot_inittab_beg: _uk_swrand_init()
+0000000000305081 trace_boot_inittab_end: _uk_swrand_init()
+0000000000305095 trace_boot_inittab_beg: pthread_initcall()
+0000000000306579 trace_boot_inittab_end: pthread_initcall()
+0000000000306594 trace_boot_inittab_beg: liblwip_init()
+0000000000408122 trace_boot_inittab_end: liblwip_init()
+0000000000408136 trace_boot_inittab_beg: vfscore_rootfs()
+0000000000497879 trace_boot_inittab_end: vfscore_rootfs()
+0000000000510082 trace_boot_end: 
+Detaching from program: /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch tlsf, 4/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x107450: file /root/workspace/unikraft/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft/plat/kvm/shutdown.c
+0000000000001380 trace_boot_time_init: 
+0000000000019305 trace_boot_plat_init: 
+0000000000020286 trace_boot_ctor_beg: libkvmpci_uk_bus_register()
+0000000000022523 trace_boot_ctor_end: libkvmpci_uk_bus_register()
+0000000000022540 trace_boot_ctor_beg: libkvmvirtio_uk_bus_register()
+0000000000022661 trace_boot_ctor_end: libkvmvirtio_uk_bus_register()
+0000000000022674 trace_boot_ctor_beg: libkvmvirtio_pci_register_driver()
+0000000000023417 trace_boot_ctor_end: libkvmvirtio_pci_register_driver()
+0000000000023431 trace_boot_ctor_beg: libkvmvirtionet_virtio_register_driver()
+0000000000023513 trace_boot_ctor_end: libkvmvirtionet_virtio_register_driver()
+0000000000023527 trace_boot_ctor_beg: fdtable_init()
+0000000000026237 trace_boot_ctor_end: fdtable_init()
+0000000000026251 trace_boot_ctor_beg: vfscore_init()
+0000000000029270 trace_boot_ctor_end: vfscore_init()
+0000000000029284 trace_boot_ctor_beg: vfsprocess_arg()
+0000000000030800 trace_boot_ctor_end: vfsprocess_arg()
+0000000000030814 trace_boot_ctor_beg: netdevprocess_arg()
+0000000000030841 trace_boot_ctor_end: netdevprocess_arg()
+0000000000030855 trace_boot_ctor_beg: init_posix_user()
+0000000000031271 trace_boot_ctor_end: init_posix_user()
+0000000000032555 trace_boot_alloc_beg: 
+0000000000056394 trace_boot_alloc_end: 
+0000000000056473 trace_boot_sched_beg: 
+0000000000058107 trace_boot_sched_end: 
+0000000000059313 trace_boot_inittab_beg: uk_bus_init_all()
+0000000000303145 trace_boot_inittab_end: uk_bus_init_all()
+0000000000303159 trace_boot_inittab_beg: _uk_swrand_init()
+0000000000303348 trace_boot_inittab_end: _uk_swrand_init()
+0000000000303363 trace_boot_inittab_beg: pthread_initcall()
+0000000000304453 trace_boot_inittab_end: pthread_initcall()
+0000000000304468 trace_boot_inittab_beg: liblwip_init()
+0000000000405177 trace_boot_inittab_end: liblwip_init()
+0000000000405191 trace_boot_inittab_beg: vfscore_rootfs()
+0000000000494744 trace_boot_inittab_end: vfscore_rootfs()
+0000000000506961 trace_boot_end: 
+Detaching from program: /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch tlsf, 5/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x107450: file /root/workspace/unikraft/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft/plat/kvm/shutdown.c
+0000000000001369 trace_boot_time_init: 
+0000000000019555 trace_boot_plat_init: 
+0000000000020639 trace_boot_ctor_beg: libkvmpci_uk_bus_register()
+0000000000023003 trace_boot_ctor_end: libkvmpci_uk_bus_register()
+0000000000023021 trace_boot_ctor_beg: libkvmvirtio_uk_bus_register()
+0000000000023137 trace_boot_ctor_end: libkvmvirtio_uk_bus_register()
+0000000000023151 trace_boot_ctor_beg: libkvmvirtio_pci_register_driver()
+0000000000023605 trace_boot_ctor_end: libkvmvirtio_pci_register_driver()
+0000000000023619 trace_boot_ctor_beg: libkvmvirtionet_virtio_register_driver()
+0000000000023706 trace_boot_ctor_end: libkvmvirtionet_virtio_register_driver()
+0000000000023719 trace_boot_ctor_beg: fdtable_init()
+0000000000026386 trace_boot_ctor_end: fdtable_init()
+0000000000026400 trace_boot_ctor_beg: vfscore_init()
+0000000000029537 trace_boot_ctor_end: vfscore_init()
+0000000000029551 trace_boot_ctor_beg: vfsprocess_arg()
+0000000000031112 trace_boot_ctor_end: vfsprocess_arg()
+0000000000031126 trace_boot_ctor_beg: netdevprocess_arg()
+0000000000031207 trace_boot_ctor_end: netdevprocess_arg()
+0000000000031221 trace_boot_ctor_beg: init_posix_user()
+0000000000031308 trace_boot_ctor_end: init_posix_user()
+0000000000032587 trace_boot_alloc_beg: 
+0000000000055924 trace_boot_alloc_end: 
+0000000000056001 trace_boot_sched_beg: 
+0000000000057639 trace_boot_sched_end: 
+0000000000058851 trace_boot_inittab_beg: uk_bus_init_all()
+0000000000302407 trace_boot_inittab_end: uk_bus_init_all()
+0000000000302422 trace_boot_inittab_beg: _uk_swrand_init()
+0000000000302608 trace_boot_inittab_end: _uk_swrand_init()
+0000000000302623 trace_boot_inittab_beg: pthread_initcall()
+0000000000304140 trace_boot_inittab_end: pthread_initcall()
+0000000000304155 trace_boot_inittab_beg: liblwip_init()
+0000000000405757 trace_boot_inittab_end: liblwip_init()
+0000000000405771 trace_boot_inittab_beg: vfscore_rootfs()
+0000000000495498 trace_boot_inittab_end: vfscore_rootfs()
+0000000000507730 trace_boot_end: 
+Detaching from program: /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch tlsf, 6/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x107450: file /root/workspace/unikraft/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft/plat/kvm/shutdown.c
+0000000000001360 trace_boot_time_init: 
+0000000000019098 trace_boot_plat_init: 
+0000000000020079 trace_boot_ctor_beg: libkvmpci_uk_bus_register()
+0000000000022428 trace_boot_ctor_end: libkvmpci_uk_bus_register()
+0000000000022442 trace_boot_ctor_beg: libkvmvirtio_uk_bus_register()
+0000000000022516 trace_boot_ctor_end: libkvmvirtio_uk_bus_register()
+0000000000022530 trace_boot_ctor_beg: libkvmvirtio_pci_register_driver()
+0000000000022967 trace_boot_ctor_end: libkvmvirtio_pci_register_driver()
+0000000000022981 trace_boot_ctor_beg: libkvmvirtionet_virtio_register_driver()
+0000000000023057 trace_boot_ctor_end: libkvmvirtionet_virtio_register_driver()
+0000000000023071 trace_boot_ctor_beg: fdtable_init()
+0000000000025924 trace_boot_ctor_end: fdtable_init()
+0000000000025938 trace_boot_ctor_beg: vfscore_init()
+0000000000028822 trace_boot_ctor_end: vfscore_init()
+0000000000028836 trace_boot_ctor_beg: vfsprocess_arg()
+0000000000030642 trace_boot_ctor_end: vfsprocess_arg()
+0000000000030656 trace_boot_ctor_beg: netdevprocess_arg()
+0000000000030739 trace_boot_ctor_end: netdevprocess_arg()
+0000000000030753 trace_boot_ctor_beg: init_posix_user()
+0000000000030778 trace_boot_ctor_end: init_posix_user()
+0000000000032269 trace_boot_alloc_beg: 
+0000000000055873 trace_boot_alloc_end: 
+0000000000055958 trace_boot_sched_beg: 
+0000000000057742 trace_boot_sched_end: 
+0000000000058973 trace_boot_inittab_beg: uk_bus_init_all()
+0000000000302450 trace_boot_inittab_end: uk_bus_init_all()
+0000000000302464 trace_boot_inittab_beg: _uk_swrand_init()
+0000000000302654 trace_boot_inittab_end: _uk_swrand_init()
+0000000000302668 trace_boot_inittab_beg: pthread_initcall()
+0000000000303772 trace_boot_inittab_end: pthread_initcall()
+0000000000303786 trace_boot_inittab_beg: liblwip_init()
+0000000000404222 trace_boot_inittab_end: liblwip_init()
+0000000000404236 trace_boot_inittab_beg: vfscore_rootfs()
+0000000000494720 trace_boot_inittab_end: vfscore_rootfs()
+0000000000506760 trace_boot_end: 
+Detaching from program: /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch tlsf, 7/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x107450: file /root/workspace/unikraft/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft/plat/kvm/shutdown.c
+0000000000001371 trace_boot_time_init: 
+0000000000019207 trace_boot_plat_init: 
+0000000000020185 trace_boot_ctor_beg: libkvmpci_uk_bus_register()
+0000000000022195 trace_boot_ctor_end: libkvmpci_uk_bus_register()
+0000000000022212 trace_boot_ctor_beg: libkvmvirtio_uk_bus_register()
+0000000000022289 trace_boot_ctor_end: libkvmvirtio_uk_bus_register()
+0000000000022303 trace_boot_ctor_beg: libkvmvirtio_pci_register_driver()
+0000000000022738 trace_boot_ctor_end: libkvmvirtio_pci_register_driver()
+0000000000022752 trace_boot_ctor_beg: libkvmvirtionet_virtio_register_driver()
+0000000000022828 trace_boot_ctor_end: libkvmvirtionet_virtio_register_driver()
+0000000000022842 trace_boot_ctor_beg: fdtable_init()
+0000000000025735 trace_boot_ctor_end: fdtable_init()
+0000000000025749 trace_boot_ctor_beg: vfscore_init()
+0000000000028550 trace_boot_ctor_end: vfscore_init()
+0000000000028564 trace_boot_ctor_beg: vfsprocess_arg()
+0000000000030083 trace_boot_ctor_end: vfsprocess_arg()
+0000000000030097 trace_boot_ctor_beg: netdevprocess_arg()
+0000000000030179 trace_boot_ctor_end: netdevprocess_arg()
+0000000000030192 trace_boot_ctor_beg: init_posix_user()
+0000000000030219 trace_boot_ctor_end: init_posix_user()
+0000000000031504 trace_boot_alloc_beg: 
+0000000000054823 trace_boot_alloc_end: 
+0000000000054907 trace_boot_sched_beg: 
+0000000000056951 trace_boot_sched_end: 
+0000000000058169 trace_boot_inittab_beg: uk_bus_init_all()
+0000000000301003 trace_boot_inittab_end: uk_bus_init_all()
+0000000000301017 trace_boot_inittab_beg: _uk_swrand_init()
+0000000000301197 trace_boot_inittab_end: _uk_swrand_init()
+0000000000301211 trace_boot_inittab_beg: pthread_initcall()
+0000000000302338 trace_boot_inittab_end: pthread_initcall()
+0000000000302352 trace_boot_inittab_beg: liblwip_init()
+0000000000402634 trace_boot_inittab_end: liblwip_init()
+0000000000402648 trace_boot_inittab_beg: vfscore_rootfs()
+0000000000492204 trace_boot_inittab_end: vfscore_rootfs()
+0000000000504237 trace_boot_end: 
+Detaching from program: /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch tlsf, 8/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x107450: file /root/workspace/unikraft/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft/plat/kvm/shutdown.c
+0000000000001377 trace_boot_time_init: 
+0000000000019590 trace_boot_plat_init: 
+0000000000020568 trace_boot_ctor_beg: libkvmpci_uk_bus_register()
+0000000000022517 trace_boot_ctor_end: libkvmpci_uk_bus_register()
+0000000000022534 trace_boot_ctor_beg: libkvmvirtio_uk_bus_register()
+0000000000022631 trace_boot_ctor_end: libkvmvirtio_uk_bus_register()
+0000000000022645 trace_boot_ctor_beg: libkvmvirtio_pci_register_driver()
+0000000000023096 trace_boot_ctor_end: libkvmvirtio_pci_register_driver()
+0000000000023110 trace_boot_ctor_beg: libkvmvirtionet_virtio_register_driver()
+0000000000023232 trace_boot_ctor_end: libkvmvirtionet_virtio_register_driver()
+0000000000023246 trace_boot_ctor_beg: fdtable_init()
+0000000000025863 trace_boot_ctor_end: fdtable_init()
+0000000000025877 trace_boot_ctor_beg: vfscore_init()
+0000000000028719 trace_boot_ctor_end: vfscore_init()
+0000000000028733 trace_boot_ctor_beg: vfsprocess_arg()
+0000000000030239 trace_boot_ctor_end: vfsprocess_arg()
+0000000000030253 trace_boot_ctor_beg: netdevprocess_arg()
+0000000000030333 trace_boot_ctor_end: netdevprocess_arg()
+0000000000030347 trace_boot_ctor_beg: init_posix_user()
+0000000000030431 trace_boot_ctor_end: init_posix_user()
+0000000000031720 trace_boot_alloc_beg: 
+0000000000054839 trace_boot_alloc_end: 
+0000000000054917 trace_boot_sched_beg: 
+0000000000056719 trace_boot_sched_end: 
+0000000000057894 trace_boot_inittab_beg: uk_bus_init_all()
+0000000000301939 trace_boot_inittab_end: uk_bus_init_all()
+0000000000301953 trace_boot_inittab_beg: _uk_swrand_init()
+0000000000302134 trace_boot_inittab_end: _uk_swrand_init()
+0000000000302148 trace_boot_inittab_beg: pthread_initcall()
+0000000000303244 trace_boot_inittab_end: pthread_initcall()
+0000000000303258 trace_boot_inittab_beg: liblwip_init()
+0000000000404545 trace_boot_inittab_end: liblwip_init()
+0000000000404559 trace_boot_inittab_beg: vfscore_rootfs()
+0000000000494193 trace_boot_inittab_end: vfscore_rootfs()
+0000000000506416 trace_boot_end: 
+Detaching from program: /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch tlsf, 9/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x107450: file /root/workspace/unikraft/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft/plat/kvm/shutdown.c
+0000000000001397 trace_boot_time_init: 
+0000000000019649 trace_boot_plat_init: 
+0000000000020672 trace_boot_ctor_beg: libkvmpci_uk_bus_register()
+0000000000022802 trace_boot_ctor_end: libkvmpci_uk_bus_register()
+0000000000022816 trace_boot_ctor_beg: libkvmvirtio_uk_bus_register()
+0000000000022897 trace_boot_ctor_end: libkvmvirtio_uk_bus_register()
+0000000000022911 trace_boot_ctor_beg: libkvmvirtio_pci_register_driver()
+0000000000023317 trace_boot_ctor_end: libkvmvirtio_pci_register_driver()
+0000000000023331 trace_boot_ctor_beg: libkvmvirtionet_virtio_register_driver()
+0000000000023413 trace_boot_ctor_end: libkvmvirtionet_virtio_register_driver()
+0000000000023427 trace_boot_ctor_beg: fdtable_init()
+0000000000026158 trace_boot_ctor_end: fdtable_init()
+0000000000026172 trace_boot_ctor_beg: vfscore_init()
+0000000000028960 trace_boot_ctor_end: vfscore_init()
+0000000000028974 trace_boot_ctor_beg: vfsprocess_arg()
+0000000000030510 trace_boot_ctor_end: vfsprocess_arg()
+0000000000030524 trace_boot_ctor_beg: netdevprocess_arg()
+0000000000030607 trace_boot_ctor_end: netdevprocess_arg()
+0000000000030621 trace_boot_ctor_beg: init_posix_user()
+0000000000030714 trace_boot_ctor_end: init_posix_user()
+0000000000031959 trace_boot_alloc_beg: 
+0000000000056122 trace_boot_alloc_end: 
+0000000000056199 trace_boot_sched_beg: 
+0000000000057874 trace_boot_sched_end: 
+0000000000059204 trace_boot_inittab_beg: uk_bus_init_all()
+0000000000301046 trace_boot_inittab_end: uk_bus_init_all()
+0000000000301064 trace_boot_inittab_beg: _uk_swrand_init()
+0000000000301318 trace_boot_inittab_end: _uk_swrand_init()
+0000000000301333 trace_boot_inittab_beg: pthread_initcall()
+0000000000302419 trace_boot_inittab_end: pthread_initcall()
+0000000000302434 trace_boot_inittab_beg: liblwip_init()
+0000000000402344 trace_boot_inittab_end: liblwip_init()
+0000000000402358 trace_boot_inittab_beg: vfscore_rootfs()
+0000000000492587 trace_boot_inittab_end: vfscore_rootfs()
+0000000000504687 trace_boot_end: 
+Detaching from program: /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch tlsf, 10/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x107450: file /root/workspace/unikraft/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_CRASH) at /root/workspace/unikraft/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft/plat/kvm/shutdown.c
+0000000000001385 trace_boot_time_init: 
+0000000000019408 trace_boot_plat_init: 
+0000000000020343 trace_boot_ctor_beg: libkvmpci_uk_bus_register()
+0000000000022415 trace_boot_ctor_end: libkvmpci_uk_bus_register()
+0000000000022429 trace_boot_ctor_beg: libkvmvirtio_uk_bus_register()
+0000000000022505 trace_boot_ctor_end: libkvmvirtio_uk_bus_register()
+0000000000022519 trace_boot_ctor_beg: libkvmvirtio_pci_register_driver()
+0000000000022933 trace_boot_ctor_end: libkvmvirtio_pci_register_driver()
+0000000000022947 trace_boot_ctor_beg: libkvmvirtionet_virtio_register_driver()
+0000000000023024 trace_boot_ctor_end: libkvmvirtionet_virtio_register_driver()
+0000000000023038 trace_boot_ctor_beg: fdtable_init()
+0000000000025831 trace_boot_ctor_end: fdtable_init()
+0000000000025846 trace_boot_ctor_beg: vfscore_init()
+0000000000028756 trace_boot_ctor_end: vfscore_init()
+0000000000028770 trace_boot_ctor_beg: vfsprocess_arg()
+0000000000030633 trace_boot_ctor_end: vfsprocess_arg()
+0000000000030647 trace_boot_ctor_beg: netdevprocess_arg()
+0000000000030738 trace_boot_ctor_end: netdevprocess_arg()
+0000000000030752 trace_boot_ctor_beg: init_posix_user()
+0000000000030837 trace_boot_ctor_end: init_posix_user()
+0000000000032153 trace_boot_alloc_beg: 
+0000000000056251 trace_boot_alloc_end: 
+0000000000056331 trace_boot_sched_beg: 
+0000000000058083 trace_boot_sched_end: 
+0000000000059364 trace_boot_inittab_beg: uk_bus_init_all()
+0000000000307803 trace_boot_inittab_end: uk_bus_init_all()
+0000000000307817 trace_boot_inittab_beg: _uk_swrand_init()
+0000000000308008 trace_boot_inittab_end: _uk_swrand_init()
+0000000000308023 trace_boot_inittab_beg: pthread_initcall()
+0000000000309130 trace_boot_inittab_end: pthread_initcall()
+0000000000309145 trace_boot_inittab_beg: liblwip_init()
+0000000000412128 trace_boot_inittab_end: liblwip_init()
+0000000000412142 trace_boot_inittab_beg: vfscore_rootfs()
+0000000000504242 trace_boot_inittab_end: vfscore_rootfs()
+0000000000516379 trace_boot_end: 
+Detaching from program: /home/hle/eurosys21-artifacts/experiments/fig_14_unikraft-nginx-alloc-boot/images/unikraft+tlsf.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
