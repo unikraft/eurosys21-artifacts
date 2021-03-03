@@ -16,13 +16,14 @@ function cleanup {
 
 trap "cleanup" EXIT
 
+mkdir -p results
+
 for queries in 10 100 1000 10000 60000 100000
 do
-	mkdir -p rawdata/${queries}
 	for alloc in "buddy" "tinyalloc" "mimalloc" "tlsf"
 	do
-		LOG=rawdata/${queries}/${alloc}.txt
-		touch $LOG
+		LOG=results/${alloc}.csv
+		echo "num_queries	speedup" > $LOG
 
 		for j in {1..5}
 		do
@@ -42,9 +43,9 @@ do
 			wait
 
 			if ! grep -q "I/O error" .out; then
-				cat .out | \
-					awk -e '$0 ~ /queries in/ {print $4}' | \
-					tee -a $LOG
+				res=`cat .out | \
+					awk -e '$0 ~ /queries in/ {print $4}'`
+				echo "${queries}	${res}" | tee -a $LOG
 			fi
 
 			# stop server
