@@ -1,14 +1,20 @@
 #!/bin/bash
 #Initializing the setup for 9pfs latency
 CURRENT_FOLDER=$PWD
-echo "Download the VM from remote server (this will take some times...)"
-curl -LO https://people.montefiore.uliege.be/gain/unikraft/vm.zip
+VM_FOLDER=vm
 
-echo "Unzip the VM..."
-unzip vm.zip
+if [ -d "$VM_FOLDER" ]; then
+    echo "Directory already exists so skip download process to gain time"
+else
+    echo "Download the VM from remote server (this will take some times...)"
+    curl -LO https://people.montefiore.uliege.be/gain/unikraft/vm.zip
+
+    echo "Unzip the VM..."
+    unzip vm.zip
+fi
 
 echo "Go to the VM folder and generate a random file for the reading"
-cd vm/test
+cd "$VM_FOLDER/test"
 head -c 1G </dev/urandom > randomfile
 cd $CURRENT_FOLDER
 
@@ -28,7 +34,7 @@ make
 echo "Compiling lib-writefile..."
 cd "$CURRENT_FOLDER/apps/lib-writefile/"
 mkdir test
+chmod +x test
 make
 
 cd $CURRENT_FOLDER
-echo "All is setup. Please refer to the README.md for the test"
