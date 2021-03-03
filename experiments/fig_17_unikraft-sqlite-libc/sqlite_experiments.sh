@@ -103,14 +103,6 @@ prepare() {
 
     echo "\n======  Preparing SQLite Test Applications  ======\n"
 
-    # Turn .config templates into real .config
-    for app in app-sqlite-*; do
-        if [ -f "$app/.config" ]; then
-            sed -i -e "s+{{ROOT_FOLDER}}+$root_folder+" \
-                -e "s+{{APP_NAME}}+$app+" "$app/.config"
-        fi
-    done
-
     # Copy SQLite include file to app folder
     for app in app-sqlite-*; do
         mkdir "$app/include"
