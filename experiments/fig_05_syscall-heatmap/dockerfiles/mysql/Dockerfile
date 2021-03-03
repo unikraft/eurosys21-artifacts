@@ -1,4 +1,4 @@
-FROM debian_env as mysql_local
+FROM debian_env as mysql
 
 # INSTALL mysql
 ENV APP_NAME mysql

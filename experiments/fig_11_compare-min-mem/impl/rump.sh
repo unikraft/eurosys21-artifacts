@@ -140,7 +140,8 @@ function nginx_rump_with_mem {
     create_tap $NETIF $BASEIP
     dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
-    cp ${IMAGES}/rump-qemu.img ${IMAGES}/rump-qemu.img.disposible
+    cp ${IMAGES}/rump-qemu.img /tmp/rump-qemu.img.disposible
+    cp ${IMAGES}/rump-qemu.iso /tmp/rump-qemu.iso
 
     {
       sleep 20
@@ -156,7 +157,9 @@ function nginx_rump_with_mem {
 
       delete_tap $NETIF
 
-      rm ${IMAGES}/rump-qemu.img.disposible
+      rm /tmp/rump-qemu.img.disposible
+      rm /tmp/rump-qemu.iso
+
 
       exit $up
     } &
@@ -167,8 +170,8 @@ function nginx_rump_with_mem {
 		    kvm -i -M $1 -g '-daemonize' \
 		    -I if,vioif,"-net tap,script=no,ifname=$NETIF" \
 		    -W if,inet,dhcp \
-		    -b ${IMAGES}/rump-qemu.iso,/data \
-		    -- ${IMAGES}/rump-qemu.img
+		    -b /tmp/rump-qemu.iso,/data \
+		    -- /tmp/rump-qemu.img.disposible
 
     wait $checker_id
     up=$?
