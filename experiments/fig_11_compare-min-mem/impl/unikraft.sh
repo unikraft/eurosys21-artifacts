@@ -14,7 +14,7 @@ function hello_unikraft_with_mem {
     docker rm -f $CONTAINER 2> /dev/null
 
     docker pull hlefeuvre/unikraft-eurosys21:latest
-    docker run --rm --privileged --name=$CONTAINER \
+    docker run --rm --privileged --name=$CONTAINER --cpuset-cpus="${CPU1}-${CPU4}" \
 			-dt hlefeuvre/unikraft-eurosys21
     docker exec $CONTAINER bash -c \
 	"cd app-helloworld && cp configs/stat.conf .config" 2> /dev/null
@@ -54,7 +54,7 @@ function sqlite_unikraft_with_mem {
     sleep 3
 
     docker pull hlefeuvre/unikraft-eurosys21:latest
-    docker run --rm --privileged --name=$CONTAINER \
+    docker run --rm --privileged --name=$CONTAINER --cpuset-cpus="${CPU1}-${CPU4}" \
 			-dt hlefeuvre/unikraft-eurosys21
     docker exec $CONTAINER bash -c \
 	"cd app-sqlite && cp configs/tlsf.conf .config" 2> /dev/null
@@ -98,7 +98,7 @@ function redis_unikraft_with_mem {
     sleep 3
 
     docker pull hlefeuvre/unikraft-eurosys21:latest
-    docker run --rm --privileged --name=$CONTAINER \
+    docker run --rm --privileged --name=$CONTAINER --cpuset-cpus="${CPU1}-${CPU4}" \
 			-dt hlefeuvre/unikraft-eurosys21
     docker exec $CONTAINER bash -c \
 	"cd app-redis && cp configs/tlsf.conf .config" 2> /dev/null
@@ -151,7 +151,7 @@ function nginx_unikraft_with_mem {
     sleep 3
 
     docker pull hlefeuvre/unikraft-eurosys21:latest
-    docker run --rm --privileged --name=$CONTAINER \
+    docker run --rm --privileged --name=$CONTAINER --cpuset-cpus="${CPU1}-${CPU4}" \
 			-dt hlefeuvre/unikraft-eurosys21
     docker exec $CONTAINER bash -c \
 	"cd app-nginx && cp configs/tlsf.conf .config"

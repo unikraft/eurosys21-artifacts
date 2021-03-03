@@ -4,6 +4,7 @@ set -x
 
 source ../common/network.sh
 source ../common/build.sh
+source ../common/set-cpus.sh
 
 BUILDDIR=..
 GUESTSTART=$(pwd)/data/guest_start.sh
@@ -80,6 +81,7 @@ rm -rf /mnt/redis-tmp
 CONTAINER=osv-tmp
 docker pull hlefeuvre/osv
 docker run --rm --privileged --name=$CONTAINER \
+			--cpuset-cpus="${CPU1}-${CPU4}" \
 			-v $(pwd)/data:/data-imported \
 			-dt hlefeuvre/osv
 docker exec -it $CONTAINER cp /data-imported/redis.conf \
@@ -131,6 +133,7 @@ cp ${IMAGES}/osv/root/osv/build/release/kernel.elf ${IMAGES}/osv-fc.kernel
 CONTAINER=rump-tmp
 docker pull hlefeuvre/rump
 docker run --rm --privileged --name=$CONTAINER \
+			--cpuset-cpus="${CPU1}-${CPU4}" \
 			-v $(pwd)/data:/data-imported \
 			-dt hlefeuvre/rump
 docker exec -it $CONTAINER cp /data-imported/redis.conf \
@@ -194,6 +197,7 @@ chmod u+x ${IMAGES}/rump/root/rumprun/app-tools/rumprun
 CONTAINER=hermitux-tmp
 docker pull olivierpierre/hermitux
 docker run --rm --privileged --name=$CONTAINER \
+			--cpuset-cpus="${CPU1}-${CPU4}" \
 			-v $(pwd)/data:/data-imported \
 			-dt olivierpierre/hermitux
 docker exec -it $CONTAINER bash -c \

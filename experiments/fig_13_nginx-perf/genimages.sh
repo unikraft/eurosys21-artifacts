@@ -8,6 +8,7 @@ BASEIP=172.190.0
 GUESTSTART=$(pwd)/data/guest_start.sh
 
 source ../common/build.sh
+source ../common/set-cpus.sh
 
 rm -rf $IMAGES
 mkdir -p $IMAGES
@@ -80,6 +81,7 @@ rm -rf /mnt/nginx-tmp
 CONTAINER=osv-tmp
 docker pull hlefeuvre/osv
 docker run --rm --privileged --name=$CONTAINER \
+			--cpuset-cpus="${CPU1}-${CPU4}" \
 			-v $(pwd)/data:/data-imported \
 			-dt hlefeuvre/osv
 docker exec -it $CONTAINER cp /data-imported/nginx.conf \
@@ -102,6 +104,7 @@ cp ${IMAGES}/osv/root/osv/build/release/usr.img ${IMAGES}/osv-qemu.img
 CONTAINER=rump-tmp
 docker pull hlefeuvre/rump
 docker run --rm --privileged --name=$CONTAINER \
+			--cpuset-cpus="${CPU1}-${CPU4}" \
 			-v $(pwd)/data:/data-imported \
 			-dt hlefeuvre/rump
 docker exec -it $CONTAINER bash -c \

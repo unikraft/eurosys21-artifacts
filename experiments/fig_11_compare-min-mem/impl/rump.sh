@@ -20,7 +20,8 @@ function hello_rump_with_mem {
     sleep 3
 
     docker pull hlefeuvre/rump-solo5
-    docker run --privileged --name=$CONTAINER -dt hlefeuvre/rump-solo5
+    docker run --privileged --name=$CONTAINER --cpuset-cpus="${CPU1}-${CPU4}" \
+		-dt hlefeuvre/rump-solo5
     docker exec $CONTAINER bash -c \
 		". /root/rumprun/obj/config && ./runtests.sh hvt" &> /dev/null
     docker exec $CONTAINER dd if=/dev/zero of=hello.disk bs=512 count=1
@@ -57,7 +58,8 @@ function sqlite_rump_with_mem {
     sleep 3
 
     docker pull hlefeuvre/rump-solo5
-    docker run --privileged --name=$CONTAINER -dt hlefeuvre/rump-solo5
+    docker run --privileged --name=$CONTAINER --cpuset-cpus="${CPU1}-${CPU4}" \
+		-dt hlefeuvre/rump-solo5
     docker exec $CONTAINER bash -c \
 		". /root/rumprun/./obj/config && ./runtests.sh hvt" &> /dev/null
     docker exec $CONTAINER bash -c "cd /root/rumprun-packages/pkgs/bin/ && \
