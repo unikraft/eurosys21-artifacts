@@ -3,7 +3,7 @@ FROM debian_env as lighttpd
 # INSTALL LIGHTTPD
 ENV APP_NAME lighttpd
 RUN apt-get update && \
-    apt-get install --no-install-recommends -y ${APP_NAME} rndc
+    apt-get install --no-install-recommends -y ${APP_NAME}
 
 RUN cp /etc/lighttpd/lighttpd.conf /home/conf
 WORKDIR /home/
