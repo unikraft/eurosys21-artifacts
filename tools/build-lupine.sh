@@ -18,6 +18,7 @@ Usage:
   $0 [OPTIONS]
 
 Options:
+  -d --dir             Path to build Lupine.
      --no-docker       Do not use Docker as the build environment.
      --only-preapre    Only prepare Lupine in build directory.
   -v --verbose         Be verbose.
@@ -34,6 +35,8 @@ EOF
 # Parse flag arguments
 for i in "$@"; do
   case $i in
+    -d |--dir )
+      LUPINE_DIR=$2; shift 2;;
     --only-prepare)
       ONLY_PREPARE=y; shift;;
     --no-docker)
