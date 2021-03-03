@@ -18,18 +18,19 @@ trap "cleanup" EXIT
 
 mkdir -p results
 
-for queries in 10 100 1000 10000 60000 100000
+for alloc in "buddy" "tinyalloc" "mimalloc" "tlsf"
 do
-	for alloc in "buddy" "tinyalloc" "mimalloc" "tlsf"
-	do
-		LOG=results/${alloc}.csv
-		echo "num_queries	speedup" > $LOG
+	LOG=results/${alloc}.csv
+	echo "num_queries	speedup" > $LOG
 
-		for j in {1..5}
+	for queries in 10 100 1000 10000 60000 100000
+	do
+
+		for j in {1..10}
 		do
 			{
 				if (( $queries > 10000 )); then
-					sleep 12
+					sleep 8
 				else
 					sleep 2
 				fi
@@ -55,3 +56,6 @@ do
 		done
 	done
 done
+
+# for some reason these experiments mess up the terminal
+reset

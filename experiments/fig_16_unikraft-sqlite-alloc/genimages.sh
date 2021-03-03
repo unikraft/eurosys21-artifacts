@@ -2,6 +2,8 @@
 
 set -x
 
+source ../common/set-cpus.sh
+
 IMAGES=$(pwd)/images
 
 rm -rf $IMAGES
