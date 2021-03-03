@@ -151,7 +151,5 @@ for E in $EXPERIMENTS_DIR/*; do
     _perform $BASENAME $ACTION
   elif [[ $FIGURE_ID == $REQUEST || $EXPERIMENT == $REQUEST ]]; then
     _perform $BASENAME $ACTION
-  else
-    log_err "Cannot run experiment: $REQUEST"
   fi
 done
