@@ -1,5 +1,7 @@
 #!/bin/bash
 #Initializing the setup for abi compatibility
+echo "go to /tmp"
+cd /tmp
 
 CURRENT_FOLDER=$PWD
 ABI_FOLDER=abi
