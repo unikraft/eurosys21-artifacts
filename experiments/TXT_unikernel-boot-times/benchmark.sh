@@ -128,10 +128,14 @@ function benchit  {
   done
 }
 
-mkdir -p rawdata
+mkdir -p rawdata results
 
 for vm in "alpine-vm" "lupine" "lupine-nokml" "hermitux" \
 	  "hermitux-light" "osv-rofs" "rump" "docker-min"
 do
   benchit 30 ${vm}
+  echo "boottime_ms" > results/${vm}.csv
+  cat rawdata/${vm}.txt | \
+	  awk '{ total += $1; count++ } END { OFMT="%f"; print total/(count*1000000) }' \
+	  >> results/${vm}.csv
 done
