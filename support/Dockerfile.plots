@@ -6,6 +6,9 @@ COPY ./requirements.txt /tmp/requirements.txt
 
 RUN set -xe; \
     apk --no-cache add \
+      gfortran \
+      lapack-dev \
+      blas-dev \
       musl-dev \
       zlib-dev \
       jpeg-dev \
