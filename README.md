@@ -21,19 +21,19 @@ Each figure, table and corresponding experiment are listed below:
 | [`fig_05`](/experiments/fig_05_syscall-heatmap/README.md)           |       | Syscalls required by a set of 30 popular server applications versus syscalls currently supported by Unikraft.                                                                                                                 |              |
 | [`fig_07`](/experiments/fig_07_syscall-support/README.md)           |       | Syscall support for [top 30 server apps](https://popcon.debian.org/). All apps are close to being supported, and several already work even if some syscalls are stubbed (SQLite, NGINX).                                      |              |
 | [`fig_08`](/experiments/fig_08_unikraft-image-size/README.md)       |       | Image sizes of Unikraft applications.  We include  permutations with and without LTO and DCE.                                                                                                                                 | 1h 10m       |
-| [`fig_09`](/experiments/fig_09_compare-image-size/README.md)        |       | Image sizes for representative applications with Unikraft and other OSes, stripped, without LTO and DCE.                                                                                                                      |              |
-| [`fig_10`](/experiments/fig_10_unikraft-boot/README.md)             |       | Boot time for Unikraft images with different virtual machine monitors.                                                                                                                                                        |              |
+| [`fig_09`](/experiments/fig_09_compare-image-size/README.md)        |       | Image sizes for representative applications with Unikraft and other OSes, stripped, without LTO and DCE.                                                                                                                      | 0h 5m        |
+| [`fig_10`](/experiments/fig_10_unikraft-boot/README.md)             |       | Boot time for Unikraft images with different virtual machine monitors.                                                                                                                                                        | 0h 7m        |
 | [`fig_11`](/experiments/fig_11_compare-min-mem/README.md)           |       | Minimum memory needed to run different applications using different OSes, including Unikraft.                                                                                                                                 |              |
-| [`fig_12`](/experiments/fig_12_redis-perf/README.md)                |       | Redis performance tested with the [`redis-benchmark`](https://github.com/redis/redis/blob/2.2/src/redis-benchmark.c), (30 connections, 100k requests, pipelining level of 16).                                                |              |
-| [`fig_13`](/experiments/fig_13_nginx-perf/README.md)                |       | NGINX (and Mirage HTTP-reply) performance tested with [`wrk`](https://github.com/wg/wrk) (1 minute, 14 threads, 30 conns, static 612B HTML page).                                                                             |              |
-| [`fig_14`](/experiments/fig_14_unikraft-nginx-alloc-boot/README.md) |       | Unikraft Boot time for NGINX with different allocators.                                                                                                                                                                       |              |
-| [`fig_15`](/experiments/fig_15_unikraft-nginx-throughput/README.md) |       | NGINX throughput with different allocators.                                                                                                                                                                                   |              |
-| [`fig_16`](/experiments/fig_16_unikraft-sqlite-alloc/README.md)     |       | Execution speedup in SQLite Unikraft, relative to [mimalloc](https://github.com/microsoft/mimalloc).                                                                                                                          |              |
+| [`fig_12`](/experiments/fig_12_redis-perf/README.md)                |       | Redis performance tested with the [`redis-benchmark`](https://github.com/redis/redis/blob/2.2/src/redis-benchmark.c), (30 connections, 100k requests, pipelining level of 16).                                                | 0h 6m        |
+| [`fig_13`](/experiments/fig_13_nginx-perf/README.md)                |       | NGINX (and Mirage HTTP-reply) performance tested with [`wrk`](https://github.com/wg/wrk) (1 minute, 14 threads, 30 conns, static 612B HTML page).                                                                             | 0h 45m       |
+| [`fig_14`](/experiments/fig_14_unikraft-nginx-alloc-boot/README.md) |       | Unikraft Boot time for NGINX with different allocators.                                                                                                                                                                       | 0h 2m        |
+| [`fig_15`](/experiments/fig_15_unikraft-nginx-throughput/README.md) |       | NGINX throughput with different allocators.                                                                                                                                                                                   | 0h 25m       |
+| [`fig_16`](/experiments/fig_16_unikraft-sqlite-alloc/README.md)     |       | Execution speedup in SQLite Unikraft, relative to [mimalloc](https://github.com/microsoft/mimalloc).                                                                                                                          | 0h 16m       |
 | [`fig_17`](/experiments/fig_17_unikraft-sqlite-libc/README.md)      |       | Time for 60k SQLite insertions with native Linux, [newlib](https://sourceware.org/newlib/) and [musl](https://www.musl-libc.org/) on Unikraft (marked as native) and SQLite ported automatically to Unikraft (musl external). |              |
-| [`fig_18`](/experiments/fig_18_unikraft-redis-alloc/README.md)      |       | Throughput for Redis Unikraft, with varying allocators and request type (`redis-benchmark`, 30 concurrent conns, 100k requests, and a pipelining level of 16.)                                                                |              |
+| [`fig_18`](/experiments/fig_18_unikraft-redis-alloc/README.md)      |       | Throughput for Redis Unikraft, with varying allocators and request type (`redis-benchmark`, 30 concurrent conns, 100k requests, and a pipelining level of 16.)                                                                | 0h 3m        |
 | [`fig_19`](/experiments/fig_19_compare-dpdk/README.md)              |       | TX throughput comparison of Unikraft versus [DPDK](https://www.dpdk.org/) in a Linux VM.                                                                                                                                      |              |
 | [`fig_20`](/experiments/fig_20_compare-9pfs/README.md)              |       | [9pfs](https://xenbits.xen.org/docs/unstable/misc/9pfs.html) latency for read and write operations, compared to Linux.                                                                                                        |              |
-| [`fig_21`](/experiments/fig_21_unikraft-boot-pages/README.md)       |       | Unikraft boot times with static and dynamic initialization of page tables.                                                                                                                                                    |              |
+| [`fig_21`](/experiments/fig_21_unikraft-boot-pages/README.md)       |       | Unikraft boot times with static and dynamic initialization of page tables.                                                                                                                                                    | 0h 1m        |
 | [`fig_22`](/experiments/fig_22_compare-vfs/README.md)               |       | Filesystem specialization and removal of the vfs layer yields important performance gains for a web cache when performing a look up and file open operation.                                                                  |              |
 
 | Table                                                        | Experiment                                                                                                                                                                                                                           | Est. runtime |
@@ -91,24 +91,35 @@ We have wrapped all the individual experiments with the `run.sh` tool:
 ./run.sh - Run all or a specific experiment.
 
 Usage:
-  ./run.sh [OPTIONS] [FIGURE_ID|TEST_NAME] [prepare|run|plot]
+  ./run.sh [OPTIONS] [FIGURE_ID|TEST_NAME] [ACTION]
 
-If no figure ID or test name is provided, all tests are run.
+If no figure ID or test name is provided, the action is run for all
+experiments.
 
 Example:
   ./run.sh fig_01
 
-Arguments:
-  prepare         Prepares the host and/or builds dependent tools
-                    and images before the test is run.
-  run             Runs the given experiment and saves the results.
-  plot            Uses the data from the experiment to generate
-                    the plot.
+Actions:
+  prepare            Prepares the host and/or builds dependent tools
+                       and images before the test is run.
+  run                Runs the given experiment and saves the results.
+  plot               Uses the data from the experiment to generate
+                       the plot.
+  clean              Clean intermediate build files from an experiment.
 
 Options:
-  -l --list       List all tests and exit.
-  -v --verbose    Be verbose.
-  -h --help       Show this help menu.
+  -D --no-docker     Do not use Docker for plotting.
+  -l --list          List all tests and exit.
+  -v --verbose       Be verbose.
+  -h --help          Show this help menu.
+
+Influential Environmental Variables
+  EXPERIMENTS_DIR    Directory of all the experiments
+                       (default: ./experiments).
+  DOCKER_IMAGE_PLOT  Docker environment for generating plots
+                       (default: unikraft/eurosys21-artifacts-plot:latest).
+  PLOT_FORMAT        File format for the plot
+                       (default: svg).
 ```
 
 Each experiment, and therefore directory listed in `experiments/`, is populated

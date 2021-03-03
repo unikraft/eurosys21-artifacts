@@ -6,7 +6,7 @@ WORKDIR=$(dirname $0)
 
 # Influential environmental variables
 EXPERIMENTS_DIR=${EXPERIMENTS_DIR:-$(pwd)/experiments}
-DOCKER_IMAGE=${DOCKER_IMAGE:-unikraft/eurosys21-artifacts-plot:latest}
+DOCKER_IMAGE_PLOT=${DOCKER_IMAGE_PLOT:-unikraft/eurosys21-artifacts-plot:latest}
 PLOT_FORMAT=${PLOT_FORMAT:-svg}
 
 # Program arguments
@@ -21,26 +21,35 @@ _help() {
 $0 - Run all or a specific experiment.
 
 Usage:
-  $0 [OPTIONS] [FIGURE_ID|TEST_NAME] [prepare|run|plot]
+  $0 [OPTIONS] [FIGURE_ID|TEST_NAME] [ACTION]
 
-If no figure ID or test name is provided, all tests are run.
+If no figure ID or test name is provided, the action is run for all
+experiments.
 
 Example:
   $0 fig_01
 
-Arguments:
-  prepare         Prepares the host and/or builds dependent tools
-                    and images before the test is run.
-  run             Runs the given experiment and saves the results.
-  plot            Uses the data from the experiment to generate
-                    the plot.
-  clean           Clean intermediate build files from an experiment.
+Actions:
+  prepare            Prepares the host and/or builds dependent tools
+                       and images before the test is run.
+  run                Runs the given experiment and saves the results.
+  plot               Uses the data from the experiment to generate
+                       the plot.
+  clean              Clean intermediate build files from an experiment.
 
 Options:
-  -D --no-docker  Do not use Docker for plotting.
-  -l --list       List all tests and exit.
-  -v --verbose    Be verbose.
-  -h --help       Show this help menu.
+  -D --no-docker     Do not use Docker for plotting.
+  -l --list          List all tests and exit.
+  -v --verbose       Be verbose.
+  -h --help          Show this help menu.
+
+Influential Environmental Variables
+  EXPERIMENTS_DIR    Directory of all the experiments
+                       (default: ./experiments).
+  DOCKER_IMAGE_PLOT  Docker environment for generating plots
+                       (default: $DOCKER_IMAGE_PLOT).
+  PLOT_FORMAT        File format for the plot
+                       (default: $PLOT_FORMAT).
 EOF
 }
 
@@ -56,7 +65,7 @@ _perform() {
       if [[ $NO_DOCKER == 'n' ]]; then
         docker run -it --rm \
           -v $(pwd):/root/workspace -w /root/workspace \
-          $DOCKER_IMAGE \
+          $DOCKER_IMAGE_PLOT \
           make -C /root/workspace/experiments/$BASENAME \
             PLOT=/root/workspace/plots/$BASENAME.$PLOT_FORMAT \
             plot
@@ -65,7 +74,7 @@ _perform() {
       fi
       ;;
     prepare|run|clean)
-      make -C $EXPERIMENT $ACTION
+      make -C $WORKDIR/experiments/$BASENAME $ACTION
       ;;
     *)
       log_err "Unknown action: $ACTION"
@@ -142,7 +151,5 @@ for E in $EXPERIMENTS_DIR/*; do
     _perform $BASENAME $ACTION
   elif [[ $FIGURE_ID == $REQUEST || $EXPERIMENT == $REQUEST ]]; then
     _perform $BASENAME $ACTION
-  else
-    log_err "Cannot run experiment: $REQUEST"
   fi
 done
