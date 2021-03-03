@@ -56,7 +56,7 @@ function redis_docker_with_mem {
     IMAGES=$(pwd)/images
     CONTAINER="redis-tmp-ram"
 
-    docker pull redis:alpine
+    docker pull redis:5.0.4-alpine
 
     {
       sleep 5
@@ -66,7 +66,7 @@ function redis_docker_with_mem {
 
     checker_id=$!
 
-    (docker run -m ${1}M --tty --privileged --name=$CONTAINER redis:alpine) &> .out
+    (docker run -m ${1}M --tty --privileged --name=$CONTAINER redis:5.0.4-alpine) &> .out
     wait $checker_id
 
     grep -q "Server initialized" .out
@@ -95,7 +95,7 @@ function nginx_docker_with_mem {
 	-g 'daemon off;error_log stderr debug;') &> .out
     wait $checker_id
 
-    grep -q "start worker processes" .out
+    grep -q "Ready to accept connections" .out
     up=$?
     rm .out
 
