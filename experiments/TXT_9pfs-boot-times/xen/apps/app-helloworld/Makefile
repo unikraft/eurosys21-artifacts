@@ -1,4 +1,4 @@
-UK_ROOT ?= $(PWD)/../../unikraft
+UK_ROOT ?= $(PWD)/../../../unikraft
 UK_LIBS ?= $(PWD)/../../libs
 LIBS :=
 

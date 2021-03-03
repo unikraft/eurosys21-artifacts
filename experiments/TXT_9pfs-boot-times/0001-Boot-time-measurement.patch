@@ -1,0 +1,50 @@
+From fa614d9de044afc1852d4bfe40af20c24e653c78 Mon Sep 17 00:00:00 2001
+From: Vlad-Andrei Badoiu <vlad_andrei.badoiu@upb.ro>
+Date: Wed, 3 Mar 2021 22:04:47 +0200
+Subject: [PATCH 1/1] Boot time measurement
+
+Signed-off-by: Vlad-Andrei Badoiu <vlad_andrei.badoiu@upb.ro>
+---
+ lib/ukboot/boot.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/lib/ukboot/boot.c b/lib/ukboot/boot.c
+index 960fdd3..7325624 100644
+--- a/lib/ukboot/boot.c
++++ b/lib/ukboot/boot.c
+@@ -38,6 +38,12 @@
+ #include <stddef.h>
+ #include <stdio.h>
+ #include <errno.h>
++#include <stdio.h>        
++#include <time.h>         
++#include <sys/types.h>    
++#define __NEED_struct_timespec
++#include <uk/time_types.h>
++struct timespec tstart={0,0}, tend={0,0};
+ 
+ #if CONFIG_LIBUKBOOT_INITBBUDDY
+ #include <uk/allocbbuddy.h>
+@@ -134,8 +140,10 @@ static void main_thread_func(void *arg)
+ 		uk_pr_debug("Call constructor: %p()...\n", *ctorfn);
+ 		(*ctorfn)();
+ 	}
+-
+ 	uk_pr_info("Calling main(%d, [", tma->argc);
++
++	clock_gettime(CLOCK_MONOTONIC, &tend);
++	printf("some_long_computation took about %ld ns\n",(tend.tv_nsec - tstart.tv_nsec)); 
+ 	for (i = 0; i < tma->argc; ++i) {
+ 		uk_pr_info("'%s'", tma->argv[i]);
+ 		if ((i + 1) < tma->argc)
+@@ -185,6 +193,7 @@ void ukplat_entry(int argc, char *argv[])
+ 	struct uk_sched *s = NULL;
+ 	struct uk_thread *main_thread = NULL;
+ #endif
++	clock_gettime(CLOCK_MONOTONIC, &tstart);
+ 
+ 	/* We use a macro because if we were to use a function we
+ 	 * would not be able to return from the function if we have
+-- 
+2.27.0
+
