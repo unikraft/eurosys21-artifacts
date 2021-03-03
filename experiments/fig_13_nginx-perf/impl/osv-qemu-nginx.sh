@@ -63,3 +63,7 @@ do
 	kill_qemu
 	rm ${IMAGES}/osv-qemu.img.disposible
 done
+
+RESULTS=results/osv-qemu.csv
+echo "throughput_reqs" > $RESULTS
+parse_nginx_results $LOG $RESULTS

@@ -62,7 +62,5 @@ do
 		kill_qemu
 	done
 
-	op=`cat $LOG | awk -e '$0 ~ /Requests\/sec: / {print $2}' | \
-		sed -r '/^\s*$/d'`
-	echo "${op}" >> $RESULTS
+	parse_nginx_results $LOG $RESULTS
 done

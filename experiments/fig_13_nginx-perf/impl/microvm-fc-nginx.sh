@@ -65,3 +65,7 @@ do
 	killall -9 firecracker firectl .firecracker
 	rm /tmp/nginx.ext2.disposible
 done
+
+RESULTS=results/microvm-fc.csv
+echo "throughput_reqs" > $RESULTS
+parse_nginx_results $LOG $RESULTS

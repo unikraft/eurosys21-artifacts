@@ -56,3 +56,7 @@ do
 	kill -9 $child_pid
 	kill_qemu
 done
+
+RESULTS=results/unikraft-qemu.csv
+echo "throughput_reqs" > $RESULTS
+parse_nginx_results $LOG $RESULTS

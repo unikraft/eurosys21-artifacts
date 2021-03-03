@@ -55,3 +55,7 @@ do
 	pkill -9 qemu-system-x86
 	rm ${IMAGES}/nginx.ext2.disposible
 done
+
+RESULTS=results/lupine-qemu.csv
+echo "throughput_reqs" > $RESULTS
+parse_nginx_results $LOG $RESULTS

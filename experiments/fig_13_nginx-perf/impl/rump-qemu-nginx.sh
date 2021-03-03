@@ -57,3 +57,7 @@ do
 	kill_qemu
 	rm ${IMAGES}/rump-qemu.img.disposible
 done
+
+RESULTS=results/rump-qemu.csv
+echo "throughput_reqs" > $RESULTS
+parse_nginx_results $LOG $RESULTS

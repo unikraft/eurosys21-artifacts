@@ -47,3 +47,7 @@ do
 done
 
 git checkout ./data/nginx.conf
+
+RESULTS=results/docker.csv
+echo "throughput_reqs" > $RESULTS
+parse_nginx_results $LOG $RESULTS

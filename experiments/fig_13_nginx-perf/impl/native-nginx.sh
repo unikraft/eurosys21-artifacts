@@ -37,3 +37,7 @@ do
 	# stop server
 	killall -9 nginx
 done
+
+RESULTS=results/native.csv
+echo "throughput_reqs" > $RESULTS
+parse_nginx_results $LOG $RESULTS

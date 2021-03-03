@@ -3,6 +3,8 @@
 # makes sure to run host setup
 ../common/setup-host.sh
 
+mkdir -p rawdata results
+
 # run benchmarks
 ./impl/lupine-fc-nginx.sh
 ./impl/lupine-qemu-nginx.sh
