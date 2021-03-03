@@ -5,34 +5,24 @@ set -x
 
 source ../common/set-cpus.sh
 source ../common/nginx.sh
+source ../common/network.sh
 
 IMAGES=images/
 BASEIP=172.190.0
 NETIF=unikraft0
 mkdir -p rawdata results
 
-echo "creating bridge"
-brctl addbr $NETIF || true
-ifconfig $NETIF ${BASEIP}.1
-killall -9 qemu-system-x86
-pkill -9 qemu-system-x86
+create_bridge $NETIF $BASEIP
+kill_qemu
 
 # run dnsmasq
-dnsmasq -d \
-        --log-queries \
-        --bind-dynamic \
-        --interface=$NETIF \
-        --listen-addr=${BASEIP}.1 \
-        --dhcp-range=${BASEIP}.2,${BASEIP}.254,255.255.255.0,12h \
-	&> $(pwd)/dnsmasq.log &
+dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
 function cleanup {
 	# kill all children (evil)
-	rm $(pwd)/dnsmasq.log
-	ifconfig $NETIF down
-	brctl delbr $NETIF
-	killall -9 qemu-system-x86 dnsmasq
-	pkill -9 qemu-system-x86 dnsmasq
+	kill_dhcp $dnsmasq_pid
+	delete_bridge $NETIF
+	kill_qemu
 	pkill -P $$
 }
 
@@ -49,6 +39,8 @@ do
 		-a "" -m 1024 -p ${CPU2} \
 		-b ${NETIF} -x
 
+	child_pid=$!
+
 	# make sure that the server has properly started
 	sleep 5
 
@@ -61,6 +53,6 @@ do
 	#curl http://${BASEIP}.2/index.html --noproxy ${BASEIP}.2 --output -
 
 	# stop server
-	killall -9 qemu-system-x86
-	pkill -9 qemu-system-x86
+	kill -9 $child_pid
+	kill_qemu
 done

@@ -92,7 +92,7 @@ function redis_rump_with_mem {
     kill_qemu
 
     create_tap $NETIF $BASEIP
-    run_dhcp $NETIF $BASEIP
+    dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
     cp ${IMAGES}/rump-qemu.img ${IMAGES}/rump-qemu.img.disposible
 
@@ -105,7 +105,7 @@ function redis_rump_with_mem {
       ping -q -c 1 $ip
       up=$?
 
-      kill_dhcp
+      kill_dhcp $dnsmasq_pid
       kill_qemu
       delete_tap $NETIF
 
@@ -136,7 +136,7 @@ function nginx_rump_with_mem {
     kill_qemu
 
     create_tap $NETIF $BASEIP
-    run_dhcp $NETIF $BASEIP
+    dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
     cp ${IMAGES}/rump-qemu.img ${IMAGES}/rump-qemu.img.disposible
 
@@ -149,7 +149,7 @@ function nginx_rump_with_mem {
       ping -q -c 1 $ip
       up=$?
 
-      kill_dhcp
+      kill_dhcp $dnsmasq_pid
       kill_qemu
 
       delete_tap $NETIF

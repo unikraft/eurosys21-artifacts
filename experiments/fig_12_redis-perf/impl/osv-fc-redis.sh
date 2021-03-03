@@ -17,21 +17,20 @@ source ../common/set-cpus.sh
 source ../common/network.sh
 source ../common/redis.sh
 
+killall -9 firecracker firectl .firecracker firecracker-x86
+create_bridge $NETIF $BASEIP
+dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
+
 function cleanup {
 	# kill all children (evil)
 	killall -9 firecracker firectl .firecracker firecracker-x86
 	rm ${IMAGES}/osv-qemu.img.disposible
 	pkill -P $$
-	kill_dhcp
+	kill_dhcp $dnsmasq_pid
 	delete_bridge $NETIF
 }
 
 trap "cleanup" EXIT
-
-killall -9 firecracker firectl .firecracker firecracker-x86
-kill_dhcp
-create_bridge $NETIF $BASEIP
-run_dhcp $NETIF $BASEIP
 
 for j in {1..5}
 do

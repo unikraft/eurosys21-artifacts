@@ -16,12 +16,11 @@ mkdir -p rawdata results
 create_bridge $NETIF $BASEIP
 
 kill_qemu
-kill_dhcp
-run_dhcp $NETIF $BASEIP
+dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
 function cleanup {
 	# kill all children (evil)
-	kill_dhcp
+	kill_dhcp $dnsmasq_pid
 	kill_qemu
 	pkill -P $$
 	delete_bridge $NETIF

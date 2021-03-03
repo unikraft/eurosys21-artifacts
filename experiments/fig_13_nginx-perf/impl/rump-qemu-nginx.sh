@@ -6,6 +6,7 @@ set -x
 source ../common/set-cpus.sh
 source ../common/network.sh
 source ../common/nginx.sh
+source ../common/qemu.sh
 
 IMAGES=$(pwd)/images/
 BASEIP=172.190.0
@@ -14,46 +15,22 @@ LOG=rawdata/rump-qemu-nginx.txt
 mkdir -p rawdata
 touch $LOG
 
-killall -9 qemu-system-x86 dnsmasq
-pkill -9 qemu-system-x86 dnsmasq
+kill_qemu
 
-create_tap() {
-    if ! ip link show tap$1 &> /dev/null; then
-        sudo ip tuntap add mode tap tap$1
-        sudo ip addr add ${BASEIP}.1/24 dev tap$1
-        sudo ip link set tap$1 up
-        echo 1 | sudo tee /proc/sys/net/ipv4/ip_forward >/dev/null
-        sudo iptables -t nat -A POSTROUTING -o bond1 -j MASQUERADE
-        sudo iptables -I FORWARD 1 -i tap$1 -j ACCEPT
-        sudo iptables -I FORWARD 1 -o tap$1 -m state --state RELATED,ESTABLISHED -j ACCEPT
-    fi
-}
-
-delete_tap() {
-    sudo ip link del tap$1
-}
-
-# run dnsmasq
-dnsmasq -d \
-        --log-queries \
-        --bind-dynamic \
-        --interface=$NETIF \
-        --listen-addr=${BASEIP}.1 \
-        --dhcp-range=${BASEIP}.2,${BASEIP}.254,255.255.255.0,12h &> $(pwd)/dnsmasq.log &
+dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
 function cleanup {
 	# kill all children (evil)
-	delete_tap 10
-	rm ${IMAGES}/rump-qemu.img.disposible
-	rm dnsmasq.log
-	killall -9 qemu-system-x86 dnsmasq
-	pkill -9 qemu-system-x86 dnsmasq
+	kill_dhcp $dnsmasq_pid
+	kill_qemu
+	delete_tap $NETIF
 	pkill -P $$
+	rm ${IMAGES}/rump-qemu.img.disposible
 }
 
 trap "cleanup" EXIT
 
-create_tap 10
+create_tap $NETIF
 
 for j in {1..5}
 do
@@ -77,7 +54,6 @@ do
 	#curl http://${ip}/index.html --noproxy ${ip} --output -
 
 	# stop server
-	killall -9 qemu-system-x86
-	pkill -9 qemu-system-x86
+	kill_qemu
 	rm ${IMAGES}/rump-qemu.img.disposible
 done

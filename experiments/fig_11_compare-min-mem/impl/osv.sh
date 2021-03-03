@@ -63,7 +63,7 @@ function redis_osv_with_mem {
     IMAGES=$(pwd)/images/redis
     NETIF=tux0
     create_bridge $NETIF $BASEIP
-    run_dhcp $NETIF $BASEIP
+    dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
     cp ${IMAGES}/osv-qemu.img ${IMAGES}/osv-qemu.img.disposible
 
@@ -81,10 +81,9 @@ function redis_osv_with_mem {
       up=$?
 
       delete_bridge $NETIF
-      kill_dhcp
+      kill_dhcp $dnsmasq_pid
       rm ${IMAGES}/osv-qemu.img.disposible
-      killall -9 qemu-system-x86
-      pkill -9 qemu-system-x86
+      kill_qemu
 
       exit $up
     } &
@@ -111,7 +110,7 @@ function nginx_osv_with_mem {
     IMAGES=$(pwd)/images/nginx
     NETIF=tux0
     create_bridge $NETIF $BASEIP
-    run_dhcp $NETIF $BASEIP
+    dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
     cp ${IMAGES}/osv-qemu.img ${IMAGES}/osv-qemu.img.disposible
 
@@ -129,7 +128,7 @@ function nginx_osv_with_mem {
       up=$?
 
       delete_bridge $NETIF
-      kill_dhcp
+      kill_dhcp $dnsmasq_pid
       rm ${IMAGES}/osv-qemu.img.disposible
       kill_qemu
 

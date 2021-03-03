@@ -6,6 +6,7 @@ modprobe tun
 
 BASEIP=172.190.0
 
+# start a dnsmasq server and echo its PID
 function run_dhcp {
     dnsmasq -d \
         --log-queries \
@@ -13,11 +14,12 @@ function run_dhcp {
         --interface=$1 \
         --listen-addr=${2}.1 \
         --dhcp-range=${2}.2,${2}.254,255.255.255.0,12h &> $(pwd)/dnsmasq.log &
+    echo $!
 }
 
+# take dnsmasq PID as $1
 function kill_dhcp {
-    pkill -9 dnsmasq
-    killall -9 dnsmasq
+    kill -9 $1
     rm dnsmasq.log
 }
 

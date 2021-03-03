@@ -3,6 +3,13 @@
 # verbose output
 set -x
 
+IMAGES=$(pwd)/images
+
+source ../common/set-cpus.sh
+source ../common/network.sh
+source ../common/redis.sh
+source ../common/qemu.sh
+
 NETIF=tap10
 LOG=rawdata/rump-qemu-redis.txt
 RESULTS=results/rump-qemu.csv
@@ -10,27 +17,18 @@ echo "operation	throughput" > $RESULTS
 mkdir -p rawdata
 touch $LOG
 
-IMAGES=$(pwd)/images
-
-source ../common/set-cpus.sh
-source ../common/network.sh
-source ../common/redis.sh
-
-killall -9 qemu-system-x86
-pkill -9 qemu-system-x86
+kill_qemu
 
 create_tap $NETIF $BASEIP
 
-kill_dhcp
-run_dhcp $NETIF $BASEIP
+dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
 function cleanup {
 	# kill all children (evil)
 	delete_tap $NETIF 
-	kill_dhcp
+	kill_dhcp $dnsmasq_pid
 	rm ${IMAGES}/rump-qemu.img.disposible
-	killall -9 qemu-system-x86
-	pkill -9 qemu-system-x86
+	kill_qemu
 	pkill -P $$
 }
 

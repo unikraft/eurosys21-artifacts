@@ -17,19 +17,17 @@ source ../common/network.sh
 source ../common/redis.sh
 
 create_bridge $NETIF $BASEIP
-killall -9 qemu-system-x86
-pkill -9 qemu-system-x86
+kill_qemu
 
 # run dnsmasq
-run_dhcp $NETIF $BASEIP
+dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
 function cleanup {
 	# kill all children (evil)
 	delete_bridge $NETIF
-	kill_dhcp
+	kill_dhcp $dnsmasq_pid
 	rm ${IMAGES}/osv-qemu.img.disposible
-	killall -9 qemu-system-x86
-	pkill -9 qemu-system-x86
+	kill_qemu
 	pkill -P $$
 }
 

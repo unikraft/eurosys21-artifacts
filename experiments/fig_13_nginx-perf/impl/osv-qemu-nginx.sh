@@ -14,29 +14,19 @@ LOG=rawdata/osv-qemu-nginx.txt
 mkdir -p rawdata
 touch $LOG
 
-echo "creating bridge"
-brctl addbr $NETIF || true
-ifconfig $NETIF ${BASEIP}.1
-killall -9 qemu-system-x86 dnsmasq
-pkill -9 qemu-system-x86 dnsmasq
+create_bridge $NETIF $BASEIP
+kill_qemu
 
 # run dnsmasq
-dnsmasq -d \
-        --log-queries \
-        --bind-dynamic \
-        --interface=$NETIF \
-        --listen-addr=${BASEIP}.1 \
-        --dhcp-range=${BASEIP}.2,${BASEIP}.254,255.255.255.0,12h &> $(pwd)/dnsmasq.log &
+dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
 function cleanup {
 	# kill all children (evil)
-	ifconfig $NETIF down
-	brctl delbr $NETIF
-	rm ${IMAGES}/osv-qemu.img.disposible
-	rm dnsmasq.log
-	killall -9 qemu-system-x86 dnsmasq
-	pkill -9 qemu-system-x86 dnsmasq
+	kill_dhcp $dnsmasq_pid
+	delete_bridge $NETIF
+	kill_qemu
 	pkill -P $$
+	rm ${IMAGES}/osv-qemu.img.disposible
 }
 
 trap "cleanup" EXIT
@@ -56,17 +46,20 @@ do
                 -m 1024 -p ${CPU2} \
 		-b ${NETIF} -x
 
+	child_pid=$!
+
 	# make sure that the server has properly started
 	sleep 6
 
-	ip=`cat $(pwd)/dnsmasq.log | grep "dnsmasq-dhcp: DHCPACK(${NETIF})" | tail -n 1 | awk  '{print $3}'`
+	ip=`cat $(pwd)/dnsmasq.log | grep "dnsmasq-dhcp: DHCPACK(${NETIF})" | \
+		tail -n 1 | awk  '{print $3}'`
 
 	# benchmark
 	benchmark_nginx_server $ip $LOG
 	#curl http://${ip}/index.html --noproxy ${ip} --output -
 
 	# stop server
-	killall -9 qemu-system-x86
-	pkill -9 qemu-system-x86
+	kill -9 $child_pid
+	kill_qemu
 	rm ${IMAGES}/osv-qemu.img.disposible
 done
