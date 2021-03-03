@@ -9,9 +9,11 @@ file which contains the Linux VM on another server.
 
 [Unikraft]: https://github.com/unikraft/unikraft
 
-This experiment takes some time (in rought average: TODO) and require
+This experiment takes some time and requires
 a very few human interaction (entering `root` as login and password
 and running the `./script` when launching the Linux VM).
+
+**APPROXIMATIVE EXECUTION TIME=2hours**
 
 ## How to Use (automatic test)
 
@@ -20,7 +22,8 @@ command. This command will:
 
 1. Prepare the environment by executing the `./setup.sh` script;
 2. Run the unikraft and Linux VM latency experiment (respectively
-`./run_unikraft.sh` and `./run_vm_linux.sh` scripts);
+`./run_unikraft.sh` and `./run_vm_linux.sh` scripts). Note that
+these script take long...
 3. Generate the figure by running the `./plot.sh` script and then save
 it into the current repository.
 
@@ -69,5 +72,5 @@ procedure below:
 ### Generate the graph
 
 Once all the results are generated, run the `./plot.sh` to generate
-the 9pfs latency plot. This one will be egenerated in the current
+the 9pfs latency plot. This one will be generated in the current
 folder with the following name: `compare_9pfs_lines.pdf`.
