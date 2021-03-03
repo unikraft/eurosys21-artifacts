@@ -11,7 +11,7 @@ else
     curl -LO https://people.montefiore.uliege.be/gain/unikraft/abi.zip
 
     echo "Unzip the archive..."
-    unzip table2-experiments.zip
+    unzip abi.zip
 fi
 
 echo "Copy prepare scripts in the abi folder"
