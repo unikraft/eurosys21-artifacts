@@ -1,0 +1,15 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Authors: Alexander Jung <a.jung@lancs.ac.uk>
+FROM python:3.6-alpine
+
+COPY ./requirements.txt /tmp/requirements.txt
+
+RUN set -xe; \
+    apk --no-cache add \
+      musl-dev \
+      zlib-dev \
+      jpeg-dev \
+      linux-headers \
+      g++ \
+      make; \
+    pip3 install -r /tmp/requirements.txt
