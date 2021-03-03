@@ -10,7 +10,7 @@ SMALL_SIZE = 12
 MEDIUM_SIZE = 14
 LARGE_SIZE = 18
 BIGGER_SIZE = 24
-KBYTES = 1000.0
+KBYTES = 1024.0
 
 PATTERNS = ('-', '+', 'x', '\\', '.')
 
