@@ -2,8 +2,6 @@
 WORKDIR=$(dirname $0)/..
 . $WORKDIR/support/common.sh
 
-set -xe
-
 # Influential environmental variables
 BUILD_DIR=${BUILD_DIR:-$WORKDIR/build}
 LUPINE_DIR=${LUPINE_DIR:-$BUILD_DIR/lupine}
