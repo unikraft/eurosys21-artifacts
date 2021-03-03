@@ -74,7 +74,7 @@ _perform() {
       fi
       ;;
     prepare|run|clean)
-      make -C $EXPERIMENT $ACTION
+      make -C $WORKDIR/experiments/$BASENAME $ACTION
       ;;
     *)
       log_err "Unknown action: $ACTION"
