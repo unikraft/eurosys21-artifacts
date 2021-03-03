@@ -1,8 +1,7 @@
-TODO: this is missing bindings to plot scripts
-
 This experiment provides data for Fig. 18.
 
 Run instructions:
  - cd experiments/18_unikraft-sqlite-alloc
  - ./genimages.sh
  - ./benchmark.sh
+ - python3 ./plot.py

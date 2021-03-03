@@ -2,3 +2,5 @@
 rawdata
 images
 .out
+__pycache__
+results
