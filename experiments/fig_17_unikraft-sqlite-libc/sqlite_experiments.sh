@@ -84,7 +84,10 @@ prepare() {
 
     cd sqlite-amalgamation-3300100
     musl-gcc -c -fno-omit-frame-pointer -fno-stack-protector -fno-tree-sra \
-        -fno-split-stack -O2 -fno-PIC -I. -g3 sqlite3.c
+        -fno-split-stack -O2 -fno-PIC -fhosted -ffreestanding \
+        -fno-tree-loop-distribute-patterns -m64 -mno-red-zone \
+        -fno-asynchronous-unwind-tables -fno-reorder-blocks -mtune=generic \
+        -D_POSIX_SOURCE -D_BSD_SOURCE -I. -g3 sqlite3.c
     ar -crs libsqlite.a sqlite3.o
     cd ..
 
@@ -102,14 +105,6 @@ prepare() {
     mv app-sqlite-test app-sqlite-linux-native
 
     echo "\n======  Preparing SQLite Test Applications  ======\n"
-
-    # Turn .config templates into real .config
-    for app in app-sqlite-*; do
-        if [ -f "$app/.config" ]; then
-            sed -i -e "s+{{ROOT_FOLDER}}+$root_folder+" \
-                -e "s+{{APP_NAME}}+$app+" "$app/.config"
-        fi
-    done
 
     # Copy SQLite include file to app folder
     for app in app-sqlite-*; do

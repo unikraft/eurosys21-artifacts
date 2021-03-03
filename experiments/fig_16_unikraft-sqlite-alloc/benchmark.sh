@@ -26,7 +26,7 @@ do
 	for queries in 10 100 1000 10000 60000 100000
 	do
 
-		for j in {1..10}
+		for j in {1..20}
 		do
 			{
 				if (( $queries > 10000 )); then
@@ -38,14 +38,15 @@ do
 			} &
 
 			script .out -c "taskset -c ${CPU1} qemu-guest \
-				-i sqlitebenchmark.cpio \
-				-k ${IMAGES}/${queries}/unikraft+${alloc}.kernel \
-				-a '' -m 1024 -p ${CPU2}"
+			    -i sqlitebenchmark.cpio \
+			    -k ${IMAGES}/${queries}/unikraft+${alloc}.kernel \
+			    -a '' -m 1024 -p ${CPU2}"
 			wait
 
 			if ! grep -q "I/O error" .out; then
 				res=`cat .out | \
-					awk -e '$0 ~ /queries in/ {print $4}'`
+				     awk -e '$0 ~ /queries in/ {print $4}' | \
+				     sed -e "s/\r//g"`
 				echo "${queries}	${res}" | tee -a $LOG
 			fi
 
