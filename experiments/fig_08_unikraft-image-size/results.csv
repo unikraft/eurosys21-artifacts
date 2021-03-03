@@ -1,0 +1,16 @@
+helloworld_dce	197280
+helloworld_dce_lto	197280
+helloworld_default	262816
+helloworld_lto	262816
+nginx_dce	852792
+nginx_dce_lto	852928
+nginx_default	1639224
+nginx_lto	1246392
+redis_dce	1114936
+redis_dce_lto	1115072
+redis_default	1835832
+redis_lto	1442752
+sqlite_dce	852792
+sqlite_dce_lto	852928
+sqlite_default	1639224
+sqlite_lto	1246392
