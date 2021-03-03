@@ -17,7 +17,9 @@ function build_for {
     docker container stop $CONTAINER
     docker rm -f $CONTAINER
     docker pull hlefeuvre/unikraft-eurosys21:latest
+    # give this one 4 CPUs to build faster
     docker run --rm --privileged --name=$CONTAINER \
+	    		--cpuset-cpus="${CPU1}-${CPU4}" \
 			-dt hlefeuvre/unikraft-eurosys21
     docker exec -it $CONTAINER bash -c \
 	"cd app-${1} && cp configs/${3}.conf .config"
