@@ -35,7 +35,13 @@ prepare:
 
 .PHONY: run
 run:
-	$(IMPLDIR)/alpine-size.sh
+	$(IMPLDIR)/hermitux-light-size.sh
+	$(IMPLDIR)/hermitux-size.sh
+	$(IMPLDIR)/lupine-size.sh
+	$(IMPLDIR)/mirage-size.sh
+	$(IMPLDIR)/native-size.sh
+	$(IMPLDIR)/osv-size.sh
+	$(IMPLDIR)/rump-size.sh
 
 .PHONY: plot
 plot:
@@ -43,7 +49,18 @@ plot:
 
 .PHONY: clean
 clean:
-	$(RM) $(ALPINE_IMAGE)
+	$(RM) -rf $(IMPLDIR)/mirage-helloworld/_build
+	$(RM) -rf $(IMPLDIR)/mirage-helloworld/.merlin
+	$(RM) -rf $(IMPLDIR)/mirage-helloworld/.mirage.config
+	$(RM) -rf $(IMPLDIR)/mirage-helloworld/dune
+	$(RM) -rf $(IMPLDIR)/mirage-helloworld/dune-project
+	$(RM) -rf $(IMPLDIR)/mirage-helloworld/dune.build
+	$(RM) -rf $(IMPLDIR)/mirage-helloworld/dune.config
+	$(RM) -rf $(IMPLDIR)/mirage-helloworld/key_gen.ml
+	$(RM) -rf $(IMPLDIR)/mirage-helloworld/main.ml
+	$(RM) -rf $(IMPLDIR)/mirage-helloworld/Makefile
+	$(RM) -rf $(IMPLDIR)/mirage-helloworld/*.opam
+	$(RM) -rf $(IMPLDIR)/mirage-helloworld/myocamlbuild.ml
 
 .PHONY: properclean
 properclean:
