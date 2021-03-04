@@ -2,7 +2,7 @@
 # Files and directories
 #
 WORKDIR ?= $(CURDIR)
-RESULTS ?= $(WORKDIR)/data
+RESULTS ?= $(WORKDIR)/results
 PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 
 #
@@ -18,20 +18,20 @@ all: prepare run plot
 
 .PHONY: prepare
 prepare:
-	$(WORKDIR)/setup.sh
+	$(info "This experiment cannot be called from run.sh.  Please read the README.md")
 
 .PHONY: run
 run:
-	$(WORKDIR)/run_unikraft.sh
-	$(WORKDIR)/run_vm_linux.sh
+	$(info "This experiment cannot be called from run.sh.  Please read the README.md")
 
 .PHONY: plot
 plot:
-	$(WORKDIR)/plot.sh
 	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
 
 .PHONY: clean
 clean:
 	$(WORKDIR)/clean.sh
 
-.PHONY: all clean plot prepare run
+.PHONY: properclean
+properclean:
+	@-

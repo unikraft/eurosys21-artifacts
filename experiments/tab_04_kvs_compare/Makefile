@@ -9,18 +9,18 @@ WORKDIR ?= $(CURDIR)
 .PHONY: all
 all: prepare run plot
 
-.PHONY: clean
-clean:
-	$(WORKDIR)/clean.sh
-
-.PHONY: plot
-plot:
-	$(WORKDIR)/plot.sh
-
 .PHONY: prepare
 prepare:
-	$(WORKDIR)/setup.sh
+	$(WORKDIR)/build.sh
 
 .PHONY: run
 run:
-	$(WORKDIR)/run_all.sh
+	$(WORKDIR)/udp_echo.sh
+
+.PHONY: plot
+plot:
+	@-
+
+.PHONY: clean
+clean:
+	$(WORKDIR)/clean.sh

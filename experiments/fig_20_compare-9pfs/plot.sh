@@ -1,6 +1,6 @@
 #!/bin/bash
 #Use this script to generate the plot (after running experiment)
-CURRENT_FOLDER=$PWD
+CURRENT_FOLDER=$(dirname $0)
 DATA_FOLDER="data"
 FILE1="$PWD/apps/lib-readfile/rhea-kvm_read.csv"
 FILE2="$PWD/apps/lib-writefile/rhea-kvm_write.csv"
@@ -37,5 +37,3 @@ else
     echo "$FILE4 does not exist. Perform the VM experiment first"
     exit 1
 fi
-
-python3 compare_9pfs.py

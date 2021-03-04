@@ -77,8 +77,12 @@ function install_dependencies() {
         socat \
         cscope \
         uuid-runtime \
+        uuid-dev \
+        libuuid1 \
         bridge-utils \
         net-tools \
+        libmhash-dev \
+        libmhash2 \
         gawk \
         musl-tools \
         qemu-utils
