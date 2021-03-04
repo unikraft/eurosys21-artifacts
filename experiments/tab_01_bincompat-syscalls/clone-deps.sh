@@ -17,3 +17,4 @@ cd "$CLONED"
 [ ! -e "libelf" ]    && git clone --branch staging 'https://github.com/unikraft/lib-libelf.git' 'libelf'
 [ ! -e "zydis" ]     && git clone --branch staging 'https://github.com/unikraft/lib-zydis.git' 'zydis'
 [ ! -e "lwip" ]      && git clone --branch staging 'https://github.com/unikraft/lib-lwip.git' 'lwip'
+exit 0
