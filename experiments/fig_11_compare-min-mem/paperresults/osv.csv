@@ -1,0 +1,5 @@
+app	minmem
+hello	24
+redis	40
+sqlite	26
+nginx	26

@@ -1,0 +1,4 @@
+app	minmem
+hello	11
+redis	13
+sqlite	10
