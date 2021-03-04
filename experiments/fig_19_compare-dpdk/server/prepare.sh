@@ -1,4 +1,5 @@
-cd unikraft/uk_test_suite/ && make
+cd unikraft/uk_test_suite/ && make fetch
+#cd build/libukdpdkbuild/ln -s ~/Unikraft_dpdk/lib_src/dpdk/ dpdk-19.08
 cd ../..
 
 

@@ -56,10 +56,10 @@ UK_PREPARE-y += prepare-dpdk
 
 UK_FETCH-y += fetch-dpdk
 
-$(eval CINCLUDES-$(CONFIG_RTE_$(call uc,$(1))) += \
-			-I$($(call uc,$(1))_BUILD)/include)
-$(eval CINCLUDES-$(CONFIG_RTE_$(call uc,$(1))) += \
-			-I$($(call uc,$(1))_BUILD)/include/generic)
+$(if $($(call uc,$(1))_BUILD),$(eval CINCLUDES-$(CONFIG_RTE_$(call uc,$(1))) += \
+			-I$($(call uc,$(1))_BUILD)/include))
+$(if $($(call uc,$(1))_BUILD),$(eval CINCLUDES-$(CONFIG_RTE_$(call uc,$(1))) += \
+			-I$($(call uc,$(1))_BUILD)/include/generic))
 endef
 
 ## Get the cpu flag from the environment

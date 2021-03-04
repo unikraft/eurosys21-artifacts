@@ -53,6 +53,7 @@ SRCS-y += rte_keepalive.c
 SRCS-y += rte_reciprocal.c
 SRCS-y += rte_service.c
 SRCS-y += uk_eal_bus.c
+SRCS-y += rte_spinlock.c
 SRCS-y += uk_eal_interrupts.c
 SRCS-$(CONFIG_NET_STD_HDR) += htons.c
 

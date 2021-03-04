@@ -69,7 +69,7 @@ static int eal_parse_args(int argc, char **argv)
 {
 	int rc;
 	char **argvopt;
-	int option_index;
+	int option_index = 0;
 	char *prgname = argv[0];
 	const int old_optind = optind;
 	const int old_optopt = optopt;
@@ -85,10 +85,13 @@ static int eal_parse_args(int argc, char **argv)
 				  eal_long_options, &option_index)) >= 0) {
 		/* getopt is not happy, stop right now */
 		if (opt == '?') {
+			uk_pr_err("Get opt long is not happy\n");
 			eal_usage(prgname);
 			rc = -1;
 			goto out;
 		}
+
+		printf("Opt: %d and optarg: %s\n", opt, optarg);
 
 		switch (opt) {
 		case 'h':

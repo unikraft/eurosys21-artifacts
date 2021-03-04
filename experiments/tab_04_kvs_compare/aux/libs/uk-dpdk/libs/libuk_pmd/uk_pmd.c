@@ -160,6 +160,7 @@ static uint16_t uk_pmd_alloc_rxpkts(void *argp, struct uk_netbuf *pkts[], uint16
 	int rc;
 	struct rte_mempool *mp;
 	int pkt_cnt, i;
+	struct rte_mbuf *mpkts[CONFIG_LIBUKNETDEV_MAX_PKT_BURST];
 
 	UK_ASSERT(argp && pkts);
 
@@ -167,7 +168,7 @@ static uint16_t uk_pmd_alloc_rxpkts(void *argp, struct uk_netbuf *pkts[], uint16
 	pkt_cnt = count;
 	
 	do {
-		rc = rte_mempool_get_bulk(mp, pkts, pkt_cnt);
+		rc = rte_mempool_get_bulk(mp, mpkts, pkt_cnt);
 		if (rc == 0)
 			goto exit;
 
@@ -179,11 +180,12 @@ static uint16_t uk_pmd_alloc_rxpkts(void *argp, struct uk_netbuf *pkts[], uint16
 	} while (pkt_cnt > 0);
 	return 0;
 exit:
+	//printf("preparing packet: %d\n", pkt_cnt);
 	for (i = 0; i < pkt_cnt; i++) {
-		struct rte_mbuf *mbuf = pkts[i];
+		struct rte_mbuf *mbuf = mpkts[i];
 		rte_pktmbuf_reset_headroom(mbuf);
-		pkts[i] = (struct uk_netbuf *) (((uintptr_t) pkts[i]) -
-				sizeof(struct uk_netbuf));
+		pkts[i] = (struct uk_netbuf *)mbuf->userdata;
+		UK_ASSERT(mbuf->userdata);
 		uk_netbuf_prepare_buf(pkts[i], sizeof(struct uk_netbuf) +
 				      mbuf->buf_len + sizeof(*mbuf) +
 				      mbuf->priv_size,
@@ -376,7 +378,7 @@ static uint16_t uk_ethdev_rx_burst(void *queue,
 	UK_ASSERT(dev_private);
 	nb_pkts = (nb_pkts > MAX_PKT_BURST)? MAX_PKT_BURST:nb_pkts;
 
-	if (!vrtl_eth_dev->data->dev_link.link_status) {
+	if (unlikely(!vrtl_eth_dev->data->dev_link.link_status)) {
 		return 0;
 	} else {
 		while (rx_count < nb_pkts) {
@@ -389,11 +391,12 @@ static uint16_t uk_ethdev_rx_burst(void *queue,
 				rx_count++;
 				UK_ASSERT(nb[i]);
 				mbuf = nb[i]->priv;
+				//printf("%s: mbuf %p\n", __func__, mbuf);
 				/**
 				 * TODO: Fill in the mbuf for packet processing
 				 */
 				mbuf->port = rxq->port_id;
-				mbuf->data_off = nb[i]->data - nb[i]->buf;
+				//mbuf->data_off = nb[i]->data - nb[i]->buf;
 				mbuf->ol_flags = 0;
 				mbuf->vlan_tci = 0;
 
@@ -449,6 +452,7 @@ static uint16_t uk_ethdev_tx_burst(void *queue, struct rte_mbuf **bufs,
 			nb[i]->len = bufs[i]->pkt_len;
 			uk_pr_debug("Sending packet: %d netbuf: %p on queue: %d len: %d mbuf_len: %d\n", i, nb[i], txq->queue_id, nb[i]->len, bufs[i]->pkt_len);
 		}
+
 		rc = uk_netdev_tx_burst(dev_private->netdev,
 				      txq->queue_id, &nb[0], &count);
 		UK_ASSERT(rc >= 0);
