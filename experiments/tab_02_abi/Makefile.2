@@ -9,18 +9,22 @@ WORKDIR ?= $(CURDIR)
 .PHONY: all
 all: prepare run plot
 
-.PHONY: clean
-clean:
-	$(WORKDIR)/clean.sh
-
-.PHONY: plot
-plot:
-	$(WORKDIR)/plot.sh
-
 .PHONY: prepare
 prepare:
-	$(WORKDIR)/setup.sh
+	@-
 
 .PHONY: run
 run:
-	$(WORKDIR)/run_all.sh
+	@-
+
+.PHONY: plot
+plot:
+	@echo "Not possible."
+
+.PHONY: clean
+clean:
+	@-
+
+.PHONY: properclean
+properclean:
+	@-
