@@ -428,7 +428,7 @@ def plot_syscall_support_per_app():
     plt.ylabel('System call support', fontsize=16)
     plt.legend((p1[0], p4[0], p3[0], p2[0]), ('Supported syscalls', 'If top 5 syscalls implemented', 'If top 10 syscalls implemented', 'If remaining syscalls implemented'))
 
-    plt.savefig("syscall-support.pdf")
+    plt.savefig("syscall-support.svg")
 
 
 def main():
