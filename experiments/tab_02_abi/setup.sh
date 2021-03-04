@@ -1,12 +1,15 @@
 #!/bin/bash
 #Initializing the setup for abi compatibility
-echo "$PWD" > .init_folder.txt
 
-echo "go to /tmp folder for the test"
-mkdir -p /tmp/abi
-cp -r * /tmp/abi
-cd /tmp/abi
-
+if [ ${PWD:0:4} == "/tmp" ]; then
+    echo "Already in /tmp folder"
+else
+    echo "$PWD" > .init_folder.txt
+    echo "Go to /tmp folder for the test"
+    mkdir -p /tmp/abi
+    cp -r * /tmp/abi
+    cd /tmp/abi
+fi
 CURRENT_FOLDER=$PWD
 ABI_FOLDER=abi
 

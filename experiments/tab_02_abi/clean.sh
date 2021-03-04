@@ -1,4 +1,11 @@
 #!/bin/bash
+INIT_FOLDER=$PWD
+if [ ${PWD:0:4} == "/tmp"  ]; then
+    echo "Already in /tmp folder"
+else
+    cd /tmp/abi
+fi
+
 CURRENT_FOLDER=$PWD
 
 echo "Copy clean script in the abi folder"
@@ -23,5 +30,4 @@ cd $CURRENT_FOLDER/abi/apps_newlib_std/
 ./script_clean.sh
 rm script_clean.sh
 
-
-cd $CURRENT_FOLDER
+cd $INIT_FOLDER

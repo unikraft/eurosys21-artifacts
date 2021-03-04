@@ -54,17 +54,9 @@ do
 		# benchmark
 		benchmark_redis_server ${ip} 6379
 
+		parse_redis_results $LOG $RESULTS
+
 		# stop server
 		kill_qemu
 	done
-
-	getop=`cat $LOG | tr ",\"" " " | awk -e '$0 ~ /GET/ {print $2}' | \
-		sed -r '/^\s*$/d' | \
-		awk '{ total += $1; count++ } END { OFMT="%f"; print total/(count*1000) }'`
-	echo "GET	${getop}" >> $RESULTS
-
-	setop=`cat $LOG | tr ",\"" " " | awk -e '$0 ~ /SET/ {print $2}' | \
-		sed -r '/^\s*$/d' | \
-		awk '{ total += $1; count++ } END { OFMT="%f"; print total/(count*1000) }'`
-	echo "SET	${setop}" >> $RESULTS
 done

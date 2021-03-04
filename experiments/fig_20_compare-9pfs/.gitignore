@@ -1,0 +1,6 @@
+apps/lib-readfile/.config.old
+apps/lib-readfile/test
+apps/lib-writefile/.config.old
+unikraft
+vm
+vm.zip

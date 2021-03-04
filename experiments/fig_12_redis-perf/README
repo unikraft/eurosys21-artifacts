@@ -5,6 +5,6 @@ Run instructions:
  - cd experiments/14_redis-perf
  - ./genimages.sh
  - ./benchmark.sh
- - python3 plots.py
+ - python3 plot.py
 
 ./benchmark.sh takes about 6 minutes in average.

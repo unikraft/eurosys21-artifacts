@@ -1,34 +1,7 @@
 #!/bin/env python3
-# SPDX-License-Identifier: BSD-3-Clause
 #
 # Authors: Alexander Jung <alexander.jung@neclab.eu>
 #
-# Copyright (c) 2020, NEC Europe Ltd., NEC Corporation. All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
-#
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in the
-#    documentation and/or other materials provided with the distribution.
-# 3. Neither the name of the copyright holder nor the names of its
-#    contributors may be used to endorse or promote products derived from
-#    this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-# POSSIBILITY OF SUCH DAMAGE.
 
 import os
 import csv
@@ -47,14 +20,18 @@ pp = pprint.PrettyPrinter(indent=4)
 WORKDIR = os.getcwd()
 RESULTSDIR = WORKDIR + '/results/'
 RESULTEXT = '.csv'
+IMAGESTAT = 'imagestats'
+IMAGE_SIZE_KEY = 'image_size'
+NUMSYMS_KEY = 'number_symbols'
 GROUP_BAR_WIDTH = .8
 DEFAULT = '_'
 
 files = []
 labels = []
 apps = []
-memstats = {}
-memusage_max = 0 # maximum observed memory size
+imagestats = {}
+imagesize_max = 0 # maximum observed image size
+number_symbols_max = 0 # maximum observed symbol count
 total_apps = 0
 bar_colors = {
   'nginx': '#0C8828',
@@ -64,41 +41,47 @@ bar_colors = {
 }
 
 labels = {
-  'unikraft': 'Unikraft',
-  'docker': 'Docker',
   'hermitux': 'Hermitux',
+  'linuxuser': 'Linux User',
   'lupine': 'Lupine',
   'osv': 'OSv',
   'rump': 'Rumprun',
-  'microvm': 'Linux\nMicroVM'
+  'unikraft': 'Rhea',
+  'mirage': 'Mirage'
 }
 
+# Prepare maxplotlib data by parsing the individual .csv files.  This process
+# goes through all image sizes and number of symbols and populates a dictionary
+# of unikernels and the application "image stats" based on the framework.
 for f in os.listdir(RESULTSDIR):
   if f.endswith(RESULTEXT):
     index = f.replace(RESULTEXT,'')
-    unikernel = index
+    files.append(f)
 
-    if unikernel not in memstats:
-      memstats[unikernel] = {}
+    result = index.split('-')
+
+    unikernel = result[0]
+    app = result[1]
+
+    if unikernel not in imagestats:
+      imagestats[unikernel] = {}
+    
+    if app not in imagestats[unikernel]:
+      total_apps += 1
+      imagestats[unikernel][app] = 0
+
+    if app not in apps:
+      apps.append(app)
 
     with open(os.path.join(RESULTSDIR, f), 'r') as csvfile:
-      csvdata = csv.reader(csvfile, delimiter="\t")
-      
-      next(csvdata) # skip header
-
-      for row in csvdata:
-        app = row[0]
-
-        memusagemb = int(row[1]) * KBYTES * KBYTES
-        memstats[unikernel][app] = memusagemb
-        
-        if memusagemb > memusage_max:
-          memusage_max = memusagemb
+      size= int(csvfile.readline())
+      imagestats[unikernel][app] = size
 
 # General style
 common_style(plt)
 
-memusage_max += KBYTES * KBYTES * 14 # add MB "margin"
+imagesize_max += KBYTES * KBYTES * 12 # add MB "margin"
+number_symbols_max += 2000
 
 # Setup matplotlib axis
 fig = plt.figure(figsize=(8, 5))
@@ -106,25 +89,33 @@ renderer = fig.canvas.get_renderer()
 
 # image size axis
 ax1 = fig.add_subplot(1,1,1)
-ax1.set_ylabel("Minimum Memory Requirement")
+ax1.set_ylabel("Image size")
 ax1.grid(which='major', axis='y', linestyle=':', alpha=0.5, zorder=0)
-ax1_yticks = np.arange(0, memusage_max, step=KBYTES*KBYTES * 8)
+ax1_yticks = np.arange(0, imagesize_max, step=KBYTES*KBYTES*2)
 ax1.set_yticks(ax1_yticks, minor=False)
 ax1.set_yticklabels([sizeof_fmt(ytick) for ytick in ax1_yticks])
-ax1.set_ylim(0, memusage_max)
+ax1.set_ylim(0, imagesize_max)
 
 # Plot coordinates
-scale = 1. / len(memstats.keys())
+scale = 1. / len(imagestats.keys())
 xlabels = []
 
 # Adjust margining
-# fig.subplots_adjust(bottom=.) #, top=1)
+fig.subplots_adjust(bottom=.15) #, top=1)
 
 i = 0
 line_offset = 0
-for unikernel in ['unikraft', 'docker', 'rump', 'hermitux', 'lupine', 'osv', 'microvm']:
+for unikernel in [
+    'unikraft',
+    'hermitux',
+    'linuxuser',
+    'lupine',
+    'mirage',
+    'osv',
+    'rump'
+  ]:
   xlabels.append(labels[unikernel])
-  apps = memstats[unikernel]
+  apps = imagestats[unikernel]
 
   # Plot a line beteween unikernel applications
   if i > 0:
@@ -140,7 +131,7 @@ for unikernel in ['unikraft', 'docker', 'rump', 'hermitux', 'lupine', 'osv', 'mi
 
   # Plot each application
   for app_label in sorted(apps):
-    app = memstats[unikernel][app_label]
+    app = imagestats[unikernel][app_label]
 
     print(unikernel, app_label, app)
 
@@ -153,12 +144,13 @@ for unikernel in ['unikraft', 'docker', 'rump', 'hermitux', 'lupine', 'osv', 'mi
       linewidth=.5
     )
     
-    ax1.text(i + 1.02 + bar_offset, app + 1000000, sizeof_fmt(app),
+    ax1.text(i + 1 + bar_offset, app + 500000, sizeof_fmt(app),
       ha='center',
       va='bottom',
       fontsize=LARGE_SIZE,
       linespacing=0,
-      #bbox=dict(pad=-.6, facecolor='white', linewidth=0),
+      zorder=2,
+      bbox=dict(pad=0, facecolor='white', linewidth=0),
       rotation='vertical'
     )
 
@@ -193,4 +185,4 @@ plt.setp(ax1.lines, linewidth=.5)
 # Save to file
 fig.tight_layout()
 makedirs("../plots", exist_ok=True)
-fig.savefig("../plots/compare_minmem.pdf") #, bbox_extra_artists=(ax1,), bbox_inches='tight')
+fig.savefig("../plots/compare_imagesize.pdf") #, bbox_extra_artists=(ax1,), bbox_inches='tight')

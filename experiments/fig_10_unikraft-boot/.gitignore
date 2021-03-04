@@ -4,3 +4,4 @@ images
 rawdata
 results
 .out
+__pycache__

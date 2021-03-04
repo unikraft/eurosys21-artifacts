@@ -65,15 +65,15 @@ for f in os.listdir(RESULTSDIR):
         if row[0] not in operations:
           operations[row[0]] = []
         
-        operations[row[0]].append(float(row[1]))
+        operations[row[0]].append(float(row[1]) / 1000.0)
       
       for operation in operations:
         all_ops = np.array(operations[operation])
         operations[operation] = {
-          MEAN_KEY: int(round(np.average(all_ops))),
-          MEDIAN_KEY: int(round(np.median(all_ops))),
-          AMAX_KEY: int(round(np.amax(all_ops))),
-          AMIN_KEY: int(round(np.amin(all_ops)))
+          MEAN_KEY: np.average(all_ops),
+          MEDIAN_KEY: np.median(all_ops),
+          AMAX_KEY: np.amax(all_ops),
+          AMIN_KEY: np.amin(all_ops)
         }
 
         if int(round((np.amax(all_ops)))) > throughput_max:
@@ -84,7 +84,7 @@ for f in os.listdir(RESULTSDIR):
 # General style
 common_style(plt)
 
-throughput_max += 1000 # margin above biggest bar
+throughput_max += 0.7 # margin above biggest bar
 
 # Setup matplotlib axis
 fig = plt.figure(figsize=(8, 5))
@@ -92,9 +92,9 @@ renderer = fig.canvas.get_renderer()
 
 # image size axis
 ax1 = fig.add_subplot(1,1,1)
-ax1.set_ylabel("Average Throughput (x1000 req/s)")
+ax1.set_ylabel("Aver. Throughput (Million req/s)")
 ax1.grid(which='major', axis='y', linestyle=':', alpha=0.5, zorder=0)
-ax1_yticks = np.arange(0, throughput_max, step=500)
+ax1_yticks = np.arange(0, throughput_max, step=0.5)
 ax1.set_yticks(ax1_yticks, minor=False)
 ax1.set_yticklabels(ax1_yticks)
 ax1.set_ylim(0, throughput_max)
@@ -130,16 +130,19 @@ for unikernel in [
 
   # Plot each application
   for operation_label in sorted(operations):
+    print("mean " + str(operations[operation_label][MEAN_KEY]) + "max " + str(operations[operation_label][AMAX_KEY]) + "min " + str(operations[operation_label][AMIN_KEY]))
     bar = ax1.bar([i + 1 + bar_offset], operations[operation_label][MEAN_KEY],
       label=operation_label,
       align='center',
       zorder=4,
+      yerr=(operations[operation_label][AMAX_KEY] - operations[operation_label][AMIN_KEY]),
+      error_kw=dict(lw=2, capsize=10, capthick=1),
       width=bar_width,
       color=bar_colors[operation_label],
       linewidth=.5
     )
     
-    ax1.text(i + 1 + bar_offset, operations[operation_label][MEAN_KEY] + 25, operations[operation_label][MEAN_KEY],
+    ax1.text(i + 1 + bar_offset, operations[operation_label][AMAX_KEY] + 0.1, round(operations[operation_label][MEAN_KEY], 2),
       ha='center',
       va='bottom',
       zorder=6,
