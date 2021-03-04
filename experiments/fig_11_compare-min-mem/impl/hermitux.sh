@@ -51,7 +51,7 @@ function sqlite_hermitux_with_mem {
 
     docker pull olivierpierre/hermitux
     docker run --privileged --name=$CONTAINER --cpuset-cpus="${CPU1}-${CPU4}" \
-		-dt olivierpierre/hermitux -dt olivierpierre/hermitux
+		-dt olivierpierre/hermitux
     docker exec $CONTAINER bash -c \
 	"cd $SQLITE_DIR && sed -i 's/\/Desktop//g' Makefile"
     docker exec $CONTAINER make -C $SQLITE_DIR
@@ -87,7 +87,7 @@ function redis_hermitux_with_mem {
 
     docker pull olivierpierre/hermitux
     docker run --privileged --name=$CONTAINER --cpuset-cpus="${CPU1}-${CPU4}" \
-		-dt olivierpierre/hermitux -dt olivierpierre/hermitux
+		-dt olivierpierre/hermitux
     docker exec $CONTAINER make -C $REDIS_DIR
 
     {
