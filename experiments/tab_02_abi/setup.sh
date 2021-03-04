@@ -8,7 +8,7 @@ else
     echo "Go to /tmp folder for the test"
     mkdir -p /tmp/abi
     cp -r * /tmp/abi
-    cp .init_folder.txt /tmp/abi
+    mv .init_folder.txt /tmp/abi
     cd /tmp/abi
 fi
 CURRENT_FOLDER=$PWD
