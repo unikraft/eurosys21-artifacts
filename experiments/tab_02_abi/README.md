@@ -6,8 +6,8 @@ This repository contains the experiments for Table 2 (ABI
 compatibility). Since these experiments have a heavy size, we decided
 to host the zip file which contains the setup on another server.
 
-**APPROXIMATIVE EXECUTION TIME=1/2hour(s)**
-**NOTE THAT THIS EXPERIMENT REQUIRES CONSIDERABLE DISK SPACE**
+**APPROXIMATIVE EXECUTION TIME=3h**
+**NOTE THAT THIS EXPERIMENT REQUIRES CONSIDERABLE DISK SPACE (+/-15GB in the /tmp folder)**
 
 ## How to Use (automatic test)
 
@@ -82,11 +82,6 @@ will be printed on stdout. In addition, there are also saved into
 CSV files respectively called `newlib-compat.csv` (in the folder
 `apps_newlib_compat/`) and `newlib-std.csv` (in the folder
 `apps_newlib_std/`).
-
-
-Sizes of all entries will be computed automatically by the script and
-will be printed on stdout. In addition, there are also saved into a
-CSV file called `newlib-abi.csv` and located at `apps_newlib/`.
 
 ### Getting LoC
 
