@@ -1,18 +1,25 @@
+#
+# Files and directories
+#
+WORKDIR ?= $(CURDIR)
+PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
+
 all:
-	@./setup.sh
-	@./run_all.sh
-	@./plot.sh
+	$(WORKDIR)/setup.sh
+	$(WORKDIR)/run_all.sh
+	$(WORKDIR)/plot.sh
 
 clean:
-	@./clean.sh
+	$(WORKDIR)/clean.sh
 
 plot:
-	@./plot.sh
+	$(WORKDIR)/plot.sh
+	$(CP) $(WORKDIR)/syscall-heatmap.svg $(PLOT)
 
 prepare:
-	@./setup.sh
+	$(WORKDIR)./setup.sh
 
 run:
-	@./run_all.sh
+	$(WORKDIR)./run_all.sh
 
 .PHONY:	all clean plot prepare run

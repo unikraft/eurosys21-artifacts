@@ -8,6 +8,7 @@ WORKDIR=$(dirname $0)
 EXPERIMENTS_DIR=${EXPERIMENTS_DIR:-$(pwd)/experiments}
 DOCKER_IMAGE_PLOT=${DOCKER_IMAGE_PLOT:-unikraft/eurosys21-artifacts-plot:latest}
 PLOT_FORMAT=${PLOT_FORMAT:-svg}
+DOCKER_FORCE_BUILD=${DOCKER_FORCE_BUILD:-y}
 
 # Program arguments
 SHOW_HELP=n
@@ -48,6 +49,8 @@ Options:
 Influential Environmental Variables
   EXPERIMENTS_DIR    Directory of all the experiments
                        (default: ./experiments).
+  DOCKER_FORCE_BUILD Force build of Docker containers
+                       (default :$DOCKER_FORCE_BUILD).
   DOCKER_IMAGE_PLOT  Docker environment for generating plots
                        (default: $DOCKER_IMAGE_PLOT).
   PLOT_FORMAT        File format for the plot
