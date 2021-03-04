@@ -1,9 +1,0 @@
-Measures 9pfs boot time overhead.
-
-Scripts to run:
-`prepare.sh` - prepares the environment
-`run.sh` - runs the experiment
-Results available in the folder `results`
-
-To clean:
-`clean.sh`
