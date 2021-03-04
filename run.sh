@@ -211,7 +211,9 @@ for E in $EXPERIMENTS_DIR/*; do
 
   # Run all experiments?
   if [[ -z "$REQUEST" ]]; then
-    perform $BASENAME $ACTION
+    perform $BASENAME prepare
+    perform $BASENAME run
+    perform $BASENAME plot
   elif [[ $FIGURE_ID == $REQUEST || $EXPERIMENT == $REQUEST ]]; then
     perform $BASENAME $ACTION
   fi
