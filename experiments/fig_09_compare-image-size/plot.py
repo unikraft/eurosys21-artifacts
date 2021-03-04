@@ -36,7 +36,7 @@ total_apps = 0
 bar_colors = {
   'nginx': '#0C8828',
   'redis': '#CE1216',
-  'helloworld': 'dimgray',
+  'hello': 'dimgray',
   'sqlite': '#4BA3E1'
 }
 
@@ -58,14 +58,7 @@ for f in os.listdir(RESULTSDIR):
     index = f.replace(RESULTEXT,'')
     files.append(f)
 
-    result = index.split('_')
-
-    if len(result) != 3:
-      continue
-
-    # only pick files that end with "imagestats"
-    if result[2] != IMAGESTAT:
-      continue
+    result = index.split('-')
 
     unikernel = result[0]
     app = result[1]
@@ -75,39 +68,19 @@ for f in os.listdir(RESULTSDIR):
     
     if app not in imagestats[unikernel]:
       total_apps += 1
-      imagestats[unikernel][app] = {
-        IMAGE_SIZE_KEY: 0,
-        NUMSYMS_KEY: 0
-      }
+      imagestats[unikernel][app] = 0
 
     if app not in apps:
       apps.append(app)
 
     with open(os.path.join(RESULTSDIR, f), 'r') as csvfile:
-      csvdata = csv.reader(csvfile, delimiter="\t")
-      
-      next(csvdata) # skip header
-      try:
-        row = next(csvdata)
-      except StopIteration:
-        print('Cannot parse: %s' % f)
-        continue
-
-      imagestats[unikernel][app] = {
-        IMAGE_SIZE_KEY: int(row[1]),
-        NUMSYMS_KEY: int(row[2])
-      }
-
-      if int(row[1]) > imagesize_max:
-        imagesize_max = int(row[1])
-
-      if int(row[2]) > number_symbols_max:
-        number_symbols_max = int(row[2])
+      size= int(csvfile.readline())
+      imagestats[unikernel][app] = size
 
 # General style
 common_style(plt)
 
-imagesize_max += KBYTES * KBYTES * 4 # add MB "margin"
+imagesize_max += KBYTES * KBYTES * 12 # add MB "margin"
 number_symbols_max += 2000
 
 # Setup matplotlib axis
@@ -133,13 +106,13 @@ fig.subplots_adjust(bottom=.15) #, top=1)
 i = 0
 line_offset = 0
 for unikernel in [
-    'unikraft-kvm',
-    'hermitux-uhyve',
-    'linux',
-    'lupine-kvm',
-    'mirage-solo5',
-    'osv-kvm',
-    'rumprun-kvm'
+    'unikraft',
+    'hermitux',
+    'linuxuser',
+    'lupine',
+    'mirage',
+    'osv',
+    'rump'
   ]:
   xlabels.append(labels[unikernel])
   apps = imagestats[unikernel]
@@ -160,9 +133,9 @@ for unikernel in [
   for app_label in sorted(apps):
     app = imagestats[unikernel][app_label]
 
-    print(unikernel, app_label, app[IMAGE_SIZE_KEY])
+    print(unikernel, app_label, app)
 
-    bar = ax1.bar([i + 1 + bar_offset], app[IMAGE_SIZE_KEY],
+    bar = ax1.bar([i + 1 + bar_offset], app,
       label=app_label,
       align='center',
       zorder=3,
@@ -171,7 +144,7 @@ for unikernel in [
       linewidth=.5
     )
     
-    ax1.text(i + 1 + bar_offset, app[IMAGE_SIZE_KEY] + 500000, sizeof_fmt(app[IMAGE_SIZE_KEY]),
+    ax1.text(i + 1 + bar_offset, app + 500000, sizeof_fmt(app),
       ha='center',
       va='bottom',
       fontsize=LARGE_SIZE,
