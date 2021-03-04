@@ -205,16 +205,18 @@ for E in $EXPERIMENTS_DIR/*; do
   case $REQUEST in
     prepare|run|plot|clean)
       ACTION=$REQUEST
-      REQUEST=$EXPERIMENT
+      REQUEST=
       ;;
   esac
 
   # Run all experiments?
-  if [[ -z "$REQUEST" ]]; then
-    perform $BASENAME prepare
-    perform $BASENAME run
-    perform $BASENAME plot
-  elif [[ $FIGURE_ID == $REQUEST || $EXPERIMENT == $REQUEST ]]; then
-    perform $BASENAME $ACTION
+  if [[ -z "$REQUEST" || $FIGURE_ID == $REQUEST || $EXPERIMENT == $REQUEST ]]; then
+    if [[ -z "$ACTION" ]]; then
+      perform $BASENAME prepare
+      perform $BASENAME run
+      perform $BASENAME plot
+    else
+      perform $BASENAME $ACTION
+    fi
   fi
 done
