@@ -19,6 +19,9 @@ all: prepare run plot
 .PHONY: prepare
 prepare:
 	@./clone-deps.sh "$(WORKDIR)"
+	@./build-shfstools.sh "$(WORKDIR)"
+	@./build-benchmark.sh "$(WORKDIR)"
+	@./build-fses.sh "$(WORKDIR)"
 
 .PHONY: run
 run:
