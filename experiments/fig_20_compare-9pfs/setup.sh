@@ -16,7 +16,6 @@ fi
 echo "Go to the VM folder and generate a random file for the reading"
 mkdir -p "$VM_FOLDER/test"
 cd "$VM_FOLDER"
-sed -i 's/8192/2048/' launcher.sh
 head -c 1G </dev/urandom > test/randomfile
 cd $CURRENT_FOLDER
 

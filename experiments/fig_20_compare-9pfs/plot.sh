@@ -8,7 +8,7 @@ FILE3="$PWD/vm/test/linux-kvm_read.csv"
 FILE4="$PWD/vm/test/linux-kvm_write.csv"
 
 
-mkdir "$DATA_FOLDER"
+mkdir -p "$DATA_FOLDER"
 
 if [ -f "$FILE1" ]; then
     cp "$FILE1" "$CURRENT_FOLDER/$DATA_FOLDER"
