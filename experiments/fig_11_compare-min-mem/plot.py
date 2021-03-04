@@ -64,13 +64,13 @@ bar_colors = {
 }
 
 labels = {
-  'unikraft': 'Rhea',
+  'unikraft': 'Unikraft',
   'docker': 'Docker',
   'hermitux': 'Hermitux',
   'lupine': 'Lupine',
   'osv': 'OSv',
   'rump': 'Rumprun',
-  'microvm': 'Alpine Linux'
+  'microvm': 'Linux\nMicroVM'
 }
 
 for f in os.listdir(RESULTSDIR):

@@ -20,7 +20,7 @@ function hello_osv_with_mem {
       sleep 3
     } &
 
-    (docker exec $CONTAINER ./scripts/run.py -m $1) > .out 2> /dev/null
+    (docker exec $CONTAINER ./scripts/firecracker.py -m $1) > .out 2> /dev/null
 
     wait
 
@@ -44,7 +44,7 @@ function sqlite_osv_with_mem {
       sleep 3
     } &
 
-    (docker exec $CONTAINER ./scripts/run.py -m $1) > .out 2> /dev/null
+    (docker exec $CONTAINER ./scripts/firecracker.py -m $1) > .out 2> /dev/null
 
     wait
 
@@ -68,7 +68,7 @@ function redis_osv_with_mem {
       sleep 3
     } &
 
-    (docker exec $CONTAINER ./scripts/run.py -m $1) > .out 2> /dev/null
+    (docker exec $CONTAINER ./scripts/firecracker.py -m $1) > .out 2> /dev/null
 
     wait
 
@@ -94,7 +94,7 @@ function nginx_osv_with_mem {
       sleep 3
     } &
 
-    (docker exec $CONTAINER ./scripts/run.py -m $1) > .out 2> /dev/null
+    (docker exec $CONTAINER ./scripts/firecracker.py -m $1) > .out 2> /dev/null
 
     wait
 
