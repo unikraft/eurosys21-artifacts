@@ -1,20 +1,37 @@
-all:
-	@./setup.sh
-	@./run_unikraft.sh
-	@./run_vm_linux.sh
-	@./plot.sh
+#
+# Files and directories
+#
+WORKDIR ?= $(CURDIR)
+RESULTS ?= $(WORKDIR)/data
+PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 
-clean:
-	@./clean.sh
+#
+# Tools
+#
+SNAKE ?= python3
 
-plot:
-	@./plot.sh
+#
+# Targets
+#
+.PHONY: all
+all: prepare run plot
 
+.PHONY: prepare
 prepare:
-	@./setup.sh
+	$(WORKDIR)/setup.sh
 
+.PHONY: run
 run:
-	@./run_unikraft.sh
-	@./run_vm_linux.sh
+	$(WORKDIR)/run_unikraft.sh
+	$(WORKDIR)/run_vm_linux.sh
+
+.PHONY: plot
+plot:
+	$(WORKDIR)/plot.sh
+	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
+
+.PHONY: clean
+clean:
+	$(WORKDIR)/clean.sh
 
 .PHONY: all clean plot prepare run
