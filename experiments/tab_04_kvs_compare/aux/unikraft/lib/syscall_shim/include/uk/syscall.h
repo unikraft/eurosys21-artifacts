@@ -37,9 +37,26 @@
 #ifndef __UK_SYSCALL_H__
 #define __UK_SYSCALL_H__
 
+#include <uk/config.h>
 #include <uk/essentials.h>
+#include <uk/errptr.h>
 #include <errno.h>
+#include <stdarg.h>
 #include <uk/print.h>
+
+/*
+ * Whenever the hidden Config.uk option LIBSYSCALL_SHIM_NOWRAPPER
+ * is set, the creation of libc-style wrappers are disable by the
+ * UK_SYSCALL_DEFINE() and UK_SYSCALL_R_DEFINE() macros. Alternatively,
+ * UK_LIBC_SYSCALLS can be set to 0 through compilation flags.
+ */
+#ifndef UK_LIBC_SYSCALLS
+#if CONFIG_LIBSYSCALL_SHIM && CONFIG_LIBSYSCALL_SHIM_NOWRAPPER
+#define UK_LIBC_SYSCALLS (0)
+#else
+#define UK_LIBC_SYSCALLS (1)
+#endif /* CONFIG_LIBSYSCALL_SHIM && CONFIG_LIBSYSCALL_SHIM_NOWRAPPER */
+#endif /* UK_LIBC_SYSCALLS */
 
 #define __uk_scc(X) ((long) (X))
 typedef long uk_syscall_arg_t;
@@ -76,6 +93,7 @@ typedef long uk_syscall_arg_t;
 #define __UK_NAME2SCALLE_FN(name) UK_CONCAT(uk_syscall_e_, name)
 #define __UK_NAME2SCALLR_FN(name) UK_CONCAT(uk_syscall_r_, name)
 
+#define UK_ARG_MAP0(...)
 #define UK_ARG_MAP1(m, type, arg) m(type, arg)
 #define UK_ARG_MAP2(m, type, arg, ...) m(type, arg), UK_ARG_MAP1(m, __VA_ARGS__)
 #define UK_ARG_MAP3(m, type, arg, ...) m(type, arg), UK_ARG_MAP2(m, __VA_ARGS__)
@@ -94,66 +112,127 @@ typedef long uk_syscall_arg_t;
 /* TODO: `void` as return type is currently not supported.
  * NOTE: Workaround is to use `int` instead.
  */
-#define __UK_SYSCALL_DEFINE(x, rtype, name, ename, rname, ...)		\
-	rtype name(UK_ARG_MAPx(x, UK_S_ARG_ACTUAL, __VA_ARGS__));	\
+/*
+ * UK_LLSYSCALL_DEFINE()
+ * Low-level variant, does not provide a libc-style wrapper
+ */
+#define __UK_LLSYSCALL_DEFINE(x, rtype, name, ename, rname, ...)	\
+	long ename(UK_ARG_MAPx(x, UK_S_ARG_LONG, __VA_ARGS__));		\
 	long rname(UK_ARG_MAPx(x, UK_S_ARG_LONG, __VA_ARGS__))		\
 	{								\
 		int _errno = errno;					\
 		long ret;						\
 									\
 		errno = 0;						\
-		ret = (long) name(					\
-			UK_ARG_MAPx(x, UK_S_ARG_CAST_ACTUAL, __VA_ARGS__)); \
+		ret = ename(						\
+			UK_ARG_MAPx(x, UK_S_ARG_CAST_LONG, __VA_ARGS__)); \
 		if (ret == -1)						\
 			ret = errno ? -errno : -EFAULT;			\
 		errno = _errno;						\
 		return ret;						\
 	}								\
+	static inline rtype __##ename(UK_ARG_MAPx(x,			\
+					UK_S_ARG_ACTUAL, __VA_ARGS__)); \
 	long ename(UK_ARG_MAPx(x, UK_S_ARG_LONG, __VA_ARGS__))		\
 	{								\
-		return (long) name(					\
+		return (long) __##ename(				\
 			UK_ARG_MAPx(x, UK_S_ARG_CAST_ACTUAL, __VA_ARGS__)); \
 	}								\
-	rtype name(UK_ARG_MAPx(x, UK_S_ARG_ACTUAL, __VA_ARGS__))
+	static inline rtype __##ename(UK_ARG_MAPx(x,			\
+						  UK_S_ARG_ACTUAL, __VA_ARGS__))
+#define _UK_LLSYSCALL_DEFINE(...) __UK_LLSYSCALL_DEFINE(__VA_ARGS__)
+#define UK_LLSYSCALL_DEFINE(rtype, name, ...)				\
+	_UK_LLSYSCALL_DEFINE(__UK_SYSCALL_DEF_NARGS(__VA_ARGS__),	\
+			     rtype,					\
+			     name,					\
+			     __UK_NAME2SCALLE_FN(name),			\
+			     __UK_NAME2SCALLR_FN(name),			\
+			     __VA_ARGS__)
+
+/*
+ * UK_SYSCALL_DEFINE()
+ * Based on UK_LLSYSCALL_DEFINE and provides a libc-style wrapper
+ * in case UK_LIBC_SYSCALLS is enabled
+ */
+#if UK_LIBC_SYSCALLS
+#define __UK_SYSCALL_DEFINE(x, rtype, name, ename, rname, ...)		\
+	long ename(UK_ARG_MAPx(x, UK_S_ARG_LONG, __VA_ARGS__));		\
+	rtype name(UK_ARG_MAPx(x, UK_S_ARG_ACTUAL, __VA_ARGS__))	\
+	{								\
+		return (rtype) ename(					\
+			UK_ARG_MAPx(x, UK_S_ARG_CAST_LONG, __VA_ARGS__)); \
+	}								\
+	__UK_LLSYSCALL_DEFINE(x, rtype, name, ename, rname, __VA_ARGS__)
 #define _UK_SYSCALL_DEFINE(...) __UK_SYSCALL_DEFINE(__VA_ARGS__)
-#define UK_SYSCALL_DEFINE(rtype, name, ...)			       \
-	_UK_SYSCALL_DEFINE(__UK_SYSCALL_DEF_NARGS(__VA_ARGS__),	       \
-			   rtype,				       \
-			   name,				       \
-			   __UK_NAME2SCALLE_FN(name),		       \
-			   __UK_NAME2SCALLR_FN(name),		       \
+#define UK_SYSCALL_DEFINE(rtype, name, ...)				\
+	_UK_SYSCALL_DEFINE(__UK_SYSCALL_DEF_NARGS(__VA_ARGS__),		\
+			   rtype,					\
+			   name,					\
+			   __UK_NAME2SCALLE_FN(name),			\
+			   __UK_NAME2SCALLR_FN(name),			\
 			   __VA_ARGS__)
+#else
+#define UK_SYSCALL_DEFINE(rtype, name, ...)				\
+	_UK_LLSYSCALL_DEFINE(__UK_SYSCALL_DEF_NARGS(__VA_ARGS__),	\
+			     rtype,					\
+			     name,					\
+			     __UK_NAME2SCALLE_FN(name),			\
+			     __UK_NAME2SCALLR_FN(name),			\
+			     __VA_ARGS__)
+#endif /* UK_LIBC_SYSCALLS */
 
 /* Raw system call implementation that is returning negative codes on errors */
 /* TODO: `void` as return type is currently not supported.
  * NOTE: Workaround is to use `int` instead.
  */
-#define __UK_SYSCALL_R_DEFINE(x, rtype, name, ename, rname, ...)	\
+/*
+ * UK_LLSYSCALL_R_DEFINE()
+ * Low-level variant, does not provide a libc-style wrapper
+ */
+#define __UK_LLSYSCALL_R_DEFINE(x, rtype, name, ename, rname, ...)	\
 	long rname(UK_ARG_MAPx(x, UK_S_ARG_LONG, __VA_ARGS__));		\
-	rtype name(UK_ARG_MAPx(x, UK_S_ARG_ACTUAL, __VA_ARGS__))	\
+	long ename(UK_ARG_MAPx(x, UK_S_ARG_LONG, __VA_ARGS__))		\
 	{								\
 		long ret = rname(					\
 			UK_ARG_MAPx(x, UK_S_ARG_CAST_LONG, __VA_ARGS__)); \
-		if (ret < 0) {						\
-			errno = (int) -ret;				\
-			return (rtype) -1;				\
+		if (ret < 0 && PTRISERR(ret)) {				\
+			errno = (int) PTR2ERR(ret);			\
+			return -1;					\
 		}							\
-		return (rtype) ret;					\
+		return ret;						\
 	}								\
-	long ename(UK_ARG_MAPx(x, UK_S_ARG_LONG, __VA_ARGS__))		\
-	{								\
-		return (long) name(					\
-			UK_ARG_MAPx(x, UK_S_ARG_CAST_ACTUAL, __VA_ARGS__)); \
-	}								\
-	static inline long __##rname(UK_ARG_MAPx(x, UK_S_ARG_ACTUAL,	\
+	static inline rtype __##rname(UK_ARG_MAPx(x, UK_S_ARG_ACTUAL,	\
 						 __VA_ARGS__));		\
 	long rname(UK_ARG_MAPx(x, UK_S_ARG_LONG, __VA_ARGS__))		\
 	{								\
-		return __##rname(					\
+		return (long) __##rname(				\
 			UK_ARG_MAPx(x, UK_S_ARG_CAST_ACTUAL, __VA_ARGS__)); \
 	}								\
-	static inline long __##rname(UK_ARG_MAPx(x, UK_S_ARG_ACTUAL,	\
+	static inline rtype __##rname(UK_ARG_MAPx(x, UK_S_ARG_ACTUAL,	\
 						 __VA_ARGS__))
+#define _UK_LLSYSCALL_R_DEFINE(...) __UK_LLSYSCALL_R_DEFINE(__VA_ARGS__)
+#define UK_LLSYSCALL_R_DEFINE(rtype, name, ...)				\
+	_UK_LLSYSCALL_R_DEFINE(__UK_SYSCALL_DEF_NARGS(__VA_ARGS__),	\
+			       rtype,					\
+			       name,					\
+			       __UK_NAME2SCALLE_FN(name),		\
+			       __UK_NAME2SCALLR_FN(name),		\
+			       __VA_ARGS__)
+
+/*
+ * UK_SYSCALL_R_DEFINE()
+ * Based on UK_LLSYSCALL_R_DEFINE and provides a libc-style wrapper
+ * in case UK_LIBC_SYSCALLS is enabled
+ */
+#if UK_LIBC_SYSCALLS
+#define __UK_SYSCALL_R_DEFINE(x, rtype, name, ename, rname, ...)	\
+	long ename(UK_ARG_MAPx(x, UK_S_ARG_LONG, __VA_ARGS__));		\
+	rtype name(UK_ARG_MAPx(x, UK_S_ARG_ACTUAL, __VA_ARGS__))	\
+	{								\
+		return (rtype) ename(					\
+			UK_ARG_MAPx(x, UK_S_ARG_CAST_LONG, __VA_ARGS__)); \
+	}								\
+	__UK_LLSYSCALL_R_DEFINE(x, rtype, name, ename, rname, __VA_ARGS__)
 #define _UK_SYSCALL_R_DEFINE(...) __UK_SYSCALL_R_DEFINE(__VA_ARGS__)
 #define UK_SYSCALL_R_DEFINE(rtype, name, ...)				\
 	_UK_SYSCALL_R_DEFINE(__UK_SYSCALL_DEF_NARGS(__VA_ARGS__),	\
@@ -162,6 +241,14 @@ typedef long uk_syscall_arg_t;
 			     __UK_NAME2SCALLE_FN(name),			\
 			     __UK_NAME2SCALLR_FN(name),			\
 			     __VA_ARGS__)
+#else
+#define UK_SYSCALL_R_DEFINE(rtype, name, ...)				\
+	_UK_LLSYSCALL_R_DEFINE(__UK_SYSCALL_DEF_NARGS(__VA_ARGS__),	\
+			       name,					\
+			       __UK_NAME2SCALLE_FN(name),		\
+			       __UK_NAME2SCALLR_FN(name),		\
+			       __VA_ARGS__)
+#endif /* UK_LIBC_SYSCALLS */
 
 
 #define __UK_SPROTO_ARGS_TYPE long
@@ -202,7 +289,10 @@ typedef long uk_syscall_arg_t;
 #include <uk/bits/syscall_stubs.h>
 
 /* System call, returns -1 and sets errno on errors */
-long uk_syscall(long n, ...);
+long uk_syscall(long nr, ...);
+long uk_vsyscall(long nr, va_list arg);
+long uk_syscall6(long nr, long arg1, long arg2, long arg3,
+		 long arg4, long arg5, long arg6);
 
 /*
  * Use this variant instead of `uk_syscall()` whenever the system call number
@@ -213,7 +303,10 @@ long uk_syscall(long n, ...);
 	UK_CONCAT(__uk_syscall, __UK_SYSCALL_NARGS(__VA_ARGS__))(__VA_ARGS__)
 
 /* Raw system call, returns negative codes on errors */
-long uk_syscall_r(long n, ...);
+long uk_syscall_r(long nr, ...);
+long uk_vsyscall_r(long nr, va_list arg);
+long uk_syscall6_r(long nr, long arg1, long arg2, long arg3,
+		   long arg4, long arg5, long arg6);
 
 /*
  * Use this variant instead of `uk_syscall_r()` whenever the system call number
@@ -248,6 +341,18 @@ const char *uk_syscall_name(long nr);
  *  - (NULL): if system call is not provided
  */
 const char *uk_syscall_name_p(long nr);
+
+/**
+ * Returns the according raw system call handler as function pointer for the
+ * given system call number. If the system call handler is not available,
+ * NULL is returned.
+ * @param nr
+ *  System call number of current architecture
+ * @return
+ *  - Function pointer to raw system call handler
+ *  - (NULL): if system call handler is not provided
+ */
+long (*uk_syscall_r_fn(long nr))(void);
 
 #endif /* CONFIG_LIBSYSCALL_SHIM */
 

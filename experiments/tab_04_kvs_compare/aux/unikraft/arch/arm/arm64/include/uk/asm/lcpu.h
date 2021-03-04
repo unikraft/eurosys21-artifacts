@@ -30,6 +30,8 @@
 #error Do not include this header directly
 #endif
 
+#define CACHE_LINE_SIZE	64
+
 #ifdef __ASSEMBLY__
 /*
  * Stack size to save general purpose registers and essential system
@@ -144,6 +146,11 @@ static inline unsigned long ukarch_read_sp(void)
 	__asm__ __volatile("mov %0, sp": "=&r"(sp));
 
 	return sp;
+}
+
+static inline void ukarch_spinwait(void)
+{
+	/* Intelligent busy wait not supported on arm64. */
 }
 
 #endif /* __ASSEMBLY__ */

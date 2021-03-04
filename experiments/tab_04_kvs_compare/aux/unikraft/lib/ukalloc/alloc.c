@@ -1,8 +1,10 @@
 /* SPDX-License-Identifier: BSD-3-Clause */
 /*
  * Authors: Florian Schmidt <florian.schmidt@neclab.eu>
+ *          Hugo Lefeuvre <hugo.lefeuvre@neclab.eu>
  *
- * Copyright (c) 2017, NEC Europe Ltd., NEC Corporation. All rights reserved.
+ * Copyright (c) 2017-2020, NEC Laboratories Europe GmbH, NEC Corporation,
+ *                          All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -28,8 +30,6 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- *
- * THIS HEADER MAY NOT BE EXTRACTED OR MODIFIED IN ANY WAY.
  */
 
 /* This is a very simple, naive implementation of malloc.
@@ -52,19 +52,20 @@
 #include <uk/essentials.h>
 #include <uk/assert.h>
 #include <uk/arch/limits.h>
+#include <uk/arch/lcpu.h>
 
 #define size_to_num_pages(size) \
 	(ALIGN_UP((unsigned long)(size), __PAGE_SIZE) / __PAGE_SIZE)
 #define page_off(x) ((unsigned long)(x) & (__PAGE_SIZE - 1))
 
-static struct uk_alloc *uk_alloc_head;
+struct uk_alloc *_uk_alloc_head;
 
 int uk_alloc_register(struct uk_alloc *a)
 {
-	struct uk_alloc *this = uk_alloc_head;
+	struct uk_alloc *this = _uk_alloc_head;
 
-	if (!uk_alloc_head) {
-		uk_alloc_head = a;
+	if (!_uk_alloc_head) {
+		_uk_alloc_head = a;
 		a->next = NULL;
 		return 0;
 	}
@@ -73,43 +74,6 @@ int uk_alloc_register(struct uk_alloc *a)
 		this = this->next;
 	this->next = a;
 	a->next = NULL;
-	return 0;
-}
-
-struct uk_alloc *uk_alloc_get_default(void)
-{
-	return uk_alloc_head;
-}
-
-int uk_alloc_set_default(struct uk_alloc *a)
-{
-	struct uk_alloc *head, *this, *prev;
-
-	head = uk_alloc_get_default();
-
-	if (a == head)
-		return 0;
-
-	if (!head) {
-		uk_alloc_head = a;
-		return 0;
-	}
-
-	this = head;
-	while (this->next) {
-		prev = this;
-		this = this->next;
-		if (a == this) {
-			prev->next = this->next;
-			this->next = head->next;
-			head = this;
-			return 0;
-		}
-	}
-
-	/* a is not registered yet. Add in front of the queue. */
-	a->next = head;
-	uk_alloc_head = a;
 	return 0;
 }
 
@@ -243,8 +207,12 @@ int uk_posix_memalign_ifpages(struct uk_alloc *a,
 	    || (align % sizeof(void *)) != 0)
 		return EINVAL;
 
+	/* According to POSIX, calling posix_memalign with a size of zero can
+	 * be handled by (1) setting memptr to NULL and returning 0 (success),
+	 * OR (2) leaving memptr untouched and returning an error code. We
+	 * implement (2).
+	 */
 	if (!size) {
-		*memptr = NULL;
 		return EINVAL;
 	}
 
@@ -253,14 +221,21 @@ int uk_posix_memalign_ifpages(struct uk_alloc *a,
 	 * preceding the memory block, but instead at the beginning of the page
 	 * preceding the memory returned by this function.
 	 *
-	 * align < sizeof(*metadata) implies that metadata are too large to be
-	 * stored preceding the first memory block at given alignment. In this
-	 * case, set align to the next power of two >= sizeof(*metadata). Since
-	 * it is a power of two, the returned pointer will still be aligned at
-	 * the requested alignment.
+	 * align < METADATA_IFPAGES_SIZE_POW2 implies that metadata are too
+	 * large to be stored preceding the first memory block at given
+	 * alignment. In this case, set align to METADATA_IFPAGES_SIZE_POW2,
+	 * the next power of two >= sizeof(*metadata). Since it is a power of
+	 * two, the returned pointer will still be aligned at the requested
+	 * alignment.
 	 */
-	if (align >= __PAGE_SIZE) {
+	if (align > __PAGE_SIZE) {
 		padding = __PAGE_SIZE;
+	} else if (align == __PAGE_SIZE) {
+		/* No padding needed: in this case we already know that the next
+		 * aligned pointer will be intptr (as handed to by palloc) +
+		 * __PAGE_SIZE.
+		 */
+		padding = 0;
 	} else if (align < METADATA_IFPAGES_SIZE_POW2) {
 		align = METADATA_IFPAGES_SIZE_POW2;
 		padding = 0;
@@ -296,6 +271,147 @@ int uk_posix_memalign_ifpages(struct uk_alloc *a,
 
 	return 0;
 }
+
+#if CONFIG_LIBUKALLOC_IFMALLOC
+
+struct metadata_ifmalloc {
+	size_t	size;
+	void	*base;
+};
+
+#define METADATA_IFMALLOC_SIZE_POW2 16
+UK_CTASSERT(!(sizeof(struct metadata_ifmalloc) > METADATA_IFMALLOC_SIZE_POW2));
+
+static struct metadata_ifmalloc *uk_get_metadata_ifmalloc(const void *ptr)
+{
+	return (struct metadata_ifmalloc *)((uintptr_t) ptr -
+		METADATA_IFMALLOC_SIZE_POW2);
+}
+
+static size_t uk_getmallocsize_ifmalloc(const void *ptr)
+{
+	struct metadata_ifmalloc *metadata = uk_get_metadata_ifmalloc(ptr);
+
+	return (size_t) ((uintptr_t) metadata->base + metadata->size -
+			 (uintptr_t) ptr);
+}
+
+void uk_free_ifmalloc(struct uk_alloc *a, void *ptr)
+{
+	struct metadata_ifmalloc *metadata;
+
+	UK_ASSERT(a);
+	UK_ASSERT(a->free_backend);
+	if (!ptr)
+		return;
+
+	metadata = uk_get_metadata_ifmalloc(ptr);
+	a->free_backend(a, metadata->base);
+}
+
+void *uk_malloc_ifmalloc(struct uk_alloc *a, size_t size)
+{
+	struct metadata_ifmalloc *metadata;
+	size_t realsize = size + METADATA_IFMALLOC_SIZE_POW2;
+	void *ptr;
+
+	UK_ASSERT(a);
+	UK_ASSERT(a->malloc_backend);
+
+	/* check for overflow */
+	if (unlikely(realsize < size))
+		return NULL;
+
+	ptr = a->malloc_backend(a, realsize);
+	if (!ptr)
+		return NULL;
+
+	metadata = ptr;
+	metadata->size = realsize;
+	metadata->base = ptr;
+
+	return (void *) ((uintptr_t) ptr + METADATA_IFMALLOC_SIZE_POW2);
+}
+
+void *uk_realloc_ifmalloc(struct uk_alloc *a, void *ptr, size_t size)
+{
+	void *retptr;
+	size_t mallocsize;
+
+	UK_ASSERT(a);
+	if (!ptr)
+		return uk_malloc_ifmalloc(a, size);
+
+	if (ptr && !size) {
+		uk_free_ifmalloc(a, ptr);
+		return NULL;
+	}
+
+	retptr = uk_malloc_ifmalloc(a, size);
+	if (!retptr)
+		return NULL;
+
+	mallocsize = uk_getmallocsize_ifmalloc(ptr);
+
+	memcpy(retptr, ptr, MIN(size, mallocsize));
+
+	uk_free_ifmalloc(a, ptr);
+	return retptr;
+}
+
+int uk_posix_memalign_ifmalloc(struct uk_alloc *a,
+				     void **memptr, size_t align, size_t size)
+{
+	struct metadata_ifmalloc *metadata;
+	size_t realsize, padding;
+	uintptr_t intptr;
+
+	UK_ASSERT(a);
+	if (((align - 1) & align) != 0
+	    || align < sizeof(void *))
+		return EINVAL;
+
+	/* Leave memptr untouched. See comment in uk_posix_memalign_ifpages. */
+	if (!size)
+		return EINVAL;
+
+	/* Store size information preceding the memory block. Since we return
+	 * pointers aligned at `align` we need to reserve at least that much
+	 * space for the size information.
+	 */
+	if (align < METADATA_IFMALLOC_SIZE_POW2) {
+		align = METADATA_IFMALLOC_SIZE_POW2;
+		padding = 0;
+	} else {
+		padding = METADATA_IFMALLOC_SIZE_POW2;
+	}
+
+	realsize = size + padding + align;
+
+	/* check for overflow */
+	if (unlikely(realsize < size))
+		return ENOMEM;
+
+	intptr = (uintptr_t) a->malloc_backend(a, realsize);
+
+	if (!intptr)
+		return ENOMEM;
+
+	*memptr = (void *) ALIGN_UP(intptr + METADATA_IFMALLOC_SIZE_POW2,
+				    (uintptr_t) align);
+
+	metadata = uk_get_metadata_ifmalloc(*memptr);
+
+	/* check for underflow */
+	UK_ASSERT(intptr <= (uintptr_t) metadata);
+
+	metadata->size = realsize;
+	metadata->base = (void *) intptr;
+
+	return 0;
+}
+
+#endif
 
 void uk_pfree_compat(struct uk_alloc *a, void *ptr,
 		     unsigned long num_pages __unused)

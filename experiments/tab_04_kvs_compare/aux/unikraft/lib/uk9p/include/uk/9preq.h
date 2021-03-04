@@ -41,6 +41,7 @@
 #include <uk/essentials.h>
 #include <uk/list.h>
 #include <uk/refcount.h>
+#include <uk/9p_core.h>
 #if CONFIG_LIBUKSCHED
 #include <uk/wait_types.h>
 #endif
@@ -61,6 +62,16 @@ extern "C" {
  * 141.
  */
 #define UK_9P_RERROR_MAXSIZE            141U
+
+/*
+ * The transmit and receive buffer size.
+ *
+ * The buffer size is not expected to exceed 1K: reads and writes are
+ * zero-copy; on-the-wire size of a stat structure should not exceed
+ * 1K -- its base size is 61, along with the lengths for name, uid,
+ * gid, muid and extension strings.
+ */
+#define UK_9P_BUFSIZE			1024U
 
 /**
  * @internal
@@ -124,8 +135,23 @@ enum uk_9preq_state {
  *  referenced anymore. A call to uk_9pdev_req_remove() is mandatory to
  *  correctly free this and remove it from the list of requests managed
  *  by the 9p device.
+ *
+ *  Should fit within one page.
  */
 struct uk_9preq {
+	/*
+	 * Fixed-size buffer for transmit, used for most messages.
+	 * Large messages will always zero-copy from the user-provided
+	 * buffer (on Twrite).
+	 */
+	uint8_t				xmit_buf[UK_9P_BUFSIZE];
+	/*
+	 * Fixed-size buffer for receive, used for most messages.
+	 * Large messages will always zero-copy into the user-provided
+	 * buffer (on Tread).
+	 */
+	uint8_t				recv_buf[UK_9P_BUFSIZE];
+	/* 2 KB offset in the structure here. */
 	/* Transmit fcall. */
 	struct uk_9preq_fcall           xmit;
 	/* Receive fcall. */
@@ -136,6 +162,8 @@ struct uk_9preq {
 	uint16_t                        tag;
 	/* Entry into the list of requests (API-internal). */
 	struct uk_list_head             _list;
+	/* @internal 9P device this request belongs to. */
+	struct uk_9pdev                 *_dev;
 	/* @internal Allocator used to allocate this request. */
 	struct uk_alloc                 *_a;
 	/* Tracks the number of references to this structure. */
@@ -146,20 +174,14 @@ struct uk_9preq {
 #endif
 };
 
+UK_CTASSERT(sizeof(struct uk_9preq) <= __PAGE_SIZE);
+
 /**
  * @internal
- * Allocates a 9p request.
+ * Initializes a 9P request.
  * Should not be used directly, use uk_9pdev_req_create() instead.
- *
- * @param a
- *   Allocator to use.
- * @param size
- *   Minimum size of the receive and transmit buffers.
- * @return
- *   - (==NULL): Out of memory.
- *   - (!=NULL): Successful.
  */
-struct uk_9preq *uk_9preq_alloc(struct uk_alloc *a, uint32_t size);
+void uk_9preq_init(struct uk_9preq *req);
 
 /**
  * Gets the 9p request, incrementing the reference count.
@@ -171,7 +193,8 @@ void uk_9preq_get(struct uk_9preq *req);
 
 /**
  * Puts the 9p request, decrementing the reference count.
- * If this was the last live reference, the memory will be freed.
+ * If this was the last live reference, it will be placed on the asociated
+ * device's request freelist.
  *
  * @param req
  *   Reference to the 9p request.
@@ -180,61 +203,6 @@ void uk_9preq_get(struct uk_9preq *req);
  *   - 1: This was the last live reference.
  */
 int uk_9preq_put(struct uk_9preq *req);
-
-/*
- * The following family of serialization and deserialization functions work
- * by employing a printf-like formatting mechanism for data types supported by
- * the 9p protocol:
- * - 'b': byte (uint8_t)
- * - 'w': word (uint16_t)
- * - 'd': double-word (uint32_t)
- * - 'q': quad-word (uint64_t)
- * - 's': uk_9p_str *
- * - 'S': uk_9p_stat *
- *
- * Similarly to vprintf(), the vserialize() and vdeserialize() functions take
- * a va_list instead of a variable number of arguments.
- *
- * Possible return values:
- * - 0: Operation successful.
- * - (-EINVAL): Invalid format specifier.
- * - (-ENOBUFS): End of buffer reached.
- */
-
-int uk_9preq_vserialize(struct uk_9preq *req, const char *fmt, va_list vl);
-int uk_9preq_serialize(struct uk_9preq *req, const char *fmt, ...);
-int uk_9preq_vdeserialize(struct uk_9preq *req, const char *fmt, va_list vl);
-int uk_9preq_deserialize(struct uk_9preq *req, const char *fmt, ...);
-
-/**
- * Copies raw data from the request receive buffer to the provided buffer.
- *
- * @param req
- *   Reference to the 9p request.
- * @param buf
- *   Destination buffer.
- * @param size
- *   Amount to copy.
- * Possible return values:
- * - 0: Operation successful.
- * - (-ENOBUFS): End of buffer reached.
- */
-int uk_9preq_copy_to(struct uk_9preq *req, void *buf, uint32_t size);
-
-/**
- * Copies raw data from the provided buffer to the request transmission buffer.
- *
- * @param req
- *   Reference to the 9p request.
- * @param buf
- *   Source buffer.
- * @param size
- *   Amount to copy.
- * Possible return values:
- * - 0: Operation successful.
- * - (-ENOBUFS): End of buffer reached.
- */
-int uk_9preq_copy_from(struct uk_9preq *req, const void *buf, uint32_t size);
 
 /**
  * Marks the given request as being ready, transitioning between states
@@ -292,6 +260,189 @@ int uk_9preq_waitreply(struct uk_9preq *req);
  *   - (< 0): An Rerror was received, the error code is 9pfs-specific.
  */
 int uk_9preq_error(struct uk_9preq *req);
+
+/*
+ * The following family of serialization and deserialization functions
+ * are used for writing the 'base' types the 9p protocol supports.
+ *
+ * These are defined in the header for better performance by not necessarily
+ * incurring a function call penalty if called from outside uk9p.
+ *
+ * Provided functions:
+ * - uk_9preq_{read,write}buf
+ * - uk_9preq_{read,write}8
+ * - uk_9preq_{read,write}16
+ * - uk_9preq_{read,write}32
+ * - uk_9preq_{read,write}64
+ * - uk_9preq_{read,write}qid
+ * - uk_9preq_{read,write}str
+ * - uk_9preq_{read,write}stat
+ *
+ * For qid, str and stat, read and write always take a pointer.
+ * For all other types, write takes the argument by value.
+ *
+ * Possible return values:
+ * - 0: Operation successful.
+ * - (-ENOBUFS): End of buffer reached.
+ */
+
+static inline int uk_9preq_writebuf(struct uk_9preq *req, const void *buf,
+		uint32_t size)
+{
+	if (req->xmit.offset + size > req->xmit.size)
+		return -ENOBUFS;
+
+	memcpy((char *)req->xmit.buf + req->xmit.offset, buf, size);
+	req->xmit.offset += size;
+	return 0;
+}
+
+static inline int uk_9preq_readbuf(struct uk_9preq *req, void *buf,
+		uint32_t size)
+{
+	if (req->recv.offset + size > req->recv.size)
+		return -ENOBUFS;
+
+	memcpy(buf, (char *)req->recv.buf + req->recv.offset, size);
+	req->recv.offset += size;
+	return 0;
+}
+
+#define _UK_9PREQ_DEFINE_WRITE_FN(name, ctype) \
+static inline int uk_9preq_##name(struct uk_9preq *req, ctype val) \
+{ \
+	return uk_9preq_writebuf(req, &val, sizeof(val)); \
+}
+
+_UK_9PREQ_DEFINE_WRITE_FN(write8, uint8_t)
+_UK_9PREQ_DEFINE_WRITE_FN(write16, uint16_t)
+_UK_9PREQ_DEFINE_WRITE_FN(write32, uint32_t)
+_UK_9PREQ_DEFINE_WRITE_FN(write64, uint64_t)
+
+#undef _UK_9PREQ_DEFINE_WRITE_FN
+
+static inline int uk_9preq_writeqid(struct uk_9preq *req, struct uk_9p_qid *val)
+{
+	int rc;
+
+	if ((rc = uk_9preq_write8(req, val->type)) ||
+		(rc = uk_9preq_write32(req, val->version)) ||
+		(rc = uk_9preq_write64(req, val->path)))
+		return rc;
+
+	return 0;
+}
+
+static inline int uk_9preq_writestr(struct uk_9preq *req, struct uk_9p_str *val)
+{
+	int rc;
+
+	if ((rc = uk_9preq_write16(req, val->size)) ||
+		(rc = uk_9preq_writebuf(req, val->data, val->size)))
+		return rc;
+
+	return 0;
+}
+
+static inline int uk_9preq_writestat(struct uk_9preq *req,
+		struct uk_9p_stat *val)
+{
+	int rc;
+
+	val->size = 61;
+	val->size += val->name.size;
+	val->size += val->uid.size;
+	val->size += val->gid.size;
+	val->size += val->muid.size;
+	val->size += val->extension.size;
+
+	if ((rc = uk_9preq_write16(req, val->size)) ||
+		(rc = uk_9preq_write16(req, val->type)) ||
+		(rc = uk_9preq_write32(req, val->dev)) ||
+		(rc = uk_9preq_writeqid(req, &val->qid)) ||
+		(rc = uk_9preq_write32(req, val->mode)) ||
+		(rc = uk_9preq_write32(req, val->atime)) ||
+		(rc = uk_9preq_write32(req, val->mtime)) ||
+		(rc = uk_9preq_write64(req, val->length)) ||
+		(rc = uk_9preq_writestr(req, &val->name)) ||
+		(rc = uk_9preq_writestr(req, &val->uid)) ||
+		(rc = uk_9preq_writestr(req, &val->gid)) ||
+		(rc = uk_9preq_writestr(req, &val->muid)) ||
+		(rc = uk_9preq_writestr(req, &val->extension)) ||
+		(rc = uk_9preq_write32(req, val->n_uid)) ||
+		(rc = uk_9preq_write32(req, val->n_gid)) ||
+		(rc = uk_9preq_write32(req, val->n_muid)))
+		return rc;
+
+	return 0;
+}
+
+#define _UK_9PREQ_DEFINE_READ_FN(name, ctype) \
+static inline int uk_9preq_##name(struct uk_9preq *req, ctype * val) \
+{ \
+	return uk_9preq_readbuf(req, val, sizeof(*val)); \
+}
+
+_UK_9PREQ_DEFINE_READ_FN(read8, uint8_t)
+_UK_9PREQ_DEFINE_READ_FN(read16, uint16_t)
+_UK_9PREQ_DEFINE_READ_FN(read32, uint32_t)
+_UK_9PREQ_DEFINE_READ_FN(read64, uint64_t)
+
+#undef _UK_9PREQ_DEFINE_READ_FN
+
+static inline int uk_9preq_readqid(struct uk_9preq *req, struct uk_9p_qid *val)
+{
+	int rc;
+
+	if ((rc = uk_9preq_read8(req, &val->type)) ||
+		(rc = uk_9preq_read32(req, &val->version)) ||
+		(rc = uk_9preq_read64(req, &val->path)))
+		return rc;
+
+	return 0;
+}
+
+static inline int uk_9preq_readstr(struct uk_9preq *req, struct uk_9p_str *val)
+{
+	int rc;
+
+	if ((rc = uk_9preq_read16(req, &val->size)))
+		return rc;
+
+	/* Optimized string read, does not allocate memory. */
+	val->data = (char *)req->recv.buf + req->recv.offset;
+	req->recv.offset += val->size;
+	if (req->recv.offset > req->recv.size)
+		return -ENOBUFS;
+
+	return 0;
+}
+
+static inline int uk_9preq_readstat(struct uk_9preq *req,
+		struct uk_9p_stat *val)
+{
+	int rc;
+
+	if ((rc = uk_9preq_read16(req, &val->size)) ||
+		(rc = uk_9preq_read16(req, &val->type)) ||
+		(rc = uk_9preq_read32(req, &val->dev)) ||
+		(rc = uk_9preq_readqid(req, &val->qid)) ||
+		(rc = uk_9preq_read32(req, &val->mode)) ||
+		(rc = uk_9preq_read32(req, &val->atime)) ||
+		(rc = uk_9preq_read32(req, &val->mtime)) ||
+		(rc = uk_9preq_read64(req, &val->length)) ||
+		(rc = uk_9preq_readstr(req, &val->name)) ||
+		(rc = uk_9preq_readstr(req, &val->uid)) ||
+		(rc = uk_9preq_readstr(req, &val->gid)) ||
+		(rc = uk_9preq_readstr(req, &val->muid)) ||
+		(rc = uk_9preq_readstr(req, &val->extension)) ||
+		(rc = uk_9preq_read32(req, &val->n_uid)) ||
+		(rc = uk_9preq_read32(req, &val->n_gid)) ||
+		(rc = uk_9preq_read32(req, &val->n_muid)))
+		return rc;
+
+	return 0;
+}
 
 #ifdef __cplusplus
 }

@@ -108,44 +108,18 @@ int uk_9pdev_request(struct uk_9pdev *dev, struct uk_9preq *req);
 void uk_9pdev_xmit_notify(struct uk_9pdev *dev);
 
 /**
- * Creates and sends 9P request to the given 9P device, serializing it with
- * the given arguments. This function acts as a shorthand for the explicit
- * calls to req_create(), serialize(), ready(), request(), waitreply().
- *
- * @param dev
- *   The Unikraft 9P Device.
- * @param type
- *   Transmit type of the request, e.g. Tversion, Tread, and so on.
- * @param size
- *   The maximum size for the receive and send buffers.
- * @param fmt
- *   The format of the data to be serialized, in the way uk_9preq_serialize()
- *   expects it.
- * @param ...
- *   The arguments to be serialized.
- * @return
- *   - (!PTRISERR): The 9p request in the UK_9PREQ_RECEIVED state.
- *   - PTRISERR: The error code with which any of the steps failed.
- */
-struct uk_9preq *uk_9pdev_call(struct uk_9pdev *dev, uint8_t type,
-			uint32_t size, const char *fmt, ...);
-
-/**
  * Create a new request, automatically allocating its tag, based on its type.
  *
  * @param dev
  *   The Unikraft 9P Device.
  * @param type
  *   Transmit type of the request, e.g. Tversion, Tread, and so on.
- * @param size
- *   The maximum size for the receive and send buffers.
  * @return
  *   If not an error pointer, the created request.
  *   Otherwise, the error in creating the request:
  *   - ENOMEM: No memory for the request or no available tags.
  */
-struct uk_9preq *uk_9pdev_req_create(struct uk_9pdev *dev, uint8_t type,
-				uint32_t size);
+struct uk_9preq *uk_9pdev_req_create(struct uk_9pdev *dev, uint8_t type);
 
 /**
  * Looks up a request based on the given tag. This is generally used by
@@ -174,6 +148,16 @@ struct uk_9preq *uk_9pdev_req_lookup(struct uk_9pdev *dev, uint16_t tag);
  *   - 1: This was the last reference to the request.
  */
 int uk_9pdev_req_remove(struct uk_9pdev *dev, struct uk_9preq *req);
+
+/**
+ * Places the given request on the 9p device's request freelist.
+ *
+ * @param dev
+ *   The Unikraft 9P Device. If NULL, doesn't place the request on the freelist.
+ * @param req
+ *   The request to be placed on the freelist.
+ */
+void uk_9pdev_req_to_freelist(struct uk_9pdev *dev, struct uk_9preq *req);
 
 /**
  * Creates a FID associated with the given 9P device.

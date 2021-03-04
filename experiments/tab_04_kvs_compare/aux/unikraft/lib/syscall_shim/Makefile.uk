@@ -9,9 +9,13 @@ LIBSYSCALL_SHIM_PHONY_SRC_NEW := $(addsuffix .new, $(LIBSYSCALL_SHIM_PHONY_SRC))
 
 LIBSYSCALL_SHIM_GEN_SRC := $(LIBSYSCALL_SHIM_INCLUDES_PATH)/provided_syscalls.h
 LIBSYSCALL_SHIM_GEN_SRC += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall.c
+LIBSYSCALL_SHIM_GEN_SRC += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall6.c
 LIBSYSCALL_SHIM_GEN_SRC += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall_r.c
+LIBSYSCALL_SHIM_GEN_SRC += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall6_r.c
+LIBSYSCALL_SHIM_GEN_SRC += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall_r_fn.c
 LIBSYSCALL_SHIM_GEN_SRC += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall_name.c
 LIBSYSCALL_SHIM_GEN_SRC += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall_name_p.c
+LIBSYSCALL_SHIM_GEN_SRC += $(LIBSYSCALL_SHIM_BUILD)/libc_stubs.c
 
 UK_PREPARE-$(CONFIG_LIBSYSCALL_SHIM) += $(LIBSYSCALL_SHIM_PHONY_SRC) $(LIBSYSCALL_SHIM_GEN_SRC)
 
@@ -46,6 +50,10 @@ $(LIBSYSCALL_SHIM_INCLUDES_PATH)/provided_syscalls.h: $(LIBSYSCALL_SHIM_BASE)/ge
 		$(AWK) -F '-' -f  $(LIBSYSCALL_SHIM_BASE)/gen_provided.awk \
 		$(LIBSYSCALL_SHIM_BUILD)/provided_syscalls.h.in > $@)
 
+$(LIBSYSCALL_SHIM_BUILD)/uk_syscall6.c: $(LIBSYSCALL_SHIM_BUILD)/provided_syscalls.h.in $(LIBSYSCALL_SHIM_BASE)/gen_uk_syscall6.awk
+	$(call build_cmd,GEN,libsyscall_shim,$(notdir $@), \
+		$(AWK) -F '-' -f $(LIBSYSCALL_SHIM_BASE)/gen_uk_syscall6.awk $< > $@)
+
 $(LIBSYSCALL_SHIM_BUILD)/uk_syscall.c: $(LIBSYSCALL_SHIM_BUILD)/provided_syscalls.h.in $(LIBSYSCALL_SHIM_BASE)/gen_uk_syscall.awk $(LIBSYSCALL_SHIM_BASE)/uk_syscall.c.in_end
 	$(call build_cmd,GEN,libsyscall_shim,$(notdir $@), \
 		$(AWK) -F '-' -f $(LIBSYSCALL_SHIM_BASE)/gen_uk_syscall.awk $< > $@ && \
@@ -56,6 +64,15 @@ $(LIBSYSCALL_SHIM_BUILD)/uk_syscall_r.c: $(LIBSYSCALL_SHIM_BUILD)/provided_sysca
 		$(AWK) -F '-' -f $(LIBSYSCALL_SHIM_BASE)/gen_uk_syscall_r.awk $< > $@ && \
 		cat $(LIBSYSCALL_SHIM_BASE)/uk_syscall_r.c.in_end >> $@)
 
+$(LIBSYSCALL_SHIM_BUILD)/uk_syscall6_r.c: $(LIBSYSCALL_SHIM_BUILD)/provided_syscalls.h.in $(LIBSYSCALL_SHIM_BASE)/gen_uk_syscall6_r.awk $(LIBSYSCALL_SHIM_BASE)/uk_syscall6_r.c.in_end
+	$(call build_cmd,GEN,libsyscall_shim,$(notdir $@), \
+		$(AWK) -F '-' -f $(LIBSYSCALL_SHIM_BASE)/gen_uk_syscall6_r.awk $< > $@ && \
+		cat $(LIBSYSCALL_SHIM_BASE)/uk_syscall6_r.c.in_end >> $@)
+
+$(LIBSYSCALL_SHIM_BUILD)/uk_syscall_r_fn.c: $(LIBSYSCALL_SHIM_BUILD)/provided_syscalls.h.in $(LIBSYSCALL_SHIM_BASE)/gen_uk_syscall_r_fn.awk
+	$(call build_cmd,GEN,libsyscall_shim,$(notdir $@), \
+		$(AWK) -F '-' -f $(LIBSYSCALL_SHIM_BASE)/gen_uk_syscall_r_fn.awk $< > $@)
+
 $(LIBSYSCALL_SHIM_BUILD)/uk_syscall_name.c: $(LIBSYSCALL_SHIM_BASE)/gen_uk_syscall_name.awk $(LIBSYSCALL_SHIM_TEMPL)
 	$(call build_cmd,GEN,libsyscall_shim,$(notdir $@), \
 		$(AWK) -f $(LIBSYSCALL_SHIM_BASE)/gen_uk_syscall_name.awk \
@@ -65,9 +82,14 @@ $(LIBSYSCALL_SHIM_BUILD)/uk_syscall_name_p.c: $(LIBSYSCALL_SHIM_BUILD)/provided_
 	$(call build_cmd,GEN,libsyscall_shim,$(notdir $@), \
 		$(AWK) -F '-' -f $(LIBSYSCALL_SHIM_BASE)/gen_uk_syscall_name_p.awk $< > $@)
 
+$(LIBSYSCALL_SHIM_BUILD)/libc_stubs.c: $(LIBSYSCALL_SHIM_BASE)/gen_libc_stubs.awk $(LIBSYSCALL_SHIM_TEMPL)
+	$(call build_cmd,GEN,libsyscall_shim,$(notdir $@), \
+		$(AWK) -f $(LIBSYSCALL_SHIM_BASE)/gen_libc_stubs.awk \
+		$(LIBSYSCALL_SHIM_TEMPL) > $@)
+
 $(LIBSYSCALL_SHIM_BUILD)/provided_syscalls.h.in.new:
 	$(call build_cmd,GEN,libsyscall_shim,$(notdir $@), \
-		echo $(UK_PROVIDED_SYSCALLS-y) | tr ' ' '\n' > $@)
+		echo $(UK_PROVIDED_SYSCALLS-y) $(UK_PROVIDED_SYSCALLS) | tr ' ' '\n' > $@)
 
 $(LIBSYSCALL_SHIM_INCLUDES_PATH)/syscall_stubs.h.new: $(LIBSYSCALL_SHIM_BASE)/gen_stubs.awk $(LIBSYSCALL_SHIM_TEMPL)
 	$(call build_cmd,GEN,libsyscall_shim,$(notdir $@), \
@@ -80,10 +102,17 @@ CINCLUDES-y   += -I$(LIBSYSCALL_SHIM_BASE)/include
 CXXINCLUDES-y += -I$(LIBSYSCALL_SHIM_BASE)/include
 
 LIBSYSCALL_SHIM_CINCLUDES += -I$(LIBSYSCALL_SHIM_BASE)
+LIBSYSCALL_SHIM_COMPFLAGS-$(CONFIG_LIBSYSCALL_SHIM_DEBUG) += -DUK_DEBUG
 
 LIBSYSCALL_SHIM_SRCS-y += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall.c
+LIBSYSCALL_SHIM_SRCS-y += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall6.c
 LIBSYSCALL_SHIM_SRCS-y += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall_r.c
+LIBSYSCALL_SHIM_SRCS-y += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall6_r.c
+LIBSYSCALL_SHIM_SRCS-y += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall_r_fn.c
+LIBSYSCALL_SHIM_UK_SYSCALL_R_FN_FLAGS+=-Wno-cast-function-type
 LIBSYSCALL_SHIM_SRCS-y += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall_name.c
 LIBSYSCALL_SHIM_SRCS-y += $(LIBSYSCALL_SHIM_BUILD)/uk_syscall_name_p.c
+LIBSYSCALL_SHIM_SRCS-$(CONFIG_LIBSYSCALL_SHIM_LIBCSTUBS) += $(LIBSYSCALL_SHIM_BUILD)/libc_stubs.c
+LIBSYSCALL_SHIM_LIBC_STUBS_FLAGS+=-fno-builtin -Wno-builtin-declaration-mismatch
 
 LIBSYSCALL_SHIM_CLEAN = $(LIBSYSCALL_SHIM_PHONY_SRC) $(LIBSYSCALL_SHIM_PHONY_SRC_NEW) $(LIBSYSCALL_SHIM_GEN_SRC) $(LIBSYSCALL_SHIM_GEN_SRC)

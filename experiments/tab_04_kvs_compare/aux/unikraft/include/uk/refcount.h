@@ -68,7 +68,7 @@ static inline void uk_refcount_init(__atomic *ref, __u32 value)
 {
 	__refcnt_assert(ref != __NULL);
 
-	ukarch_store_n(&ref->counter, value);
+	ref->counter = value;
 }
 
 /**
@@ -80,7 +80,12 @@ static inline void uk_refcount_acquire(__atomic *ref)
 {
 	__refcnt_assert((ref != __NULL) && (ref->counter < __U32_MAX));
 
-	ukarch_inc(&ref->counter);
+	//ukarch_inc(&ref->counter);
+	asm volatile(
+		     "incw %[cnt]"
+		     : [cnt] "=m" (ref->counter)   /* output */
+		     : "m" (ref->counter)          /* input */
+		     ); 
 }
 
 /**
@@ -100,7 +105,15 @@ static inline int uk_refcount_release(__atomic *ref)
 	/* Compiler Fence */
 	barrier();
 
-	old = ukarch_fetch_add(&ref->counter, -1);
+	//old = ukarch_fetch_add(&ref->counter, -1);
+
+	old = ref->counter;
+	asm volatile(
+		     "decw %[cnt]"
+		     : [cnt] "=m" (ref->counter)   /* output */
+		     : "m" (ref->counter)          /* input */
+		     );
+
 	__refcnt_assert(old > 0);
 	if (old > 1)
 		return 0;
@@ -149,7 +162,8 @@ static inline __u32 uk_refcount_read(const __atomic *ref)
 {
 	__refcnt_assert(ref != __NULL);
 
-	return ukarch_load_n(&ref->counter);
+	//return ukarch_load_n(&ref->counter);
+	return ref->counter;
 }
 
 

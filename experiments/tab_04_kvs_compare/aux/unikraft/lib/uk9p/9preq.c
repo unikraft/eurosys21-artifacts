@@ -35,6 +35,7 @@
 #include <string.h>
 #include <uk/config.h>
 #include <uk/9preq.h>
+#include <uk/9pdev.h>
 #include <uk/9p_core.h>
 #include <uk/list.h>
 #include <uk/refcount.h>
@@ -45,58 +46,14 @@
 #include <uk/wait.h>
 #endif
 
-static int _fcall_alloc(struct uk_alloc *a, struct uk_9preq_fcall *f,
-			uint32_t size)
+void uk_9preq_init(struct uk_9preq *req)
 {
-	UK_ASSERT(a);
-	UK_ASSERT(f);
-	UK_ASSERT(size > 0);
-
-	f->buf = uk_calloc(a, size, sizeof(char));
-	if (f->buf == NULL)
-		return -ENOMEM;
-
-	f->size = size;
-	f->offset = 0;
-	f->zc_buf = NULL;
-	f->zc_size = 0;
-	f->zc_offset = 0;
-
-	return 0;
-}
-
-static void _fcall_free(struct uk_alloc *a, struct uk_9preq_fcall *f)
-{
-	UK_ASSERT(a);
-	UK_ASSERT(f);
-
-	if (f->buf)
-		uk_free(a, f->buf);
-}
-
-struct uk_9preq *uk_9preq_alloc(struct uk_alloc *a, uint32_t size)
-{
-	struct uk_9preq *req;
-	int rc;
-
-	req = uk_calloc(a, 1, sizeof(*req));
-	if (req == NULL)
-		goto out;
-
-	rc = _fcall_alloc(a, &req->xmit, size);
-	if (rc < 0)
-		goto out_free;
-
-	rc = _fcall_alloc(a, &req->recv, MAX(size, UK_9P_RERROR_MAXSIZE));
-	if (rc < 0)
-		goto out_free;
-
-	UK_INIT_LIST_HEAD(&req->_list);
-	req->_a = a;
-	uk_refcount_init(&req->refcount, 1);
-#if CONFIG_LIBUKSCHED
-	uk_waitq_init(&req->wq);
-#endif
+	req->xmit.buf = req->xmit_buf;
+	req->recv.buf = req->recv_buf;
+	req->xmit.size = req->recv.size = UK_9P_BUFSIZE;
+	req->xmit.zc_buf = req->recv.zc_buf = NULL;
+	req->xmit.zc_size = req->recv.zc_size = 0;
+	req->xmit.zc_offset = req->recv.zc_offset = 0;
 
 	/*
 	 * Assume the header has already been written.
@@ -104,22 +61,13 @@ struct uk_9preq *uk_9preq_alloc(struct uk_alloc *a, uint32_t size)
 	 * actual message size is known.
 	 */
 	req->xmit.offset = UK_9P_HEADER_SIZE;
+	req->recv.offset = 0;
 
-	return req;
-
-out_free:
-	_fcall_free(a, &req->recv);
-	_fcall_free(a, &req->xmit);
-	uk_free(a, req);
-out:
-	return NULL;
-}
-
-static void _req_free(struct uk_9preq *req)
-{
-	_fcall_free(req->_a, &req->recv);
-	_fcall_free(req->_a, &req->xmit);
-	uk_free(req->_a, req);
+	UK_INIT_LIST_HEAD(&req->_list);
+	uk_refcount_init(&req->refcount, 1);
+#if CONFIG_LIBUKSCHED
+	uk_waitq_init(&req->wq);
+#endif
 }
 
 void uk_9preq_get(struct uk_9preq *req)
@@ -133,296 +81,9 @@ int uk_9preq_put(struct uk_9preq *req)
 
 	last = uk_refcount_release(&req->refcount);
 	if (last)
-		_req_free(req);
+		uk_9pdev_req_to_freelist(req->_dev, req);
 
 	return last;
-}
-
-static int _fcall_write(struct uk_9preq_fcall *fcall, const void *buf,
-		uint32_t size)
-{
-	if (fcall->offset + size > fcall->size)
-		return -ENOBUFS;
-
-	memcpy((char *)fcall->buf + fcall->offset, buf, size);
-	fcall->offset += size;
-	return 0;
-}
-
-static int _fcall_serialize(struct uk_9preq_fcall *f, const char *fmt, ...);
-
-static int _fcall_vserialize(struct uk_9preq_fcall *fcall, const char *fmt,
-			va_list vl)
-{
-	int rc = 0;
-
-	while (*fmt) {
-		switch (*fmt) {
-		case 'b': {
-			uint8_t x;
-
-			x = va_arg(vl, unsigned int);
-			rc = _fcall_write(fcall, &x, sizeof(x));
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		case 'w': {
-			uint16_t x;
-
-			x = va_arg(vl, unsigned int);
-			rc = _fcall_write(fcall, &x, sizeof(x));
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		case 'd': {
-			uint32_t x;
-
-			x = va_arg(vl, uint32_t);
-			rc = _fcall_write(fcall, &x, sizeof(x));
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		case 'q': {
-			uint64_t x;
-
-			x = va_arg(vl, uint64_t);
-			rc = _fcall_write(fcall, &x, sizeof(x));
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		case 's': {
-			struct uk_9p_str *p;
-
-			p = va_arg(vl, struct uk_9p_str *);
-			rc = _fcall_write(fcall, &p->size, sizeof(p->size));
-			if (rc < 0)
-				goto out;
-			rc = _fcall_write(fcall, p->data, p->size);
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		case 'Q': {
-			struct uk_9p_qid *p;
-
-			p = va_arg(vl, struct uk_9p_qid *);
-			rc = _fcall_serialize(fcall, "bdq", p->type,
-					p->version, p->path);
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		case 'S': {
-			struct uk_9p_stat *p;
-
-			p = va_arg(vl, struct uk_9p_stat *);
-			rc = _fcall_serialize(fcall, "wwdQdddqsssssddd",
-					p->size, p->type, p->dev, &p->qid,
-					p->mode, p->atime, p->mtime, p->length,
-					&p->name, &p->uid, &p->gid, &p->muid,
-					&p->extension, p->n_uid, p->n_gid,
-					p->n_muid);
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		default:
-			rc = -EINVAL;
-			goto out;
-		}
-
-		fmt++;
-	}
-
-out:
-	return rc;
-}
-
-static int _fcall_serialize(struct uk_9preq_fcall *f, const char *fmt, ...)
-{
-	va_list vl;
-	int rc;
-
-	va_start(vl, fmt);
-	rc = _fcall_vserialize(f, fmt, vl);
-	va_end(vl);
-
-	return rc;
-}
-
-int uk_9preq_vserialize(struct uk_9preq *req, const char *fmt, va_list vl)
-{
-	int rc;
-
-	UK_ASSERT(req);
-	UK_ASSERT(UK_READ_ONCE(req->state) == UK_9PREQ_INITIALIZED);
-	rc = _fcall_vserialize(&req->xmit, fmt, vl);
-
-	return rc;
-}
-
-int uk_9preq_serialize(struct uk_9preq *req, const char *fmt, ...)
-{
-	va_list vl;
-	int rc;
-
-	va_start(vl, fmt);
-	rc = uk_9preq_vserialize(req, fmt, vl);
-	va_end(vl);
-
-	return rc;
-}
-
-static int _fcall_read(struct uk_9preq_fcall *fcall, void *buf, uint32_t size)
-{
-	if (fcall->offset + size > fcall->size)
-		return -ENOBUFS;
-
-	memcpy(buf, (char *)fcall->buf + fcall->offset, size);
-	fcall->offset += size;
-	return 0;
-}
-
-static int _fcall_deserialize(struct uk_9preq_fcall *f, const char *fmt, ...);
-
-static int _fcall_vdeserialize(struct uk_9preq_fcall *fcall,
-			      const char *fmt,
-			      va_list vl)
-{
-	int rc = 0;
-
-	while (*fmt) {
-		switch (*fmt) {
-		case 'b': {
-			uint8_t *x;
-
-			x = va_arg(vl, uint8_t *);
-			rc = _fcall_read(fcall, x, sizeof(*x));
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		case 'w': {
-			uint16_t *x;
-
-			x = va_arg(vl, uint16_t *);
-			rc = _fcall_read(fcall, x, sizeof(*x));
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		case 'd': {
-			uint32_t *x;
-
-			x = va_arg(vl, uint32_t *);
-			rc = _fcall_read(fcall, x, sizeof(*x));
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		case 'q': {
-			uint64_t *x;
-
-			x = va_arg(vl, uint64_t *);
-			rc = _fcall_read(fcall, x, sizeof(*x));
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		case 's': {
-			struct uk_9p_str *p;
-
-			p = va_arg(vl, struct uk_9p_str *);
-			rc = _fcall_read(fcall, &p->size, sizeof(p->size));
-			if (rc < 0)
-				goto out;
-			p->data = (char *)fcall->buf + fcall->offset;
-			fcall->offset += p->size;
-			break;
-		}
-		case 'Q': {
-			struct uk_9p_qid *p;
-
-			p = va_arg(vl, struct uk_9p_qid *);
-			rc = _fcall_deserialize(fcall, "bdq", &p->type,
-					&p->version, &p->path);
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		case 'S': {
-			struct uk_9p_stat *p;
-
-			p = va_arg(vl, struct uk_9p_stat *);
-			rc = _fcall_deserialize(fcall, "wwdQdddqsssssddd",
-					&p->size, &p->type, &p->dev, &p->qid,
-					&p->mode, &p->atime, &p->mtime,
-					&p->length, &p->name, &p->uid, &p->gid,
-					&p->muid, &p->extension, &p->n_uid,
-					&p->n_gid, &p->n_muid);
-			if (rc < 0)
-				goto out;
-			break;
-		}
-		default:
-			rc = -EINVAL;
-			goto out;
-		}
-
-		fmt++;
-	}
-
-out:
-	return rc;
-}
-
-static int _fcall_deserialize(struct uk_9preq_fcall *f, const char *fmt, ...)
-{
-	va_list vl;
-	int rc;
-
-	va_start(vl, fmt);
-	rc = _fcall_vdeserialize(f, fmt, vl);
-	va_end(vl);
-
-	return rc;
-}
-
-int uk_9preq_vdeserialize(struct uk_9preq *req, const char *fmt, va_list vl)
-{
-	int rc;
-
-	UK_ASSERT(req);
-	UK_ASSERT(UK_READ_ONCE(req->state) == UK_9PREQ_RECEIVED);
-	rc = _fcall_vdeserialize(&req->recv, fmt, vl);
-
-	return rc;
-}
-
-int uk_9preq_deserialize(struct uk_9preq *req, const char *fmt, ...)
-{
-	va_list vl;
-	int rc;
-
-	va_start(vl, fmt);
-	rc = uk_9preq_vdeserialize(req, fmt, vl);
-	va_end(vl);
-
-	return rc;
-}
-
-int uk_9preq_copy_to(struct uk_9preq *req, void *buf, uint32_t size)
-{
-	return _fcall_read(&req->recv, buf, size);
-}
-
-int uk_9preq_copy_from(struct uk_9preq *req, const void *buf, uint32_t size)
-{
-	return _fcall_write(&req->xmit, buf, size);
 }
 
 int uk_9preq_ready(struct uk_9preq *req, enum uk_9preq_zcdir zc_dir,
@@ -434,10 +95,8 @@ int uk_9preq_ready(struct uk_9preq *req, enum uk_9preq_zcdir zc_dir,
 
 	UK_ASSERT(req);
 
-	if (UK_READ_ONCE(req->state) != UK_9PREQ_INITIALIZED) {
-		rc = -EIO;
-		goto out;
-	}
+	if (UK_READ_ONCE(req->state) != UK_9PREQ_INITIALIZED)
+		return -EIO;
 
 	/* Save current offset as the size of the message. */
 	total_size = req->xmit.offset;
@@ -448,10 +107,10 @@ int uk_9preq_ready(struct uk_9preq *req, enum uk_9preq_zcdir zc_dir,
 
 	/* Serialize the header. */
 	req->xmit.offset = 0;
-	rc = uk_9preq_serialize(req, "dbw", total_size_with_zc, req->xmit.type,
-			req->tag);
-	if (rc < 0)
-		goto out;
+	if ((rc = uk_9preq_write32(req, total_size_with_zc)) < 0 ||
+		(rc = uk_9preq_write8(req, req->xmit.type)) < 0 ||
+		(rc = uk_9preq_write16(req, req->tag)) < 0)
+		return rc;
 
 	/* Reset offset and size to sane values. */
 	req->xmit.offset = 0;
@@ -474,8 +133,7 @@ int uk_9preq_ready(struct uk_9preq *req, enum uk_9preq_zcdir zc_dir,
 	/* Update the state. */
 	UK_WRITE_ONCE(req->state, UK_9PREQ_READY);
 
-out:
-	return rc;
+	return 0;
 }
 
 int uk_9preq_receive_cb(struct uk_9preq *req, uint32_t recv_size)
@@ -495,8 +153,10 @@ int uk_9preq_receive_cb(struct uk_9preq *req, uint32_t recv_size)
 	/* Deserialize the header into request fields. */
 	req->recv.offset = 0;
 	req->recv.size = recv_size;
-	rc = _fcall_deserialize(&req->recv, "dbw", &size,
-			&req->recv.type, &tag);
+	if ((rc = uk_9preq_read32(req, &size)) < 0 ||
+		(rc = uk_9preq_read8(req, &req->recv.type)) < 0 ||
+		(rc = uk_9preq_read16(req, &tag)) < 0)
+		return rc;
 
 	/* Check sanity of deserialized values. */
 	if (rc < 0)
@@ -557,8 +217,8 @@ int uk_9preq_error(struct uk_9preq *req)
 	 */
 	UK_BUGON(req->recv.offset != UK_9P_HEADER_SIZE);
 
-	rc = uk_9preq_deserialize(req, "sd", &error, &errcode);
-	if (rc < 0)
+	if ((rc = uk_9preq_readstr(req, &error)) < 0 ||
+		(rc = uk_9preq_read32(req, &errcode)) < 0)
 		return rc;
 
 	uk_pr_debug("RERROR %.*s %d\n", error.size, error.data, errcode);
