@@ -2,14 +2,16 @@
 # Files and directories
 #
 WORKDIR ?= $(CURDIR)
+ROOTDIR ?= $(WORKDIR)/../..
+LUPINEDIR ?= $(WORKDIR)/build/lupine
 RESULTS ?= $(WORKDIR)/results
 PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 
 #
 # Tools
 #
-SNAKE ?= python3
 DOCKER ?= docker
+SNAKE ?= python3
 
 #
 # Targets
@@ -19,7 +21,9 @@ all: prepare run plot
 
 .PHONY: prepare
 prepare:
-	$(DOCKER) pull hlefeuvre/instrumented-vmms:latest
+	# $(ROOTDIR)/tools/build-lupine.sh -d $(LUPINEDIR)
+	$(DOCKER) pull hlefeuvre/alpine-sqlite
+	$(DOCKER) tag hlefeuvre/alpine-sqlite alpine-sqlite
 	$(WORKDIR)/genimages.sh
 
 .PHONY: run
@@ -32,4 +36,4 @@ plot:
 
 .PHONY: clean
 clean:
-	@-
+	@

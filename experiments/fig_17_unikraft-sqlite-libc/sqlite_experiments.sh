@@ -167,7 +167,7 @@ plot() {
 
     echo "\n======  Generating Figure  ======\n"
 
-    "$script_folder/gen_fig.py" "$results_folder" \
+    "$script_folder/plot.py" "$results_folder" \
         "$script_folder/unikraft_sqlite_libc.pdf"
 
     echo "Generated figure is available at

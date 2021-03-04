@@ -7,9 +7,7 @@ CONFIGSDIR ?= $(WORKDIR)/configs
 RESULTS ?= $(WORKDIR)/results.csv
 PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 
-KRAFT_IMAGE ?= eurosys21-artifacts/kraft
-KRAFT_VERSION ?= 913a31bb45cc4be6b69133473842ad3622065342
-UK_KRAFT_GITHUB_TOKEN ?= a5f9963fceb0aa51e69e8d51eb12cde44136b5f8
+KRAFT_IMAGE ?= unikraft/eurosys21-artifacts-kraft:latest
 
 IMAGES ?= $(sort $(notdir $(wildcard $(CONFIGSDIR)/*)))
 
@@ -27,15 +25,7 @@ PLAT ?= kvm
 all: prepare run plot
 
 .PHONY: prepare
-prepare: docker helloworld nginx redis sqlite
-
-.PHONY: docker
-docker:
-	docker build \
-		--build-arg UK_KRAFT_GITHUB_TOKEN=$(UK_KRAFT_GITHUB_TOKEN) \
-		--build-arg KRAFT_VERSION=$(KRAFT_VERSION) \
-		-t $(KRAFT_IMAGE) \
-		-f $(WORKDIR)/Dockerfile .
+prepare: helloworld nginx redis sqlite
 
 .PHONY: helloworld
 helloworld: helloworld_default helloworld_dce helloworld_lto helloworld_dce_lto
@@ -81,7 +71,7 @@ sqlite_%:
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v list pull -w .unikraft lib/sqlite@0.4)
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft build)
-	cp $(CONFIGSDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@
+	cp $(CONFIGSDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@_$(PLAT)-$(ARCH)
 
 .PHONY: run
 run: $(addprefix checksize-,$(IMAGES))

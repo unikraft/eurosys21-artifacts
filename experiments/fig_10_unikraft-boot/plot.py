@@ -20,11 +20,11 @@ from os import listdir, makedirs
 pp = pprint.PrettyPrinter(indent=4)
 
 def plot(data=None, output=None):
+  WORKDIR = os.getcwd()
   RESULTSDIR = data
   RESULTEXT = '.csv'
 
   MINUTES = 60
-  DEFAULT_COMPONENET_KEY = '_'
   MEAN_KEY = 'mean'
   MEDIAN_KEY = 'median'
   AMAX_KEY = 'amax'
@@ -37,15 +37,14 @@ def plot(data=None, output=None):
   boottimes = {}
   boottime_max = 0 # maximum observed build time
   stack_max = 1 # number of bars to be stacked
-  total_allocators = 0
+  total_vmms = 0
   component_colors = {
+    "vmm": '#9774a7', # dark purple
+    "guest": '#fff3cd',  # yellow
   }
-  text_xlabels = {
-    'buddy': 'Binary Buddy',
-    'mimalloc': 'mimalloc',
-    'region': 'bootalloc',
-    'tinyalloc': 'tinyalloc',
-    'tlsf': 'TLSF'
+  component_labels = {
+    'vmm': 'VMM',
+    "guest": 'Unikraft Guest',
   }
 
   colors = [
@@ -79,67 +78,83 @@ def plot(data=None, output=None):
     '#7c4f4f',  # dark yellow
   ]
 
+  text_xlabels = {
+    'qemu': 'QEMU',
+    'qemu1nic': "QEMU (1NIC)",
+    'qemumicrovm': 'QEMU\n(MicroVM)',
+    'solo5': 'Solo5',
+    'firecracker': 'Firecracker',
+  }
+
   for f in os.listdir(RESULTSDIR):
     if f.endswith(RESULTEXT):
-      allocator = f.replace(RESULTEXT,'')
+      unikernel = f.replace(RESULTEXT,'')
       files.append(f)
 
-      # component = None
-
-      # if '+' in unikernel:
-      #   unikernel = unikernel.split('+')
-      #   component = unikernel[1]
-      #   unikernel = unikernel[0]
-
-
-      if allocator not in boottimes:
-        total_allocators += 1
-        boottimes[allocator] = {}
+      if unikernel not in boottimes:
+        total_vmms += 1
+        boottimes[unikernel] = {
+          "guest" : {
+            MEAN_KEY: 0,
+            MEDIAN_KEY: 0,
+            AMAX_KEY: 0,
+            AMIN_KEY: 0
+          }
+        }
 
       with open(os.path.join(RESULTSDIR, f), 'r') as csvfile:
         csvdata = csv.reader(csvfile, delimiter="\t")
         
         next(csvdata) # skip header
         
-        execution_times = {}
+        vmm_times = []
+        guest_times = []
 
         for row in csvdata:
-          if row[0] not in execution_times:
-            execution_times[row[0]] = []
-
-          execution_times[row[0]].append(float(row[1]))
+          vmm_times.append(float(row[0]) / 1000.0)
+          guest_times.append(float(row[1]) / 1000.0)
         
-        for component in execution_times.keys():
+        if len(vmm_times) == 0 or len(vmm_times) != len(guest_times):
+          print("Could not parse empty data set: %s" % f)
+          continue
 
-          # Create a unique pair for the component for an associated colour
-          if component not in component_colors.keys():
-            component_colors[component] = colors[1]
-            colors.pop(1)
+        guest_times = np.array(guest_times)
+        vmm_times = np.array(vmm_times)
 
-          componenet_exec_times = np.array(execution_times[component])
+        mean_vmm = float(np.average(vmm_times))
+        median_vmm = float(np.median(vmm_times))
+        amax_vmm = float(np.amax(vmm_times))
+        amin_vmm = float(np.amin(vmm_times))
 
-          mean = float(np.average(componenet_exec_times))
-          median = float(np.median(componenet_exec_times))
-          amax = float(np.amax(componenet_exec_times))
-          amin = float(np.amin(componenet_exec_times))
+        mean_guest = float(np.average(guest_times))
+        median_guest = float(np.median(guest_times))
+        amax_guest = float(np.amax(guest_times))
+        amin_guest = float(np.amin(guest_times))
 
-          if amax > boottime_max:
-            boottime_max = amax
+        if amax_guest + amax_vmm > boottime_max:
+          boottime_max = amax_guest + amax_vmm
 
-          boottimes[allocator][component] = {
-            MEAN_KEY: mean,
-            MEDIAN_KEY: median,
-            AMAX_KEY: amax,
-            AMIN_KEY: amin,
-          }
+        boottimes[unikernel]["guest"] = {
+          MEAN_KEY: mean_guest,
+          MEDIAN_KEY: median_guest,
+          AMAX_KEY: amax_guest,
+          AMIN_KEY: amin_guest,
+        }
+        boottimes[unikernel]["vmm"] = {
+          MEAN_KEY: mean_vmm,
+          MEDIAN_KEY: median_vmm,
+          AMAX_KEY: amax_vmm,
+          AMIN_KEY: amin_vmm,
+        }
 
-          if len(boottimes[allocator]) > stack_max:
-            stack_max = len(boottimes[allocator])
+        if len(boottimes[unikernel]) > stack_max:
+          stack_max = len(boottimes[unikernel])
 
   # General style
   common_style(plt)
 
-  boottime_max += 3500 # margin above biggest bar
+
+  boottime_max += 700 # margin above biggest bar
 
   # Setup matplotlib
   fig = plt.figure(figsize=(8, 5))
@@ -148,7 +163,7 @@ def plot(data=None, output=None):
 
   # This plot:
   # ax.set_title('Unikernel Build Times', pad=35)
-  ax.set_ylabel("Total Boot Time (us)") 
+  ax.set_ylabel("Total Boot Time (ms)") 
   # ax.set_xlabel('Applications', labelpad=10)
 
   # Add padding above tallest bar
@@ -157,15 +172,11 @@ def plot(data=None, output=None):
 
   renderer = fig.canvas.get_renderer()
 
-  ax_yticks = np.arange(0, boottime_max, step=2000)
-  ax.set_yticklabels([str(ytick) for ytick in ax_yticks])
-  ax.set_yticks(ax_yticks, minor=False)
-
-  # ax.set_yscale('symlog')
+  ax.set_yscale('symlog')
   # ax.set_yticks(np.arange(0, (boottime_max / MINUTES) + 10, step=2), minor=False)
 
   # Adjust margining
-  # fig.subplots_adjust(bottom=.1) #, top=1)
+  fig.subplots_adjust(bottom=.1) #, top=1)
 
   # Plot coordinates
   yticks = 0
@@ -173,15 +184,15 @@ def plot(data=None, output=None):
   xlabels = []
 
   # Create a blank matrix where we'll align bar sizes for matplotlib
-  means = np.zeros((stack_max, total_allocators), dict)
-  labels = np.zeros((stack_max, total_allocators), dict)
+  means = np.zeros((stack_max, total_vmms), dict)
+  labels = np.zeros((stack_max, total_vmms), dict)
 
 
   i = 0
-  for allocator in text_xlabels.keys():
+  for vmm in text_xlabels.keys():
     # Write unikernel project on top as "header"
-    lxpos = (i + .5 * len(boottimes[allocator].keys())) * scale
-    xlabels.append(text_xlabels[allocator])
+    lxpos = (i + .5 * len(boottimes[vmm].keys())) * scale
+    xlabels.append(text_xlabels[vmm])
 
     # ax.text(lxpos, 1.04, r'\textbf{%s}' % unikernel, ha='center', transform=ax.transAxes, fontweight='bold')
 
@@ -193,13 +204,13 @@ def plot(data=None, output=None):
     #   line.set_clip_on(False)
     #   ax.add_line(line)
 
-    components = list(boottimes[allocator].items())
+    components = list(boottimes[vmm].items())
     total_time = 0.
 
-    # Plot each allocator's as a multi-bar
+    # Plot each vmm's as a multi-bar
     j = 0
-    for component_label in sorted(boottimes[allocator]):
-      component = boottimes[allocator][component_label]
+    for component_label in sorted(boottimes[vmm]):
+      component = boottimes[vmm][component_label]
 
       means[j][i] = (component[MEAN_KEY])
       total_time += component[MEAN_KEY]
@@ -210,20 +221,14 @@ def plot(data=None, output=None):
         bottom_offset += means[k - 1][i]
 
       # Save the component label
-      if component_label == DEFAULT_COMPONENET_KEY:
-        component_label = DEFAULT_COMPONENET_KEY
-
-      if component_label == DEFAULT_COMPONENET_KEY:
-        labels[j][i] = (DEFAULT_COMPONENET_KEY)
-      else:
-        labels[j][i] = (component_label)
+      labels[j][i] = (component_label)
       
       # Plot the bar at the correct matrix location
       bar = ax.bar([i + 1], component[MEAN_KEY],
         bottom=bottom_offset,
-        label=component_label,
+        label=component_labels[component_label],
         align='center',
-        zorder=12,
+        zorder=3,
         width=BAR_WIDTH,
         color=component_colors[component_label],
         linewidth=.5
@@ -232,20 +237,21 @@ def plot(data=None, output=None):
       # Write total time label if last bar
       if j == len(components) - 1:
         bottom_offset += component[MEAN_KEY]  # + .28 # + spacing
-        print_total_time = "%-.0fus" % (total_time)
 
-        # if total_time < 1:
+        print_total_time = "%-.01fms" % (total_time)
+        #if total_time < 1:
+        #  print_total_time = "%-.0fms" % (total_time * 1000)
 
-        # elif total_time < MINUTES:
-        #   print_total_time = "%-.2fs" % (total_time)
+        #elif total_time < MINUTES:
+        #  print_total_time = "%-.2fs" % (total_time)
 
-        # elif total_time > MINUTES * MINUTES:
-        #   print_total_time = strftime("%-Hh %-Mm", gmtime(total_time))
+        #elif total_time > MINUTES * MINUTES:
+        #  print_total_time = strftime("%-Hh %-Mm", gmtime(total_time))
 
-        # else:
-        #   print_total_time = strftime("%-Mm %-Ss", gmtime(total_time))
+        #else:
+        #  print_total_time = strftime("%-Mm %-Ss", gmtime(total_time))
         
-        plt.text(i + 1, bottom_offset, print_total_time,
+        plt.text(i + 1, bottom_offset * 1.2, print_total_time,
           ha='center',
           va='bottom',
           fontsize=LARGE_SIZE,
@@ -286,12 +292,12 @@ def plot(data=None, output=None):
     
     i += 1
 
-  xticks = range(1, total_allocators + 1)
+  xticks = range(1, total_vmms + 1)
 
   ax.set_xticks(xticks)
-  ax.set_xticklabels(xlabels, fontsize=LARGE_SIZE)
-  # ax.set_xticklabels(xlabels, fontsize=LARGE_SIZE, rotation=45, ha='right', rotation_mode='anchor')
-  ax.set_xlim(.5, total_allocators + .5)
+  # ax.set_xticklabels(xlabels, fontsize=LARGE_SIZE)
+  ax.set_xticklabels(xlabels, fontsize=LARGE_SIZE, rotation=40, ha='right', rotation_mode='anchor')
+  ax.set_xlim(.5, total_vmms + .5)
   ax.yaxis.grid(True, zorder=0, linestyle=':')
   plt.setp(ax.lines, linewidth=.5)
 
@@ -301,15 +307,17 @@ def plot(data=None, output=None):
 
   # Create a unique legend
   handles, labels = plt.gca().get_legend_handles_labels()
-  by_label = dict(zip(labels, handles))
+  by_label = dict(zip(labels[::-1], handles[::-1]))
   leg = plt.legend(by_label.values(), by_label.keys(),
     loc='upper right',
-    ncol=3,
-    fontsize=LARGE_SIZE,
-    columnspacing=.8
+    ncol=1,
+    fontsize=LARGE_SIZE
   )
   leg.get_frame().set_linewidth(0.0)
 
   # Save to file
   fig.tight_layout()
   fig.savefig(output)
+
+if __name__ == '__main__':
+  fire.Fire(plot)

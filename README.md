@@ -1,7 +1,7 @@
 # Unikraft EuroSys'21 Artifacts
 
 This repository contains the artifacts, including experiments and graphs, for
-the paper: "Building Fast, Specialized Unikernels the Easy Way"
+the paper: "Unikraft: Building Fast, Specialized Unikernels the Easy Way"
 
 
 ## Experiments
@@ -34,7 +34,7 @@ Each figure, table and corresponding experiment are listed below:
 | [`fig_18`](/experiments/fig_18_unikraft-redis-alloc/README.md)      | <img src="/plots/fig_18_unikraft-redis-alloc.svg" width="200" />     | Throughput for Redis Unikraft, with varying allocators and request type (`redis-benchmark`, 30 concurrent conns, 100k requests, and a pipelining level of 16.)                                                                | 0h 3m        |
 | [`fig_19`](/experiments/fig_19_compare-dpdk/README.md)              | <img src="/plots/fig_19_compare-dpdk.svg" width="200" />             | TX throughput comparison of Unikraft versus [DPDK](https://www.dpdk.org/) in a Linux VM.                                                                                                                                      |              |
 | [`fig_20`](/experiments/fig_20_compare-9pfs/README.md)              | <img src="/plots/fig_20_compare-9pfs.svg" width="200" />             | [9pfs](https://xenbits.xen.org/docs/unstable/misc/9pfs.html) latency for read and write operations, compared to Linux.                                                                                                        |              |
-| [`fig_21`](/experiments/fig_21_unikraft-boot-pages/README.md)       | <img src="/plots/fig_21_unikraft-boot-pages.svg" width="200" />      | Unikraft boot times with static and dynamic initialization of page tables.                                                                                                                                                    | 0h 1m        |
+| [`fig_21`](/experiments/fig_21_unikraft-boot-pages/README.md)       | <img src="/plots/fig_21_unikraft-boot-pages.svg" width="200" />      | Unikraft boot times with static and dynamic initialization of page tables.                                                                                                                                                    | 0h 3m        |
 | [`fig_22`](/experiments/fig_22_compare-vfs/README.md)               | <img src="/plots/fig_22_compare-vfs.svg" width="200" />              | Filesystem specialization and removal of the vfs layer yields important performance gains for a web cache when performing a look up and file open operation.                                                                  |              |
 
 | Table                                                        | Experiment                                                                                                                                                                                                                           | Est. runtime |

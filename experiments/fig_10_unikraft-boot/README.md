@@ -6,5 +6,6 @@ Run instructions:
  - cd experiments/fig_10_unikraft-boot
  - ./genimages.sh
  - ./benchmark.sh
+ - python3 plot.py
 
 ./benchmark.sh takes about 6m30s in average.

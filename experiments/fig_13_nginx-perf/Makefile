@@ -2,14 +2,13 @@
 # Files and directories
 #
 WORKDIR ?= $(CURDIR)
-RESULTS ?= $(WORKDIR)/results
+RESULTS ?= $(WORKDIR)/paperresults
 PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 
 #
 # Tools
 #
 SNAKE ?= python3
-DOCKER ?= docker
 
 #
 # Targets
@@ -19,7 +18,6 @@ all: prepare run plot
 
 .PHONY: prepare
 prepare:
-	$(DOCKER) pull hlefeuvre/instrumented-vmms:latest
 	$(WORKDIR)/genimages.sh
 
 .PHONY: run

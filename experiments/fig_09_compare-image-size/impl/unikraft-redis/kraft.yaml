@@ -1,0 +1,45 @@
+---
+specification: '0.5'
+name: app
+unikraft:
+  version: '0.4'
+  kconfig:
+    - CONFIG_KVM_KERNEL_SERIAL_CONSOLE=n
+    - CONFIG_KVM_KERNEL_VGA_CONSOLE=n
+    - CONFIG_KVM_DEBUG_SERIAL_CONSOLE=n
+    - CONFIG_KVM_DEBUG_VGA_CONSOLE=n
+    - CONFIG_LIBUKDEBUG=n
+    - CONFIG_LIBUKDEBUG_PRINTK_ERR=n
+    - CONFIG_LIBUKDEBUG_PRINT_TIME=n
+    - CONFIG_LIBUKDEBUG_ENABLE_ASSERT=n
+    - CONFIG_LIBUKDEBUG=y
+    - CONFIG_LIBUKALLOC=y
+    - CONFIG_LIBUKSCHED=y
+    - CONFIG_LIBPOSIX_SYSINFO=y
+    - CONFIG_LIBPOSIX_LIBDL=y
+targets:
+  - architecture: x86_64
+    platform: kvm
+libraries:
+  pthread-embedded:
+    version: '0.4'
+  newlib:
+    version: '0.4'
+    kconfig:
+      - CONFIG_LIBNEWLIBC=y
+      - CONFIG_LIBNEWLIBC_WANT_IO_C99_FORMATS=y
+      - CONFIG_LIBNEWLIBC_LINUX_ERRNO_EXTENSIONS=y
+  lwip:
+    version: '0.4'
+    kconfig:
+      - CONFIG_LWIP_IPV6=y
+  redis:
+    version: '0.4'
+    kconfig:
+      - CONFIG_LIBREDIS_SERVER=y
+      - CONFIG_LIBREDIS_COMMON=y
+      - CONFIG_LIBREDIS_LIBREDIS_LUA=y
+      - CONFIG_LIBREDIS_SERVER_MAIN_FUNCTION=y
+volumes: {}
+networks:
+  net0: {}

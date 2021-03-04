@@ -33,6 +33,7 @@
 import os
 import csv
 import sys
+import fire
 import numpy as np
 from time import gmtime
 from time import strftime
@@ -44,153 +45,157 @@ from os import listdir, makedirs
 import pprint
 pp = pprint.PrettyPrinter(indent=4)
 
-WORKDIR = os.getcwd()
-RESULTSDIR = WORKDIR + '/results/'
-RESULTEXT = '.csv'
-GROUP_BAR_WIDTH = .8
-DEFAULT = '_'
+def plot(data=None, output=None):
+  WORKDIR = os.getcwd()
+  RESULTSDIR = data
+  RESULTEXT = '.csv'
+  GROUP_BAR_WIDTH = .8
+  DEFAULT = '_'
 
-files = []
-labels = []
-apps = []
-memstats = {}
-memusage_max = 0 # maximum observed memory size
-total_apps = 0
-bar_colors = {
-  'nginx': '#0C8828',
-  'redis': '#CE1216',
-  'hello': 'dimgray',
-  'sqlite': '#4BA3E1'
-}
+  files = []
+  labels = []
+  apps = []
+  memstats = {}
+  memusage_max = 0 # maximum observed memory size
+  total_apps = 0
+  bar_colors = {
+    'nginx': '#0C8828',
+    'redis': '#CE1216',
+    'hello': 'dimgray',
+    'sqlite': '#4BA3E1'
+  }
 
-labels = {
-  'unikraft': 'Unikraft',
-  'docker': 'Docker',
-  'hermitux': 'Hermitux',
-  'lupine': 'Lupine',
-  'osv': 'OSv',
-  'rump': 'Rumprun',
-  'microvm': 'Linux\nMicroVM'
-}
+  labels = {
+    'unikraft': 'Unikraft',
+    'docker': 'Docker',
+    'hermitux': 'Hermitux',
+    'lupine': 'Lupine',
+    'osv': 'OSv',
+    'rump': 'Rumprun',
+    'microvm': 'Linux\nMicroVM'
+  }
 
-for f in os.listdir(RESULTSDIR):
-  if f.endswith(RESULTEXT):
-    index = f.replace(RESULTEXT,'')
-    unikernel = index
+  for f in os.listdir(RESULTSDIR):
+    if f.endswith(RESULTEXT):
+      index = f.replace(RESULTEXT,'')
+      unikernel = index
 
-    if unikernel not in memstats:
-      memstats[unikernel] = {}
+      if unikernel not in memstats:
+        memstats[unikernel] = {}
 
-    with open(os.path.join(RESULTSDIR, f), 'r') as csvfile:
-      csvdata = csv.reader(csvfile, delimiter="\t")
-      
-      next(csvdata) # skip header
-
-      for row in csvdata:
-        app = row[0]
-
-        memusagemb = int(row[1]) * KBYTES * KBYTES
-        memstats[unikernel][app] = memusagemb
+      with open(os.path.join(RESULTSDIR, f), 'r') as csvfile:
+        csvdata = csv.reader(csvfile, delimiter="\t")
         
-        if memusagemb > memusage_max:
-          memusage_max = memusagemb
+        next(csvdata) # skip header
 
-# General style
-common_style(plt)
+        for row in csvdata:
+          app = row[0]
 
-memusage_max += KBYTES * KBYTES * 14 # add MB "margin"
+          memusagemb = int(row[1]) * KBYTES * KBYTES
+          memstats[unikernel][app] = memusagemb
+          
+          if memusagemb > memusage_max:
+            memusage_max = memusagemb
 
-# Setup matplotlib axis
-fig = plt.figure(figsize=(8, 5))
-renderer = fig.canvas.get_renderer()
+  # General style
+  common_style(plt)
 
-# image size axis
-ax1 = fig.add_subplot(1,1,1)
-ax1.set_ylabel("Minimum Memory Requirement")
-ax1.grid(which='major', axis='y', linestyle=':', alpha=0.5, zorder=0)
-ax1_yticks = np.arange(0, memusage_max, step=KBYTES*KBYTES * 8)
-ax1.set_yticks(ax1_yticks, minor=False)
-ax1.set_yticklabels([sizeof_fmt(ytick) for ytick in ax1_yticks])
-ax1.set_ylim(0, memusage_max)
+  memusage_max += KBYTES * KBYTES * 14 # add MB "margin"
 
-# Plot coordinates
-scale = 1. / len(memstats.keys())
-xlabels = []
+  # Setup matplotlib axis
+  fig = plt.figure(figsize=(8, 5))
+  renderer = fig.canvas.get_renderer()
 
-# Adjust margining
-# fig.subplots_adjust(bottom=.) #, top=1)
+  # image size axis
+  ax1 = fig.add_subplot(1,1,1)
+  ax1.set_ylabel("Minimum Memory Requirement")
+  ax1.grid(which='major', axis='y', linestyle=':', alpha=0.5, zorder=0)
+  ax1_yticks = np.arange(0, memusage_max, step=KBYTES*KBYTES * 8)
+  ax1.set_yticks(ax1_yticks, minor=False)
+  ax1.set_yticklabels([sizeof_fmt(ytick) for ytick in ax1_yticks])
+  ax1.set_ylim(0, memusage_max)
 
-i = 0
-line_offset = 0
-for unikernel in ['unikraft', 'docker', 'rump', 'hermitux', 'lupine', 'osv', 'microvm']:
-  xlabels.append(labels[unikernel])
-  apps = memstats[unikernel]
+  # Plot coordinates
+  scale = 1. / len(memstats.keys())
+  xlabels = []
 
-  # Plot a line beteween unikernel applications
-  if i > 0:
-    line = plt.Line2D([i * scale, i * scale], [-.02, 1],
-        transform=ax1.transAxes, color='black',
-        linewidth=1)
-    line.set_clip_on(False)
-    ax1.add_line(line)
+  # Adjust margining
+  # fig.subplots_adjust(bottom=.) #, top=1)
 
-  j = 0
-  bar_width = GROUP_BAR_WIDTH / len(apps.keys())
-  bar_offset = (bar_width / 2) - (GROUP_BAR_WIDTH / 2)
+  i = 0
+  line_offset = 0
+  for unikernel in ['unikraft', 'docker', 'rump', 'hermitux', 'lupine', 'osv', 'microvm']:
+    xlabels.append(labels[unikernel])
+    apps = memstats[unikernel]
 
-  # Plot each application
-  for app_label in sorted(apps):
-    app = memstats[unikernel][app_label]
+    # Plot a line beteween unikernel applications
+    if i > 0:
+      line = plt.Line2D([i * scale, i * scale], [-.02, 1],
+          transform=ax1.transAxes, color='black',
+          linewidth=1)
+      line.set_clip_on(False)
+      ax1.add_line(line)
 
-    print(unikernel, app_label, app)
+    j = 0
+    bar_width = GROUP_BAR_WIDTH / len(apps.keys())
+    bar_offset = (bar_width / 2) - (GROUP_BAR_WIDTH / 2)
 
-    bar = ax1.bar([i + 1 + bar_offset], app,
-      label=app_label,
-      align='center',
-      zorder=3,
-      width=bar_width,
-      color=bar_colors[app_label],
-      linewidth=.5
-    )
-    
-    ax1.text(i + 1.02 + bar_offset, app + 1000000, sizeof_fmt(app),
-      ha='center',
-      va='bottom',
-      fontsize=LARGE_SIZE,
-      linespacing=0,
-      #bbox=dict(pad=-.6, facecolor='white', linewidth=0),
-      rotation='vertical'
-    )
+    # Plot each application
+    for app_label in sorted(apps):
+      app = memstats[unikernel][app_label]
 
-    bar_offset += bar_width
-    j += 1
+      print(unikernel, app_label, app)
 
-  i += 1
+      bar = ax1.bar([i + 1 + bar_offset], app,
+        label=app_label,
+        align='center',
+        zorder=3,
+        width=bar_width,
+        color=bar_colors[app_label],
+        linewidth=.5
+      )
+      
+      ax1.text(i + 1.02 + bar_offset, app + 1000000, sizeof_fmt(app),
+        ha='center',
+        va='bottom',
+        fontsize=LARGE_SIZE,
+        linespacing=0,
+        #bbox=dict(pad=-.6, facecolor='white', linewidth=0),
+        rotation='vertical'
+      )
 
-# sys.exit(1)
+      bar_offset += bar_width
+      j += 1
 
-# set up x-axis labels
-xticks = range(1, len(xlabels) + 1)
-ax1.set_xticks(xticks)
-ax1.set_xticklabels(xlabels, fontsize=LARGE_SIZE, rotation=40, ha='right', rotation_mode='anchor')
-# ax1.set_xticklabels(xlabels, fontsize=LARGE_SIZE, fontweight='bold')
-ax1.set_xlim(.5, len(xlabels) + .5)
-ax1.yaxis.grid(True, zorder=0, linestyle=':')
-ax1.tick_params(axis='both', which='both', length=0)
+    i += 1
 
-# Create a unique legend
-handles, labels = plt.gca().get_legend_handles_labels()
-by_label = dict(zip(labels, handles))
-leg = plt.legend(by_label.values(), by_label.keys(),
-  loc='upper left',
-  ncol=2,
-  fontsize=LARGE_SIZE,
-)
-leg.get_frame().set_linewidth(0.0)
+  # sys.exit(1)
 
-plt.setp(ax1.lines, linewidth=.5)
+  # set up x-axis labels
+  xticks = range(1, len(xlabels) + 1)
+  ax1.set_xticks(xticks)
+  ax1.set_xticklabels(xlabels, fontsize=LARGE_SIZE, rotation=40, ha='right', rotation_mode='anchor')
+  # ax1.set_xticklabels(xlabels, fontsize=LARGE_SIZE, fontweight='bold')
+  ax1.set_xlim(.5, len(xlabels) + .5)
+  ax1.yaxis.grid(True, zorder=0, linestyle=':')
+  ax1.tick_params(axis='both', which='both', length=0)
 
-# Save to file
-fig.tight_layout()
-makedirs("../plots", exist_ok=True)
-fig.savefig("../plots/compare_minmem.pdf") #, bbox_extra_artists=(ax1,), bbox_inches='tight')
+  # Create a unique legend
+  handles, labels = plt.gca().get_legend_handles_labels()
+  by_label = dict(zip(labels, handles))
+  leg = plt.legend(by_label.values(), by_label.keys(),
+    loc='upper left',
+    ncol=2,
+    fontsize=LARGE_SIZE,
+  )
+  leg.get_frame().set_linewidth(0.0)
+
+  plt.setp(ax1.lines, linewidth=.5)
+
+  # Save to file
+  fig.tight_layout()
+  fig.savefig(output) #, bbox_extra_artists=(ax1,), bbox_inches='tight')
+
+
+if __name__ == '__main__':
+  fire.Fire(plot)
