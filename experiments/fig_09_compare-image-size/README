@@ -1,4 +1,3 @@
-TODO: generate plot!
 TODO: @alex add Mirage experiment
 
 This experiment provides data for Fig. 10, without Unikraft
@@ -7,5 +6,6 @@ This experiment provides data for Fig. 10, without Unikraft
 Run instructions:
  - cd experiments/10_compare-image-size
  - ./imgsize.sh
+ - python3 plot.sh
 
 ./imgsize.sh takes about 5 minutes in average.
