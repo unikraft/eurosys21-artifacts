@@ -59,18 +59,18 @@ total_apps = 0
 bar_colors = {
   'nginx': '#0C8828',
   'redis': '#CE1216',
-  'helloworld': 'dimgray',
+  'hello': 'dimgray',
   'sqlite': '#4BA3E1'
 }
 
 labels = {
-  'unikraft-kvm': 'Rhea',
+  'unikraft': 'Rhea',
   'docker': 'Docker',
-  'hermitux-uhyve': 'Hermitux',
-  'lupine-firecracker': 'Lupine',
-  'osv-kvm': 'OSv',
-  'rumprun-kvm': 'Rumprun',
-  'alpine-kvm': 'Alpine Linux'
+  'hermitux': 'Hermitux',
+  'lupine': 'Lupine',
+  'osv': 'OSv',
+  'rump': 'Rumprun',
+  'microvm': 'Alpine Linux'
 }
 
 for f in os.listdir(RESULTSDIR):
@@ -122,7 +122,7 @@ xlabels = []
 
 i = 0
 line_offset = 0
-for unikernel in ['unikraft-kvm', 'docker', 'hermitux-uhyve', 'rumprun-kvm', 'lupine-firecracker', 'osv-kvm', 'alpine-kvm']:
+for unikernel in ['unikraft', 'docker', 'rump', 'hermitux', 'lupine', 'osv', 'microvm']:
   xlabels.append(labels[unikernel])
   apps = memstats[unikernel]
 
