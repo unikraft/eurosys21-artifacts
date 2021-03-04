@@ -1,5 +1,8 @@
 results
 __pycache__
+impl/*/build
+impl/*/.unikraft
+impl/*/.config
 impl/mirage-helloworld/_build
 impl/mirage-helloworld/.merlin
 impl/mirage-helloworld/.mirage.config
