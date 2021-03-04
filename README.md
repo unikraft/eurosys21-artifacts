@@ -3,6 +3,7 @@
 This repository contains the artifacts, including experiments and graphs, for
 the paper: "Building Fast, Specialized Unikernels the Easy Way"
 
+
 ## Experiments
 
 The paper lists 22 figures and 3 tables worth of experiments, which both
@@ -70,6 +71,7 @@ boxes with an Intel i7 9700K 3.6 GHz (4.9 Ghz with Turbo Boost, 8 cores) and
 32GB of RAM. For the DPDK experiment we used[Intel X520-T2](https://ark.intel.com/content/www/de/de/ark/products/69655/intel-ethernet-converged-network-adapter-x520-t2.html)
 cards with the 82599EB chipset.
 
+
 ### Software
 
 #### Kernel
@@ -103,20 +105,6 @@ However, both the pinning and governor settings are handled by the scripts in
 this repo (as opposed to the kernel boot parameters, which you will need to take
 care of manually).
 
-For [`fig_22`](/experiments/fig_22_compare-vfs/README.md) we made changes to
-Linux kernel (TODO: Simon).
-
-#### Xen
-
-For 
-
-#### DPDK
-
-For [`fig_19`](/experiments/fig_19_compare-dpdk/README.md), we installed
-[DPDK](dpdk.org) which has [additional installation
-instructions](http://doc.dpdk.org/guides/linux_gsg/sys_reqs.html#compilation-of-the-dpdk).
-We have provided a convience script to help with the installation process,
-[`tools/install-dpdk.sh`](/tools/install-dpdk.sh).
 
 ## Getting Start
 
@@ -128,6 +116,7 @@ We have provided a convience script to help with the installation process,
 2. Many of the experiments use [Docker](https://docs.docker.com/get-docker/) as
    an intermediate tool for creating build and test environments (along with
    testing Docker itself).  Please install Docker on your system to continue.
+
 
 ## Running experiments
 
