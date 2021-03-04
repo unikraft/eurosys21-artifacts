@@ -70,6 +70,7 @@ function install_dependencies() {
         qemu-system-x86 \
         redis-tools \
         socat \
+        cscope \
         uuid-runtime \
         bridge-utils \
         net-tools \
