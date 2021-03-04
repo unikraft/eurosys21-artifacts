@@ -131,7 +131,9 @@ We have provided a convience script to help with the installation process,
 
 ## Running experiments
 
-We have wrapped all the individual experiments with the `run.sh` tool:
+We have wrapped all the individual experiments with the `run.sh` tool.  This
+script will install the necessary dependencies for all experiments (excluding
+Docker) only for Debian Buster.
 
 ```
 ./run.sh - Run all or a specific experiment.
