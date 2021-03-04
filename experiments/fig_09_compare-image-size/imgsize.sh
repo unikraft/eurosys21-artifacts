@@ -15,3 +15,5 @@ echo "Running rump..."
 ./impl/rump-size.sh
 echo "Running native..."
 ./impl/native-size.sh
+echo "Running mirage..."
+./impl/mirage-size.sh
