@@ -9,7 +9,7 @@ PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 
 KRAFT_IMAGE ?= eurosys21-artifacts/kraft
 KRAFT_VERSION ?= 913a31bb45cc4be6b69133473842ad3622065342
-UK_KRAFT_GITHUB_TOKEN ?= a5f9963fceb0aa51e69e8d51eb12cde44136b5f8
+UK_KRAFT_GITHUB_TOKEN ?= 
 
 IMAGES ?= $(sort $(notdir $(wildcard $(CONFIGSDIR)/*)))
 
