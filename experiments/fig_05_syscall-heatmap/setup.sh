@@ -1,4 +1,7 @@
 #!/bin/bash
+python3 -m pip install xlrd==1.2.0
+python3 -m pip install seaborn
+
 mkdir aggregated_dockerfile
 cd dockerfiles/base
 docker build -t debian_env .

@@ -6,7 +6,7 @@ This repository contains the experiments for Table 2 (ABI
 compatibility). Since these experiments have a heavy size, we decided
 to host the zip file which contains the setup on another server.
 
-**APPROXIMATIVE EXECUTION TIME=30minutes**
+**APPROXIMATIVE EXECUTION TIME=30/45minutes**
 
 ## How to Use (automatic test)
 
@@ -16,8 +16,8 @@ command. This command will:
 1. Prepare the environment by executing the `./setup.sh` script. Note
 that this script takes a long time...
 2. Run the ABI compatibility experiment by running `./run_all.sh`. 
-3. Generate the table by running the `./plot.sh` script and then save
-it into the current repository as `merged.csv`.
+3. Generate the table by running the `./plot.sh` script. It will be
+saved into the current repository as `merged.csv`.
 
 ## How to Use (manual test)
 

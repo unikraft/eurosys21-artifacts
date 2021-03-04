@@ -17,7 +17,7 @@ import matplotlib.ticker as ticker
 
 # Folder storing application JSON files from syscall analysis tool:
 # one JSON file per-application
-APPLICATION_JSON_FOLDER = 'to_aggregate'
+APPLICATION_JSON_FOLDER = 'aggregated_dockerfile'
 
 # Excel file that contains the syscall implementation
 # TODO: Use Google DOC API.
@@ -428,7 +428,7 @@ def plot_syscall_support_per_app():
     plt.ylabel('System call support', fontsize=16)
     plt.legend((p1[0], p4[0], p3[0], p2[0]), ('Supported syscalls', 'If top 5 syscalls implemented', 'If top 10 syscalls implemented', 'If remaining syscalls implemented'))
 
-    plt.show()
+    plt.savefig("syscall-support.pdf")
 
 
 def main():
