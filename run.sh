@@ -77,17 +77,17 @@ function install_dependencies() {
         bridge-utils \
         net-tools \
         gawk \
+        musl-tools \
         qemu-utils
       
       # Plot script requirements
-      if [[ $NO_DOCKER == 'n' ]]; then
+      if [[ $NO_DOCKER == 'y' ]]; then
         apt-get install -y \
           python3 \
           python3-click \
           python3-tabulate \
           python3-numpy \
           python3-matplotlib \
-          musl-tools \
           texlive-fonts-recommended \
           texlive-fonts-extra \
           dvipng
