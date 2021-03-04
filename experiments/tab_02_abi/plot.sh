@@ -68,4 +68,4 @@ base_folder=$(cat .init_folder.txt)
 cp $PWD/merged.csv $base_folder
 cp -r $DATA_FOLDER $base_folder
 
-echo "Results are available in data and are merged into merged.csv"
+echo "Raw results are available in the data folder and CSV merged table is written in  merged.csv (current folder)"
