@@ -8,11 +8,11 @@ is provided in this repository.
 
 In order to gather syscalls we perform a syscalls analysis of 30
 applications by running a dependency analyser tool that we have
-implemented ourself.
+implemented ourself (see *Others* section for futher information).
 
 To have the right environment for each application, we have created a
 docker file per application. These ones are available in the 
-`dockerfile` folder. Note that docker must be installed on your 
+`dockerfiles` folder. Note that docker must be installed on your 
 machine to perform this experiment.
 
 **APPROXIMATIVE EXECUTION TIME=30/45minutes**
@@ -52,20 +52,25 @@ a new application.
 
 If you want to gather yourself the syscalls of an app, you need to
 download and use our toolchain. Please follow the following steps:
-1. clone the tools repo with the following command: `git clone git@github.com:gaulthiergain/tools.git`;
-2. install GO and setup your GO PATH/ROOT variables;
-3. run `make deps` within this folder and then run `make`;
-4. when you have the `tools` binary file, you can use it as follow:
+1. Clone the tools repo with the following command: 
+`git clone git@github.com:gaulthiergain/tools.git`;
+2. Install GO and setup your GO PATH/ROOT variables;
+3. Run `make deps` within this folder and then run `make`;
+4. When you have the `tools` binary file, you can use it as follow:
 `./tools --dep -p <program_name> [-o|--options <option>][-t|--testFile <test_file>]`;
-5. Note that you need to install yourself the application before using the tools;
+5. Note that you need to install yourself the application before using 
+the tools. The most easiest solution is to write a docker file.
 
-Example with the apache web server, a specic config file and a test file.
+Example with the nginx web server and a test file:
 
-`sudo ./tools --dep -p ~/dev/bin_programs/apache/httpd-2.4.46/httpd -o " -f /usr/local/apache2/conf/httpd.conf -X -k start" -t ~/go/src/tools/testfiles/test_http.json`
+`./tools --dep -p nginx -t ~/testfiles/test_http.json`
 
-Please refer to the wiki for further information: https://github.com/gaulthiergain/tools/wiki
+Please refer to the wiki for further information: 
+https://github.com/gaulthiergain/tools/wiki
 
-### Further Information about the heatmap
+### Further Information about the heatmap script
+
+The heatmap script allows to generate has also various features:
 
 ```
 python3 heatmap.py --help
