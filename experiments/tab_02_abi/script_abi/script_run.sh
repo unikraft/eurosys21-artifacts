@@ -6,7 +6,7 @@ for d in *; do
         echo "Enter to $d repository"
         cd $d
      
-        size=$(ls -lh build/app-compat_kvm-x86_64|awk '{print $5}')
+        size=$(ls -lh app-compat_kvm-x86_64|awk '{print $5}')
         if [[ $size == *"K"* ]]; then
             size=$(sed 's/.\{1\}$//' <<< "$size")
             size="0.$size"
