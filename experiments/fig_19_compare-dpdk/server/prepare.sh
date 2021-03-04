@@ -1,3 +1,9 @@
+cd unikraft/uk_test_suite/ && make
+cd ../..
+
+
+echo "Getting the Linux VM with DPDK"
+
 FILE=../aux/debian.qcow2
 if test -f "$FILE"; then
     echo "$FILE exists."
