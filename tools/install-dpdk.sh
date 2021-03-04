@@ -64,12 +64,12 @@ function install_dependencies() {
 
   case $DISTRO in
     buster)
-      apt-get -qq update
+      apt-get update
       apt-get install -y \
         git \
         clang \
         doxygen \
-        hugepages \
+        libhugetlbfs-bin \
         build-essential 
       ;;
     *)
