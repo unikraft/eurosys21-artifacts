@@ -20,7 +20,7 @@ def plot(data=None, output=None):
 
     for i in components:
         adj_list[i] = {}
-        for line in  open(i + ".deps", "r"):
+        for line in  open(os.path.join(data, i) + ".deps", "r"):
             if "lib" in line:
                 j = line.split("/")[2]
                 if j == i or j == "ukdebug":
