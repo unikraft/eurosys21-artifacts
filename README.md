@@ -172,11 +172,3 @@ Influential Environmental Variables
 
 Each experiment, and therefore directory listed in `experiments/`, is populated
 with a `README.md` which includes more detail about the individual experiment.
-
-<!--
-
-Experiments which require host precision (and therefore `ukbench`):
-
- * `14_redis-perf`;
- * `15_nginx-perf`;
--->
