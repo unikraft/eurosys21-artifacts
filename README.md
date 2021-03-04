@@ -43,6 +43,12 @@ Each figure, table and corresponding experiment are listed below:
 | [`tab_02`](/experiments/tab_02_abi/README.md)                | Results from automated porting based on externally-built archives when linked against Unikraft using musl and newlib. We show whether the port succeeded with the glibc compatibility layer ("compat layer") and without it ("std"). |              |
 | [`tab_03`](/experiments/tab_03_kvs_compare/README.md)        | kvs_compare                                                                                                                                                                                                                          |              |
 
+The paper also mentions several results in-line, which can be found at:
+
+| Text                                                           | Experiment | Est. runtime |
+|----------------------------------------------------------------|------------|--------------|
+| [`txt_01`](/experiments/txt_01_unikernel-boot-times/README.md) |            |              |
+| [`txt_02`](/experiments/txt_02_9pfs-boot-times/README.md)      |            |              |
 
 ## Prerequisites
 
