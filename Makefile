@@ -1,18 +1,20 @@
 # SPDX-License-Identifier: BSD-3-Clause
 # Authors: Alexander Jung <a.jung@lancs.ac.uk>
 WORKDIR ?= $(CURDIR)
-IMAGE ?= unikraft/eurosys21-artifacts-plot:latest
 
 DOCKER ?= docker
+DOCKER_FORCE_BUILD ?= n
+IMAGES ?= $(subst Dockerfile.,,$(notdir $(wildcard $(WORKDIR)/support/Dockerfile.*)))
+IMAGE_PREFFIX ?= unikraft/eurosys21-artifacts-
 
 .PHONY: docker
-docker: docker-plots
-
-.PHONY: docker-plots
-docker-plots:
-docker-plots:
+docker: $(addprefix docker-,$(IMAGES))
+docker-%:
+	$(DOCKER) pull $(IMAGE_PREFFIX)$*:latest || true
+ifeq ($(DOCKER_FORCE_BUILD),y)
 	$(DOCKER) build \
-		-f $(WORKDIR)/support/Dockerfile.plots \
-		--tag $(IMAGE) \
-		--cache-from $(IMAGE) \
+		-f $(WORKDIR)/support/Dockerfile.$* \
+		--tag $(IMAGE_PREFFIX)$*:latest \
+		--cache-from $(IMAGE_PREFFIX)$*:latest \
 		.
+endif
