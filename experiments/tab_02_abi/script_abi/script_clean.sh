@@ -5,8 +5,8 @@ for d in *; do
         echo "Enter to $d repository"
         cd $d
         echo "Cleaning $d ... This may take some times"
+        make properclean &> "make_clean_$d.txt" 
         rm *.txt &> /dev/null
-        make clean &> "make_clean_$d.txt" 
         cd ..
         echo "---------------------------------------------"
     fi
