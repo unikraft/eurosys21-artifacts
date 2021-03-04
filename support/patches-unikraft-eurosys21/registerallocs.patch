@@ -1,0 +1,45 @@
+diff --git a/lib/ukboot/Config.uk b/lib/ukboot/Config.uk
+index 9e2996d7..7e48e168 100644
+--- a/lib/ukboot/Config.uk
++++ b/lib/ukboot/Config.uk
+@@ -97,6 +97,14 @@ if LIBUKBOOT
+ 		depends on LIBTLSF_INCLUDED
+ 		select LIBTLSF
+ 
++		config LIBUKBOOT_INITMIMALLOC
++		bool "MIMALLOC"
++		select LIBMIMALLOC
++
++		config LIBUKBOOT_INITTINYALLOC
++		bool "TINYALLOC"
++		select LIBTINYALLOC
++
+ 		config LIBUKBOOT_NOALLOC
+ 		bool "None"
+ 
+diff --git a/lib/ukboot/boot.c b/lib/ukboot/boot.c
+index 2f7ab24a..4e303045 100644
+--- a/lib/ukboot/boot.c
++++ b/lib/ukboot/boot.c
+@@ -47,6 +47,10 @@
+ #include <uk/allocregion.h>
+ #elif CONFIG_LIBUKBOOT_INITTLSF
+ #include <uk/tlsf.h>
++#elif CONFIG_LIBUKBOOT_INITMIMALLOC
++#include <uk/mimalloc.h>
++#elif CONFIG_LIBUKBOOT_INITTINYALLOC
++#include <uk/tinyalloc.h>
+ #endif
+ #if CONFIG_LIBUKSCHED
+ #include <uk/sched.h>
+@@ -241,6 +245,10 @@ void ukplat_entry(int argc, char *argv[])
+ 			a = uk_allocbbuddy_init(md.base, md.len);
+ #elif CONFIG_LIBUKBOOT_INITREGION
+ 			a = uk_allocregion_init(md.base, md.len);
++#elif CONFIG_LIBUKBOOT_INITTINYALLOC
++			a = uk_tinyalloc_init(md.base, md.len);
++#elif CONFIG_LIBUKBOOT_INITMIMALLOC
++			a = uk_mimalloc_init(md.base, md.len);
+ #elif CONFIG_LIBUKBOOT_INITTLSF
+ 			a = uk_tlsf_init(md.base, md.len);
+ #endif

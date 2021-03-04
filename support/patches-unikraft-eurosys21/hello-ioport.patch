@@ -1,0 +1,32 @@
+diff --git a/Makefile b/Makefile
+index 5426bae..c565d5a 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,6 +1,6 @@
+ UK_ROOT ?= $(PWD)/../../unikraft
+ UK_LIBS ?= $(PWD)/../../libs
+-LIBS :=
++LIBS := $(PWD)/../../plats/plat-solo5
+ 
+ all:
+        @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS)
+diff --git a/main.c b/main.c
+index 0a14cb0..3e28339 100644
+--- a/main.c
++++ b/main.c
+@@ -23,8 +23,15 @@ static void millisleep(unsigned int millisec)
+ }
+ #endif /* CONFIG_APPHELLOWORLD_SPINNER */
+ 
++#include <stdint.h>
++static inline void outb(uint16_t port, uint8_t v)
++{
++        __asm__ __volatile__("outb %0,%1" : : "a"(v), "dN"(port));
++}
++
+ int main(int argc, char *argv[])
+ {
++       outb(1500, 1);
+ #if CONFIG_APPHELLOWORLD_PRINTARGS || CONFIG_APPHELLOWORLD_SPINNER
+        int i;
+ #endif

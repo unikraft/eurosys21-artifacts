@@ -14,8 +14,8 @@ mkdir -p data
 # Generate nginx images (using nginx/ genimages script)
 # ========================================================================
 
-${BUILDDIR}/fig_13_nginx-perf/genimages.sh
 cp -r ${BUILDDIR}/fig_13_nginx-perf/data/* data/
+${BUILDDIR}/fig_13_nginx-perf/genimages.sh
 # in case redis/genimages.sh cleans up $IMAGES
 IMAGES=$(pwd)/images/
 mv $IMAGES nginx
@@ -24,8 +24,8 @@ mv $IMAGES nginx
 # Generate redis images (using redis/ genimages script)
 # ========================================================================
 
-${BUILDDIR}/fig_12_redis-perf/genimages.sh
 cp -r ${BUILDDIR}/fig_12_redis-perf/data/* data/
+${BUILDDIR}/fig_12_redis-perf/genimages.sh
 # see previous comment
 IMAGES=$(pwd)/images/
 mv $IMAGES redis

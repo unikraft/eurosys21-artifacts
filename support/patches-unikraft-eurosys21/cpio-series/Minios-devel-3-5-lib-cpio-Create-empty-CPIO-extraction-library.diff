@@ -1,0 +1,35 @@
+diff --git a/lib/Makefile.uk b/lib/Makefile.uk
+index aa7e730..1503e73 100644
+--- a/lib/Makefile.uk
++++ b/lib/Makefile.uk
+@@ -20,6 +20,7 @@ $(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/fdt))
+ $(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/syscall_shim))
+ $(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/vfscore))
+ $(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/ramfs))
++$(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/cpio))
+ $(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/devfs))
+ $(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/9pfs))
+ $(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/uklock))
+diff --git a/lib/cpio/Makefile.uk b/lib/cpio/Makefile.uk
+new file mode 100644
+index 0000000..c3411bf
+--- /dev/null
++++ b/lib/cpio/Makefile.uk
+@@ -0,0 +1,7 @@
++$(eval $(call addlib_s,libcpio,$(CONFIG_LIBCPIO)))
++
++# LIBCPIO_CFLAGS-$(call gcc_version_ge,8,0) += -Wno-cast-function-type
++
++CINCLUDES-$(CONFIG_LIBCPIO) += -I$(LIBCPIO_BASE)/include
++CXXINCLUDES-$(CONFIG_LIBCPIO) += -I$(LIBCPIO_BASE)/include
++LIBCPIO_SRCS-y += $(LIBCPIO_BASE)/cpio.c
+diff --git a/lib/cpio/cpio.c b/lib/cpio/cpio.c
+new file mode 100644
+index 0000000..e69de29
+diff --git a/lib/cpio/exportsyms.uk b/lib/cpio/exportsyms.uk
+new file mode 100644
+index 0000000..b0047fa
+--- /dev/null
++++ b/lib/cpio/exportsyms.uk
+@@ -0,0 +1 @@
++None
