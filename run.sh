@@ -107,7 +107,7 @@ function perform() {
   local BASENAME=$1
   local ACTION=$2
 
-  log_dbg "Running $ACTION on $BASENAME..."
+  log_inf "Running $ACTION on $BASENAME..."
 
   case $ACTION in
     plot)
@@ -165,7 +165,7 @@ fi
 
 # Do we need Docker?
 if [[ $LIST_ALL != 'y' && $NO_DOCKER == 'n' ]]; then
-  log_dbg "Building utility containers..."
+  log_inf "Building utility containers..."
   make -C $WORKDIR docker
 fi
 
