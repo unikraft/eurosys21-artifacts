@@ -210,13 +210,11 @@ struct uk_netdev_rxqueue_conf {
 #endif
 };
 
-typedef int (*uk_netpool_dtor_t)(struct uk_netbuf *, int cnt);
 /**
  * A structure used to configure an Unikraft network device TX queue.
  */
 struct uk_netdev_txqueue_conf {
 	struct uk_alloc *a;               /* Allocator for descriptors. */
-	uk_netpool_dtor_t *burst_dtor;
 };
 
 /** Driver callback type to read device/driver capabilities,
@@ -374,23 +372,6 @@ struct uk_netdev_data {
 
 	const uint16_t       id;    /**< ID is assigned during registration */
 	const char           *drv_name;
-};
-
-struct uk_netdev_rxq_stats {
-	uint64_t	rx_success;
-	uint64_t	rx_dropped;
-	uint64_t	rx_itr;
-	uint64_t	rx_latency;
-	uint64_t	rxq_latency;
-	uint64_t	rxq_process_latency;
-};
-
-struct uk_netdev_txq_stats {
-	uint64_t	tx_success;
-	uint64_t	tx_dropped;
-	uint64_t	tx_ring_latency;
-	uint64_t	tx_free_latency;
-	uint64_t	tx_prepare_latency;
 };
 
 /**

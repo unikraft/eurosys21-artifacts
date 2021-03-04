@@ -102,60 +102,36 @@ ifeq ($(CONFIG_UK_BASE),)
 $(error "Invalid base directory (CONFIG_UK_BASE)")
 endif
 
-# parameter A: APP_DIR ###
+# A // APP_DIR
 # Set A variable if not already done on the command line;
 ifneq ("$(origin A)", "command line")
-override A := $(CONFIG_UK_BASE)
-else
-ifeq ("$(filter /%,$(A))", "")
-$(error Path to app directory (A) is not absolute)
-endif
+A := $(CONFIG_UK_BASE)
 endif
 # Remove the trailing '/.'
 # Also remove the trailing '/' the user can set when on the command line.
 override A := $(realpath $(patsubst %/,%,$(patsubst %.,%,$(A))))
 ifeq ($(A),)
-$(error Invalid app directory (A))
+$(error "Invalid app directory (A)")
 endif
 override CONFIG_UK_APP   := $(A)
 override APP_DIR  := $(A)
 override APP_BASE := $(A)
 
-# parameter O: BUILD_DIR ###
+# BUILD_DIR
 # Use O variable if set on the command line, otherwise use $(A)/build;
 ifneq ("$(origin O)", "command line")
-_O := $(APP_BASE)/build
+BUILD_DIR := $(shell mkdir -p $(CONFIG_UK_APP)/build && cd $(CONFIG_UK_APP)/build >/dev/null && pwd)
+$(if $(BUILD_DIR),, $(error could not create directory "$(A)/build"))
 else
-ifeq ("$(filter /%,$(O))", "")
-$(error Path to output directory (O) is not absolute)
+BUILD_DIR := $(shell mkdir -p $(O) && cd $(O) >/dev/null && pwd)
+$(if $(BUILD_DIR),, $(error could not create directory "$(O)"))
 endif
-_O := $(realpath $(dir $(O)))/$(notdir $(O))
-endif
-BUILD_DIR := $(shell mkdir -p $(_O) && cd $(_O) >/dev/null && pwd)
-$(if $(BUILD_DIR),, $(error could not create directory "$(_O)"))
-BUILD_DIR := $(realpath $(patsubst %/,%,$(patsubst %.,%,$(BUILD_DIR))))
-override O := $(BUILD_DIR)
-
-# parameter C: UK_CONFIG ###
-# Use C variable if set on the command line, otherwise use $(A)/.config;
-ifneq ("$(origin C)", "command line")
-ifeq ("$(origin C)", "undefined")
-override C := $(CONFIG_UK_APP)/.config
-endif
-else
-ifeq ("$(filter /%,$(C))", "")
-$(error Path to configuration file (C) is not absolute)
-endif
-override C := $(realpath $(dir $(C)))/$(notdir $(C))
-endif
-UK_CONFIG  := $(C)
-CONFIG_DIR := $(dir $(C))
+override BUILD_DIR := $(realpath $(patsubst %/,%,$(patsubst %.,%,$(BUILD_DIR))))
 
 # EPLAT_DIR (list of external platform libraries)
 # Retrieved from P variable from the command line (paths separated by colon)
 ifeq ("$(origin P)", "command line")
 $(foreach E,$(subst :, ,$(P)), \
-$(if $(filter /%,$(E)),,$(error Path to external platform "$(E)" (P) is not absolute));\
 $(if $(wildcard $(E)), \
 	$(eval EPLAT_DIR += $(E)) \
 , $(if $(wildcard $(CONFIG_UK_BASE)/$(E)),\
@@ -166,13 +142,18 @@ $(if $(wildcard $(E)), \
 )
 endif
 EPLAT_DIR := $(realpath $(patsubst %/,%,$(patsubst %.,%,$(EPLAT_DIR))))
+build_dir_make  := 0
+ifneq ($(BUILD_DIR),$(UK_BASE))
+	build_dir_make := 1;
+else
+	sub_make_exec := 1;
+endif
 
 # ELIB_DIR (list of external libraries)
 # Retrieved from L variable from the command line (paths separated by colon)
 ifeq ("$(origin L)", "command line")
 # library path exists?
 $(foreach E,$(subst :, ,$(L)), \
-$(if $(filter /%,$(E)),,$(error Path to external library "$(E)" (L) is not absolute));\
 $(if $(wildcard $(E)), \
 	$(eval ELIB_DIR += $(E)) \
 , $(if $(wildcard $(CONFIG_UK_BASE)/$(E)),\
@@ -184,24 +165,11 @@ $(if $(wildcard $(E)), \
 endif
 ELIB_DIR := $(realpath $(patsubst %/,%,$(patsubst %.,%,$(ELIB_DIR))))
 
-$(call verbose_info,* Unikraft base:      $(CONFIG_UK_BASE))
-$(call verbose_info,* Configuration:      $(UK_CONFIG))
-$(call verbose_info,* Application base:   $(CONFIG_UK_APP))
-$(call verbose_info,* External platforms: [ $(EPLAT_DIR) ])
-$(call verbose_info,* External libraries: [ $(ELIB_DIR) ])
-$(call verbose_info,* Build output:       $(BUILD_DIR))
-
-build_dir_make  := 0
-ifneq ($(BUILD_DIR),$(UK_BASE))
-	build_dir_make := 1;
-else
-	sub_make_exec := 1;
-endif
-
 # KConfig settings
 
 CONFIG_UK_PLAT        := $(CONFIG_UK_BASE)/plat/
 CONFIG_UK_LIB         := $(CONFIG_UK_BASE)/lib/
+CONFIG_DIR            := $(CONFIG_UK_APP)
 CONFIG_CONFIG_IN      := $(CONFIG_UK_BASE)/Config.uk
 CONFIG                := $(CONFIG_UK_BASE)/support/kconfig
 CONFIGLIB	      := $(CONFIG_UK_BASE)/support/kconfiglib
@@ -330,14 +298,6 @@ LDFLAGS :=
 LDFLAGS-y :=
 IMAGE_LDFLAGS :=
 IMAGE_LDFLAGS-y :=
-EACHOLIB_SRCS :=
-EACHOLIB_SRCS-y :=
-EACHOLIB_OBJS :=
-EACHOLIB_OBJS-y :=
-EACHOLIB_ALIBS :=
-EACHOLIB_ALIBS-y :=
-EACHOLIB_LOCALS :=
-EACHOLIB_LOCALS-y :=
 
 # Pull in the user's configuration file
 ifeq ($(filter $(noconfig_targets),$(MAKECMDGOALS)),)
@@ -445,8 +405,7 @@ properclean:
 
 distclean: properclean
 	$(call verbose_cmd,RM,config,$(RM) \
-		$(UK_CONFIG) $(UK_CONFIG).old \
-		$(CONFIG_DIR)/.$(notdir $(UK_CONFIG)).tmp \
+		$(UK_CONFIG) $(UK_CONFIG).old $(CONFIG_DIR)/..config.tmp \
 		$(CONFIG_DIR)/.auto.deps)
 
 .PHONY: distclean properclean
@@ -954,14 +913,12 @@ print-objs:
 		$(foreach P,$(UK_PLATS) $(UK_PLATS-y),\
 		$(if $(call qstrip,$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y)),\
 		$(foreach L,$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y), \
-		$(if $(call qstrip,$($(call vprefix_lib,$(L),OBJS)) $($(call vprefix_lib,$(L),OBJS-y)) \
-		       $(EACHOLIB_OBJS) $(EACHOLIB_OBJS-y)), \
-		'$(L):\n   $($(call vprefix_lib,$(L),OBJS)) $($(call vprefix_lib,$(L),OBJS-y)) $(EACHOLIB_OBJS) $(EACHOLIB_OBJS-y)\n'\
+		$(if $(call qstrip,$($(call vprefix_lib,$(L),OBJS)) $($(call vprefix_lib,$(L),OBJS-y))), \
+		'$(L):\n   $($(call vprefix_lib,$(L),OBJS)) $($(call vprefix_lib,$(L),OBJS-y))\n'\
 		))))\
 		$(foreach L,$(UK_LIBS) $(UK_LIBS-y),\
-		$(if $(call qstrip,$($(call vprefix_lib,$(L),OBJS)) $($(call vprefix_lib,$(L),OBJS-y)) \
-		       $(EACHOLIB_OBJS) $(EACHOLIB_OBJS-y)), \
-		'$(L):\n   $($(call vprefix_lib,$(L),OBJS)) $($(call vprefix_lib,$(L),OBJS-y)) $(EACHOLIB_OBJS) $(EACHOLIB_OBJS-y)\n'\
+		$(if $(call qstrip,$($(call vprefix_lib,$(L),OBJS)) $($(call vprefix_lib,$(L),OBJS-y))),\
+		'$(L):\n   $($(call vprefix_lib,$(L),OBJS)) $($(call vprefix_lib,$(L),OBJS-y))\n'\
 		))
 
 print-srcs:
@@ -969,14 +926,12 @@ print-srcs:
 		$(foreach P,$(UK_PLATS) $(UK_PLATS-y),\
 		$(if $(call qstrip,$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y)),\
 		$(foreach L,$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y), \
-		$(if $(call qstrip,$($(call vprefix_lib,$(L),SRCS)) $($(call vprefix_lib,$(L),SRCS-y)) \
-		       $(EACHOLIB_SRCS) $(EACHOLIB_SRCS-y)), \
-		'$(L):\n   $($(call vprefix_lib,$(L),SRCS)) $($(call vprefix_lib,$(L),SRCS-y)) $(EACHOLIB_SRCS) $(EACHOLIB_SRCS-y)\n'\
+		$(if $(call qstrip,$($(call vprefix_lib,$(L),SRCS)) $($(call vprefix_lib,$(L),SRCS-y))), \
+		'$(L):\n   $($(call vprefix_lib,$(L),SRCS)) $($(call vprefix_lib,$(L),SRCS-y))\n'\
 		))))\
 		$(foreach L,$(UK_LIBS) $(UK_LIBS-y),\
-		$(if $(call qstrip,$($(call vprefix_lib,$(L),SRCS)) $($(call vprefix_lib,$(L),SRCS-y)) \
-		       $(EACHOLIB_SRCS) $(EACHOLIB_SRCS-y)), \
-		'$(L):\n   $($(call vprefix_lib,$(L),SRCS)) $($(call vprefix_lib,$(L),SRCS-y)) $(EACHOLIB_SRCS) $(EACHOLIB_SRCS-y)\n'\
+		$(if $(call qstrip,$($(call vprefix_lib,$(L),SRCS)) $($(call vprefix_lib,$(L),SRCS-y))),\
+		'$(L):\n   $($(call vprefix_lib,$(L),SRCS)) $($(call vprefix_lib,$(L),SRCS-y))\n'\
 		))
 else
 print-libs:
@@ -1041,15 +996,7 @@ help:
 	@echo '  savedefconfig          - Save current config to UK_DEFCONFIG (minimal config)'
 	@echo '  allyesconfig           - New config where all options are accepted with yes'
 	@echo '  allnoconfig            - New config where all options are answered with no'
-	@echo ''
-	@echo 'Command-line variables:'
-	@echo '  V=0|1                  - 0 => quiet build (default), 1 => verbose build'
-	@echo '  C=[PATH]               - path to .config configuration file'
-	@echo '  O=[PATH]               - path to build output (will be created if it does not exist)'
-	@echo '  A=[PATH]               - path to Unikraft application'
-	@echo '  L=[PATH]:[PATH]:..     - colon-separated list of paths to external libraries'
-	@echo '  P=[PATH]:[PATH]:..     - colon-separated list of paths to external platforms'
-	@echo ''
+	@echo
 	@echo 'Miscellaneous:'
 	@echo '  print-version          - print Unikraft version'
 	@echo '  print-libs             - print library names enabled for build'
@@ -1057,6 +1004,7 @@ help:
 	@echo '  print-objs             - print object file names enabled for build'
 	@echo '  print-srcs             - print source file names enabled for build'
 	@echo '  print-vars             - prints all the variables currently defined in Makefile'
+	@echo '  make V=0|1             - 0 => quiet build (default), 1 => verbose build'
 	@echo ''
 
 endif #umask

@@ -8,7 +8,6 @@
 #include <rte_mbuf.h>
 #include <testsuite.h>
 #include <uk/assert.h>
-#define CONFIG_USE_DPDK_PMD
 #ifndef CONFIG_USE_DPDK_PMD
 #include <uk/netbuf.h>
 #include <uk/netdev.h>

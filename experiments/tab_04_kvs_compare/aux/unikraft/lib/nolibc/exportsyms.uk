@@ -45,7 +45,6 @@ strtoul
 strtoll
 strtoull
 atoi
-qsort
 
 # string
 memcpy
