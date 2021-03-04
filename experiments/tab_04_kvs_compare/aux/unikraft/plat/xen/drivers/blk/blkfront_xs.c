@@ -75,7 +75,7 @@ static int blkfront_xb_get_nb_max_queues(struct blkfront_dev *dev)
 	xendev = dev->xendev;
 
 	err = xs_scanf(XBT_NIL, xendev->otherend, "multi-queue-max-queues",
-				"%"PRIu16,
+				"%"SCNu16,
 				&dev->nb_queues);
 	if (err < 0) {
 		uk_pr_err("Failed to read multi-queue-max-queues: %d\n", err);
@@ -360,6 +360,7 @@ static int blkfront_xb_write_rings_info(struct blkfront_dev *dev)
 
 	UK_ASSERT(dev != NULL);
 
+again:
 	err = xs_transaction_start(&xbt);
 	if (err)
 		goto abort_transaction;
@@ -375,6 +376,9 @@ static int blkfront_xb_write_rings_info(struct blkfront_dev *dev)
 	}
 
 	err = xs_transaction_end(xbt, 0);
+	if (err == -EAGAIN)
+		goto again;
+
 	if (err)
 		uk_pr_err("Failed to end transaction: %d\n", err);
 
@@ -501,12 +505,18 @@ int blkfront_xb_connect(struct blkfront_dev *blkdev)
 	}
 
 	err = xenbus_switch_state(XBT_NIL, xendev, XenbusStateConnected);
-	if (err)
+	if (err) {
+		uk_pr_err("Failed to switch state to XenbusStateConnected: %d.\n",
+				err);
 		goto err;
+	}
+
 
 	err = blkfront_xb_wait_be_connect(blkdev);
-	if (err)
+	if (err) {
+		uk_pr_err("Backend failed to change state: %d.\n", err);
 		goto err;
+	}
 
 	err = blkfront_xb_get_capabilities(blkdev);
 	if (err) {

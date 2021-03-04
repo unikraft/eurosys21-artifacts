@@ -65,17 +65,77 @@
 extern "C" {
 #endif
 
+#ifndef CONFIG_UK_NETDEV_SCRATCH_SIZE
+#define CONFIG_UK_NETDEV_SCRATCH_SIZE 0
+#endif /* CONFIG_UK_NETDEV_SCRATCH_SIZE */
+
 struct uk_netdev;
 UK_TAILQ_HEAD(uk_netdev_list, struct uk_netdev);
 
 /**
+ * Ethernet size macros
+ */
+/* Header fields */
+#define UK_ETH_ADDR_LEN			   6
+#define UK_ETH_TYPE_LEN			   2
+#define UK_ETH_8021Q_LEN		(UK_ETH_TYPE_LEN + 2)
+
+/* Ethernet header */
+/* Untagged */
+#define UK_ETH_HDR_UNTAGGED_LEN		((2 * UK_ETH_ADDR_LEN) + \
+					 UK_ETH_TYPE_LEN)
+/* Single VLAN tag (IEEE 802.1q) */
+#define UK_ETH_HDR_8021Q_LEN		(UK_ETH_HDR_UNTAGGED_LEN + \
+					 UK_ETH_8021Q_LEN)
+/* Double VLAN tag (IEEE 802.1q) */
+#define UK_ETH_HDR_8021AD_LEN		(UK_ETH_HDR_UNTAGGED_LEN + \
+					 (2 * UK_ETH_8021Q_LEN))
+
+/* Payload */
+#define UK_ETH_PAYLOAD_MAXLEN		1500
+#define UK_ETH_JPAYLOAD_MAXLEN		9000 /**< Jumbo frame. */
+
+/* Frame sizes */
+#define UK_ETH_FRAME_MINLEN		  60
+
+
+#define UK_ETH_FRAME_UNTAGGED_MAXLEN	(UK_ETH_HDR_UNTAGGED_LEN +	\
+					 UK_ETH_PAYLOAD_MAXLEN)
+#define UK_ETH_FRAME_8021Q_MAXLEN	(UK_ETH_HDR_8021_LEN + \
+					 UK_ETH_PAYLOAD_MAXLEN)
+#define UK_ETH_FRAME_8021AD_MAXLEN	(UK_ETH_HDR_8021ADLEN + \
+					 UK_ETH_PAYLOAD_MAXLEN)
+#define UK_ETH_FRAME_MAXLEN		(UK_ETH_FRAME_8021AD_MAXLEN)
+
+
+#define UK_ETH_JFRAME_UNTAGGED_MAXLEN	(UK_ETH_HDR_UNTAGGED_LEN +	\
+					 UK_ETH_JPAYLOAD_MAXLEN)
+#define UK_ETH_JFRAME_8021Q_MAXLEN	(UK_ETH_HDR_8021_LEN + \
+					 UK_ETH_JPAYLOAD_MAXLEN)
+#define UK_ETH_JFRAME_8021AD_MAXLEN	(UK_ETH_HDR_8021ADLEN + \
+					 UK_ETH_JPAYLOAD_MAXLEN)
+#define UK_ETH_JFRAME_MAXLEN		(UK_ETH_JFRAME_8021AD_MAXLEN)
+
+/**
  * A structure used for Ethernet hardware addresses
  */
-#define UK_NETDEV_HWADDR_LEN 6 /**< Length of Ethernet address. */
+#define UK_NETDEV_HWADDR_LEN		(UK_ETH_ADDR_LEN)
 
 struct uk_hwaddr {
 	uint8_t addr_bytes[UK_NETDEV_HWADDR_LEN];
 } __packed;
+
+
+/**
+ * The netdevice support rx/tx interrupt.
+ */
+#define UK_FEATURE_RXQ_INTR_BIT		    0
+#define UK_FEATURE_RXQ_INTR_AVAILABLE  (1UL << UK_FEATURE_RXQ_INTR_BIT)
+#define UK_FEATURE_TXQ_INTR_BIT		    1
+#define UK_FEATURE_TXQ_INTR_AVAILABLE  (1UL << UK_FEATURE_TXQ_INTR_BIT)
+
+#define uk_netdev_rxintr_supported(feature)	\
+	(feature & (UK_FEATURE_RXQ_INTR_AVAILABLE))
 
 /**
  * A structure used to describe network device capabilities.
@@ -87,6 +147,7 @@ struct uk_netdev_info {
 	uint16_t max_mtu;   /**< Maximum supported MTU size. */
 	uint16_t nb_encap_tx;  /**< Number of bytes required as headroom for tx. */
 	uint16_t nb_encap_rx;  /**< Number of bytes required as headroom for rx. */
+	uint32_t features; /**< bitmap of the features supported */
 };
 
 /**
@@ -210,11 +271,13 @@ struct uk_netdev_rxqueue_conf {
 #endif
 };
 
+typedef int (*uk_netpool_dtor_t)(struct uk_netbuf *, int cnt);
 /**
  * A structure used to configure an Unikraft network device TX queue.
  */
 struct uk_netdev_txqueue_conf {
 	struct uk_alloc *a;               /* Allocator for descriptors. */
+	uk_netpool_dtor_t *burst_dtor;
 };
 
 /** Driver callback type to read device/driver capabilities,
@@ -374,6 +437,29 @@ struct uk_netdev_data {
 	const char           *drv_name;
 };
 
+struct uk_netdev_einfo {
+	const char *ipv4_addr;
+	const char *ipv4_net_mask;
+	const char *ipv4_gw_addr;
+};
+
+struct uk_netdev_rxq_stats {
+	uint64_t	rx_success;
+	uint64_t	rx_dropped;
+	uint64_t	rx_itr;
+	uint64_t	rx_latency;
+	uint64_t	rxq_latency;
+	uint64_t	rxq_process_latency;
+};
+
+struct uk_netdev_txq_stats {
+	uint64_t	tx_success;
+	uint64_t	tx_dropped;
+	uint64_t	tx_ring_latency;
+	uint64_t	tx_free_latency;
+	uint64_t	tx_prepare_latency;
+};
+
 /**
  * NETDEV
  * A structure used to interact with a network device.
@@ -401,6 +487,13 @@ struct uk_netdev {
 	struct uk_netdev_tx_queue   *_tx_queue[CONFIG_LIBUKNETDEV_MAXNBQUEUES];
 
 	UK_TAILQ_ENTRY(struct uk_netdev) _list;
+
+	/** Netdevice address configuration */
+	struct uk_netdev_einfo *_einfo;
+
+#if (CONFIG_UK_NETDEV_SCRATCH_SIZE > 0)
+	char scratch_pad[CONFIG_UK_NETDEV_SCRATCH_SIZE];
+#endif /* CONFIG_UK_NETDEV_SCRATCH_SIZE */
 };
 
 #ifdef __cplusplus

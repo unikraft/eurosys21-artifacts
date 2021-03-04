@@ -38,11 +38,14 @@
 
 #include <sys/types.h>
 
+struct liblinuxuplat_memregion {
+	void *base;
+	size_t len;
+};
+
 struct liblinuxuplat_opts {
-	struct {
-		void *base;
-		size_t len;
-	} heap;
+	struct liblinuxuplat_memregion heap;
+	struct liblinuxuplat_memregion initrd;
 };
 
 extern struct liblinuxuplat_opts _liblinuxuplat_opts;

@@ -90,6 +90,9 @@ extern "C" {
 #ifndef __align
 #define __align(bytes)         __attribute__((aligned(bytes)))
 #endif
+#ifndef __unalign
+#define __unalign              __align(1)
+#endif
 /* NOTE: weak aliasing does not work well with link-time optimization
  * currently. Hopefully this will be fixed in gcc 9. The problem is,
  * if a weak symbol is referenced in the library, gcc resolves calls
@@ -308,6 +311,11 @@ extern "C" {
 		long    __bits[__bitset_words((_s))];   \
 	}
 
+
+#ifndef UK_NARGS
+#define __UK_NARGS_X(a, b, c, d, e, f, g, h, n, ...) n
+#define UK_NARGS(...)  __UK_NARGS_X(, ##__VA_ARGS__, 7, 6, 5, 4, 3, 2, 1, 0)
+#endif /* UK_NARGS */
 
 #ifdef __cplusplus
 }

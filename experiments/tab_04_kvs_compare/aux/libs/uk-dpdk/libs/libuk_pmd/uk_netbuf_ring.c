@@ -59,10 +59,12 @@ int uk_netbuf_mbuf_dtor(struct uk_netbuf *nb)
 	mbuf = (struct rte_mbuf *)nb->priv;
 	pool = mbuf->pool;
 	user_mbp_priv = rte_mempool_get_priv(pool);
-
+	uk_refcount_init(&nb->refcount, 1);
+#if 0
 	uk_netbuf_init_indir(nb, mbuf->buf_addr, mbuf->buf_len, RTE_PKTMBUF_HEADROOM,
 			     nb->priv, uk_netbuf_mbuf_dtor);
 	free_desc_cnt++;
+#endif
 
 	/* Reinit the netbuf structure */
 	rte_pktmbuf_free(mbuf);

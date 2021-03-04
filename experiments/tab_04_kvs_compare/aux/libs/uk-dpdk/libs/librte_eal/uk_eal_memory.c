@@ -28,6 +28,7 @@ int rte_eal_hugepage_init(void)
 
 		page_sz = RTE_PGSIZE_4K;
 		n_segs = internal_config.memory / page_sz;
+		printf("%s: Configure %d of segments\n", __func__, n_segs);
 
 		if (rte_fbarray_init(&msl->memseg_arr, "nohugemem", n_segs,
 			sizeof(struct rte_memseg))) {
