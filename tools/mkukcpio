@@ -1,0 +1,30 @@
+#!/bin/bash
+usage()
+{
+	echo "$0 [output.cpio] [base folder]" 1>&2
+	exit 1
+}
+
+[ -z "$1" -o -z "$2" ] && usage
+if [ -e "$1" ]; then
+	echo "Output '$1' does already exist" 1>&2
+	usage
+fi
+if [ ! -d "$2" ]; then
+	echo "'$2' is not a directory" 1>&2
+	usage
+fi
+
+OUT_BASE="$( readlink -f "$( dirname "$1" )" )"
+OUT_FILE="$( basename "$1" )"
+
+if [ ! -d "${OUT_BASE}" ]; then
+	echo "Target directory for '$1' does not exist" 1>&2
+	usage
+fi
+
+cd "$2"
+find . -depth -print0 \
+	| tac \
+	| bsdcpio -v -o --format newc > "${OUT_BASE}/${OUT_FILE}"
+exit $?
