@@ -17,9 +17,12 @@ function hello_docker_with_mem {
       docker rm -f $CONTAINER 2> /dev/null
     } &
 
-    docker pull hello-world
+    docker pull alpine
+    # note: we do not use the hello-world container because it
+    # is bloated (uses a full-fledged Debian Buster instead of
+    # Alpine).
     docker run -m ${1}M --privileged --name="$CONTAINER" \
-			hello-world > .out 2> /dev/null
+			alpine echo "Hello world!" | tee .out
     wait
 
     grep -q Hello .out
