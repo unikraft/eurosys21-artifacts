@@ -11,5 +11,3 @@ cd ..
 ./create_cscope_db.sh
 
 ./component_symbols.sh
-
-python3 plot.py
