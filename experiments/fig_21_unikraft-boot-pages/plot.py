@@ -115,12 +115,14 @@ for method in ['static', 'dynamic']:
       label=label,
       align='center',
       zorder=4,
+      yerr=operations[operation][AMAX_KEY]-operations[operation][AMIN_KEY],
+      error_kw=dict(lw=2, capsize=10, capthick=1),
       width=GROUP_BAR_WIDTH,
       color=bar_color,
       linewidth=.5
     )
   
-    ax1.text(i + 1, operations[operation][MEAN_KEY] + 10, operations[operation][MEAN_KEY],
+    ax1.text(i + 1, operations[operation][AMAX_KEY] + 10, operations[operation][MEAN_KEY],
       ha='center',
       va='bottom',
       zorder=6,

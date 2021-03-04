@@ -9,7 +9,7 @@ source ../common/qemu.sh
 IMAGES=$(pwd)/images
 QEMU_GUEST=qemu-guest
 
-function benchmark {
+benchmark() {
 	taskset -c ${CPU1} ${QEMU_GUEST} \
 		-k ${1} -m ${3} -g 1234 -p ${CPU2} \
 		-x -P -- -overcommit mem-lock=on
@@ -29,8 +29,15 @@ function benchmark {
 	kill_qemu
 }
 
+parse_boot_times() {
+	boottime=`cat $1 | awk -e '$0 ~ /trace_boot_end/ {print $1}' | \
+			sed -r '/^\s*$/d' | \
+			awk '{ total += $1; count++ } END { print total/(count*1000) }'`
+	echo "$3	${boottime}" >> $2
+}
+
 suffix=`date '+%d%m%Y%H%M%S'`
-mkdir -p rawdata/ results
+mkdir -p rawdata/ results/
 
 kill_qemu
 
@@ -40,16 +47,12 @@ echo "memory	boottime_us" > $RESULTS
 LOG=rawdata/1024Mstat-${suffix}.txt
 touch $LOG
 
-for j in {1..1}
+for j in {1..10}
 do
 	echo "running batch 1024Mstat, ${j}/10" >> $LOG
 	benchmark ${IMAGES}/unikraft+stat.kernel ${LOG} 1024
+	parse_boot_times $LOG $RESULTS 1024
 done
-
-boottime=`cat $LOG | awk -e '$0 ~ /trace_boot_end/ {print $1}' | \
-		sed -r '/^\s*$/d' | \
-		awk '{ total += $1; count++ } END { print total/(count*1000) }'`
-echo "1024	${boottime}" >> $RESULTS
 
 RESULTS=results/dynamic.csv
 echo "memory	boottime_us" > $RESULTS
@@ -59,7 +62,7 @@ do
 	LOG=rawdata/${mem}Mdyn-${suffix}.txt
 	touch $LOG
 
-	for j in {1..1}
+	for j in {1..10}
 	do
 		echo "running batch ${mem}Mdyn, ${j}/10" >> $LOG
 		if (( $mem > 32 )); then
@@ -67,10 +70,7 @@ do
 		else
 			benchmark ${IMAGES}/unikraft+dyn32.kernel ${LOG} $mem
 		fi
-	done
 
-	boottime=`cat $LOG | awk -e '$0 ~ /trace_boot_end/ {print $1}' | \
-		sed -r '/^\s*$/d' | \
-		awk '{ total += $1; count++ } END { print total/(count*1000) }'`
-	echo "${mem}	${boottime}" >> $RESULTS
+		parse_boot_times $LOG $RESULTS $mem
+	done
 done
