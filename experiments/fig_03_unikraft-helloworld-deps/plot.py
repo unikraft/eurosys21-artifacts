@@ -1,81 +1,88 @@
+#!/bin/env python3
+import os
+import fire
 from graphviz import Digraph
 
-components=["nolibc", "ukalloc", "ukallocbbuddy", "ukboot", "ukargparse"]
+def plot(data=None, output=None):
+    components=["nolibc", "ukalloc", "ukallocbbuddy", "ukboot", "ukargparse"]
 
-dot = Digraph(comment='Hello graph plot', engine="fdp")
-dot.attr(ratio="compress")
-dot.attr(ranksep="0")
-dot.attr(concentrate="true")
-dot.attr(size="50,20")
-dot.attr(rankdir="LR")
-dot.attr("node", fontname="Helvetica", fontcolor="black", fontsize="30",shape="box")
-dot.attr("edge", fontname="Helvetica", fontcolor="blue", fontsize="15")
+    dot = Digraph(comment='Hello graph plot', engine="fdp")
+    dot.attr(ratio="compress")
+    dot.attr(ranksep="0")
+    dot.attr(concentrate="true")
+    dot.attr(size="50,20")
+    dot.attr(rankdir="LR")
+    dot.attr("node", fontname="Helvetica", fontcolor="black", fontsize="30",shape="box")
+    dot.attr("edge", fontname="Helvetica", fontcolor="blue", fontsize="15")
 
-#for i in components:
-#    dot.node(i)
+    #for i in components:
+    #    dot.node(i)
 
-adj_list = {}
-
-
-for i in components:
-    adj_list[i] = {}
-    for line in  open(i + ".deps", "r"):
-        if "lib" in line:
-            j = line.split("/")[2]
-            if j == i or j == "ukdebug":
-                continue
-
-            if j not in components:
-                continue
-
-            if j not in adj_list[i]:
-                adj_list[i][j] = 0
-
-            adj_list[i][j] = adj_list[i][j] + 1
+    adj_list = {}
 
 
-myDict = {
-  **dict.fromkeys(["nolibc"], "posix-layer"),
-  **dict.fromkeys(["ukalloc", "ukallocbbuddy"], "mm"),
-  **dict.fromkeys(["ukboot"], "ukboot1"),
-  **dict.fromkeys(["ukargparse"], "ukargparse1"),
-}
+    for i in components:
+        adj_list[i] = {}
+        for line in  open(os.path.join(data, i) + ".deps", "r"):
+            if "lib" in line:
+                j = line.split("/")[2]
+                if j == i or j == "ukdebug":
+                    continue
 
-G = {}
-for i in components:
-    G[myDict[i]] = {}
+                if j not in components:
+                    continue
 
-    for j, value in adj_list[i].items():
-        #print(myDict[j])
-        if myDict[j] not in G[myDict[i]]:
-            G[myDict[i]][myDict[j]] = 0
-       
-        G[myDict[i]][myDict[j]] += value 
-        #dot.edge(i, j, label=str(value))
+                if j not in adj_list[i]:
+                    adj_list[i][j] = 0
 
-for i, value in G.items():
-    #print("#####  " + i)
-    t = "cluster"+i
-    with dot.subgraph(name=t) as c:
-        c.attr(label=i)
-        c.attr(pack="8")
-        c.attr(style="filled")
-        c.attr(color="lightgrey")
-        c.attr(overlap='false')
-        c.attr(style='rounded, filled')
-        c.attr(fontsize='10')
-
-        for j, value2 in myDict.items():
-            if value2 == i:
-                c.node(j, shape="box", style="filled, rounded",color="white",fontsize="12")
+                adj_list[i][j] = adj_list[i][j] + 1
 
 
-for i, value in G.items():
-    for j, value2 in value.items():
-        if i != j:
-            dot.edge("cluster"+i,"cluster"+j, label=str(value2))
+    myDict = {
+    **dict.fromkeys(["nolibc"], "posix-layer"),
+    **dict.fromkeys(["ukalloc", "ukallocbbuddy"], "mm"),
+    **dict.fromkeys(["ukboot"], "ukboot1"),
+    **dict.fromkeys(["ukargparse"], "ukargparse1"),
+    }
 
-dot.edge("clusterposix-layer", "clustermm", "6")
-dot.attr("node", fontcolor="white", fontsize="25", shape="box", style="filled", color="black")
-dot.edge("Hello World", "clusterposix-layer")
-dot.render('output/unikraft_hello.gv')
+    G = {}
+    for i in components:
+        G[myDict[i]] = {}
+
+        for j, value in adj_list[i].items():
+            #print(myDict[j])
+            if myDict[j] not in G[myDict[i]]:
+                G[myDict[i]][myDict[j]] = 0
+        
+            G[myDict[i]][myDict[j]] += value 
+            #dot.edge(i, j, label=str(value))
+
+    for i, value in G.items():
+        #print("#####  " + i)
+        t = "cluster"+i
+        with dot.subgraph(name=t) as c:
+            c.attr(label=i)
+            c.attr(pack="8")
+            c.attr(style="filled")
+            c.attr(color="lightgrey")
+            c.attr(overlap='false')
+            c.attr(style='rounded, filled')
+            c.attr(fontsize='10')
+
+            for j, value2 in myDict.items():
+                if value2 == i:
+                    c.node(j, shape="box", style="filled, rounded",color="white",fontsize="12")
+
+
+    for i, value in G.items():
+        for j, value2 in value.items():
+            if i != j:
+                dot.edge("cluster"+i,"cluster"+j, label=str(value2))
+
+    dot.edge("clusterposix-layer", "clustermm", "6")
+    dot.attr("node", fontcolor="white", fontsize="25", shape="box", style="filled", color="black")
+    dot.edge("Hello World", "clusterposix-layer")
+    dot.render(output)
+
+if __name__ == '__main__':
+    fire.Fire(plot)
