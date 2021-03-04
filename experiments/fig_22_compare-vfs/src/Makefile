@@ -28,8 +28,8 @@ $(MAKECMDGOALS):
 endif
 endif
 
-LINUX_CFLAGS+=-Wall -Wextra -O2 -g3 -fpie
-LINUX_LDFLAGS+=-static-pie
+LINUX_CFLAGS+=-Wall -Wextra -O2 -g3 -fpie -fdata-sections -ffunction-sections -flto
+LINUX_LDFLAGS+=-static-pie -Wl,--gc-sections $(LINUX_CFLAGS)
 
 fsbench: main.c
 	$(CC) $(LINUX_LDFLAGS) $^ $(LINUX_LDLIBS) -o $@
