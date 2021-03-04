@@ -14,6 +14,7 @@ prepare:
 	$(WORKDIR)/clone-deps.sh "$(WORKDIR)"
 	$(WORKDIR)/build-elfloader.sh "$(WORKDIR)"
 	$(WORKDIR)/build-benchmark.sh "$(WORKDIR)"
+	$(WORKDIR)/build-fses.sh "$(WORKDIR)"
 
 .PHONY: run
 run:
