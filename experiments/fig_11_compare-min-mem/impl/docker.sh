@@ -91,11 +91,11 @@ function nginx_docker_with_mem {
     checker_id=$!
 
     (docker run -m ${1}M --tty --privileged --name=$CONTAINER \
-	nginx:1.15.6-alpine nginx \
+	--net=host nginx:1.15.6-alpine nginx \
 	-g 'daemon off;error_log stderr debug;') &> .out
     wait $checker_id
 
-    grep -q "Ready to accept connections" .out
+    grep -q "start worker processes" .out
     up=$?
     rm .out
 
