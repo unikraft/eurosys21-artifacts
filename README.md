@@ -43,45 +43,87 @@ Each figure, table and corresponding experiment are listed below:
 | [`tab_03`](/experiments/tab_03_kvs_compare/README.md)        | kvs_compare                                                                                                                                                                                                                          |              |
 
 
-## Software and Hardware Requirements
+## Prerequisites
+
+### Hardware
 
 Before you can run these experiments, you will need to prepare your host
-environment. In the paper, we used three different set ups:
+environment.  In the paper, we used three different set ups:
 
  1. A Linux host with KVM enabled and Linux kernel 4.19 (most
     experiments). We use a somewhat older kernel because HermiTux will
     not run with newer versions, as noted [here](https://github.com/ssrg-vt/hermitux/issues/12).
- 
- 2. A Linux host with a recent Linux kernel (5.??) used as a DPDK packet     generator (Fig 19). In addition, we patch the kernel with these patches [1] to conduct syscall overhead experiments (Tab 1).
- 
+ 2. A Linux host with a recent Linux kernel (5.11) used as a DPDK packet
+    generator ([`fig_19`](/experiments/fig_19_compare-dpdk/README.md)).  In
+    addition, we patch the kernel with [these patches](#) to conduct syscall
+    overhead experiments ([`tab_01`](/experiments/tab_01_bincompat-syscalls/README.md)).
  3. A Xen host used for Xen 9pfs experiments.). 
 
-A single server can be used for almost all experiments, though it would require installing different Linux kernel versions, or the Xen hypervisor and rebooting to switch from one set up to another. The exception is the DPDK experiment, which requires two servers connected to each other via a 10Gb link.
+A single server can be used for almost all experiments, though it would require
+installing different Linux kernel versions, or the Xen hypervisor and rebooting
+to switch from one set up to another.  The exception is the DPDK experiment,
+which requires two servers connected to each other via a 10Gb link.
 
-All of our results were run on inexpensive (roughly EUR 800) [Shuttle SH370R6](http://global.shuttle.com/products/productsDetail?productId=2265) boxes with an Intel i7 9700K 3.6 GHz (4.9 Ghz with Turbo Boost, 8 cores) and 32GB of RAM. For the DPDK experiment we used [Intel X520-T2](https://ark.intel.com/content/www/de/de/ark/products/69655/intel-ethernet-converged-network-adapter-x520-t2.html) cards with the 82599EB chipset.
+All of our results were run on inexpensive (roughly EUR 800)
+[Shuttle SH370R6](http://global.shuttle.com/products/productsDetail?productId=2265)
+boxes with an Intel i7 9700K 3.6 GHz (4.9 Ghz with Turbo Boost, 8 cores) and
+32GB of RAM. For the DPDK experiment we used[Intel X520-T2](https://ark.intel.com/content/www/de/de/ark/products/69655/intel-ethernet-converged-network-adapter-x520-t2.html)
+cards with the 82599EB chipset.
 
-For all set ups, we disabled Hyper-Threading and isolated 4 CPU cores for the host with the following kernel boot parameters:
+### Software
 
-`isolcpus=4,5,6,7 noht`
+#### Kernel
 
-From the remaining 4 CPU cores we pinned one to the VM, another one to the VMM (e.g., qemu-system), and another one to the client tool (e.g., wrk or redis-benchmark), and set the governor to performance. Both the pinning and governor settings are handled by the scripts in this repo (as opposed to the kernel boot parameters, which you will need to take care of manually).	
+All experiments were on Debian Buster
 
+For all set ups, we disabled Hyper-Threading (`noht`) and isolated 4 CPU cores
+(e.g. `isocpus=4,5,6,7`).  This can be done by setting kernel boot parameters,
+e.g. with pxelinux:
 
+```
+...
+LABEL item_kernel0
+  MENU LABEL Linux
+  MENU DEFAULT
+  KERNEL vmlinuz-4.19.0
+  APPEND isolcpus=4,5,6,7 noht
+  ...
+```
 
+From the remaining 4 CPU cores, we pinned one to the VM, another one to the VMM
+(e.g., `qemu-system-x86_64`), and another one to the client tool (e.g., `wrk` or
+`redis-benchmark`).  For all experiments, we set the governor to performance,
+which can be done generally by:
 
+```
+echo "performance" > /sys/devices/system/cpu/cpu$CPU_ID/cpufreq/scaling_governor
+```
 
+However, both the pinning and governor settings are handled by the scripts in
+this repo (as opposed to the kernel boot parameters, which you will need to take
+care of manually).
 
+For [`fig_22`](/experiments/fig_22_compare-vfs/README.md) we made changes to
+Linux kernel (TODO: Simon).
 
-## Getting Started
+#### DPDK
+
+For [`fig_19`](/experiments/fig_19_compare-dpdk/README.md), we installed
+[DPDK](dpdk.org) which has [additional installation
+instructions](http://doc.dpdk.org/guides/linux_gsg/sys_reqs.html#compilation-of-the-dpdk).
+We have provided a convience script to help with the installation process,
+[`tools/install-dpdk.sh`](/tools/install-dpdk.sh).
+
+## Getting Start
 
 1. To start running these experiments, begin by cloning this repository:
    ```bash
    git clone https://github.com/unikraft/eurosys21-artifacts.git
    ```
 
-2. Many of the experiments use [Docker](https://docs.docker.com/get-docker/) as an intermediate tool for creating
-   build and test environments (along with testing Docker itself).  Please
-	 install Docker on your system to continue.
+2. Many of the experiments use [Docker](https://docs.docker.com/get-docker/) as
+   an intermediate tool for creating build and test environments (along with
+   testing Docker itself).  Please install Docker on your system to continue.
 
 ## Running experiments
 
