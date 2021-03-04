@@ -14,7 +14,7 @@ cd "$CLONED"
 # clone repos if they do not exist yet
 [ ! -e "unikraft" ]  && git clone --branch skuenzer/eurosys21 'https://github.com/skuenzer/unikraft.git'
 [ ! -e "elfloader" ] && git clone --branch skuenzer/eurosys21 'https://github.com/skuenzer/app-elfloader.git' 'elfloader'
-[ ! -e "libelf" ]    && git clone --branch staging 'https://github.com/unikraft/lib-libelf.git' 'libelf'
-[ ! -e "zydis" ]     && git clone --branch staging 'https://github.com/unikraft/lib-zydis.git' 'zydis'
-[ ! -e "lwip" ]      && git clone --branch staging 'https://github.com/unikraft/lib-lwip.git' 'lwip'
+[ ! -e "libelf" ]    && git clone --branch skuenzer/eurosys21 'https://github.com/skuenzer/lib-libelf.git' 'libelf'
+[ ! -e "zydis" ]     && git clone --branch skuenzer/eurosys21 'https://github.com/skuenzer/lib-zydis.git' 'zydis'
+[ ! -e "lwip" ]      && git clone --branch skuenzer/eurosys21 'https://github.com/skuenzer/lib-lwip.git' 'lwip'
 exit 0
