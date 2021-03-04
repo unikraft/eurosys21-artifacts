@@ -28,6 +28,7 @@
 #define __STDLIB_H__
 
 #include <uk/config.h>
+#include <uk/essentials.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -85,6 +86,11 @@ int posix_memalign(void **memptr, size_t align, size_t size);
  */
 void *memalign(size_t align, size_t size);
 #endif /* CONFIG_LIBUKALLOC */
+
+void abort(void) __noreturn;
+
+void qsort(void *base, size_t nmemb, size_t size,
+           int (*compar)(const void *, const void *));
 
 #if CONFIG_LIBPOSIX_PROCESS
 int system(const char *command);

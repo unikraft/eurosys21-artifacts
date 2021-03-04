@@ -107,7 +107,7 @@ def plot(data=None, output=None):
           if row[0] not in execution_times:
             execution_times[row[0]] = []
 
-          execution_times[row[0]].append(float(row[1]))
+          execution_times[row[0]].append(float(row[1]) / 1000.0)
         
         for component in execution_times.keys():
 
@@ -139,7 +139,7 @@ def plot(data=None, output=None):
   # General style
   common_style(plt)
 
-  boottime_max += 3500 # margin above biggest bar
+  boottime_max += 1.5 # margin above biggest bar
 
   # Setup matplotlib
   fig = plt.figure(figsize=(8, 5))
@@ -148,7 +148,7 @@ def plot(data=None, output=None):
 
   # This plot:
   # ax.set_title('Unikernel Build Times', pad=35)
-  ax.set_ylabel("Total Boot Time (us)") 
+  ax.set_ylabel("Total Boot Time (ms)")
   # ax.set_xlabel('Applications', labelpad=10)
 
   # Add padding above tallest bar
@@ -157,7 +157,7 @@ def plot(data=None, output=None):
 
   renderer = fig.canvas.get_renderer()
 
-  ax_yticks = np.arange(0, boottime_max, step=2000)
+  ax_yticks = np.arange(0, boottime_max, step=0.5)
   ax.set_yticklabels([str(ytick) for ytick in ax_yticks])
   ax.set_yticks(ax_yticks, minor=False)
 
@@ -232,7 +232,7 @@ def plot(data=None, output=None):
       # Write total time label if last bar
       if j == len(components) - 1:
         bottom_offset += component[MEAN_KEY]  # + .28 # + spacing
-        print_total_time = "%-.0fus" % (total_time)
+        print_total_time = round(total_time, 2)
 
         # if total_time < 1:
 
@@ -245,7 +245,7 @@ def plot(data=None, output=None):
         # else:
         #   print_total_time = strftime("%-Mm %-Ss", gmtime(total_time))
         
-        plt.text(i + 1, bottom_offset, print_total_time,
+        plt.text(i + 1, bottom_offset + 0.1, print_total_time,
           ha='center',
           va='bottom',
           fontsize=LARGE_SIZE,
@@ -301,7 +301,8 @@ def plot(data=None, output=None):
 
   # Create a unique legend
   handles, labels = plt.gca().get_legend_handles_labels()
-  by_label = dict(zip(labels, handles))
+  # make sure it is in the same order as the layers
+  by_label = dict(zip(labels[::-1], handles[::-1]))
   leg = plt.legend(by_label.values(), by_label.keys(),
     loc='upper right',
     ncol=3,

@@ -41,8 +41,10 @@
 #include <stdio.h>
 #include <errno.h>
 
-#if CONFIG_LIBUKALLOC && CONFIG_LIBUKALLOCBBUDDY && CONFIG_LIBUKBOOT_INITALLOC
+#if CONFIG_LIBUKBOOT_INITBBUDDY
 #include <uk/allocbbuddy.h>
+#elif CONFIG_LIBUKBOOT_INITREGION
+#include <uk/allocregion.h>
 #endif
 #if CONFIG_LIBUKSCHED
 #include <uk/sched.h>
@@ -61,6 +63,9 @@
 #ifdef CONFIG_LIBUKLIBPARAM
 #include <uk/libparam.h>
 #endif /* CONFIG_LIBUKLIBPARAM */
+#if CONFIG_LIBUKSP
+#include <uk/sp.h>
+#endif
 
 int main(int argc, char *argv[]) __weak;
 
@@ -178,13 +183,21 @@ void ukplat_entry(int argc, char *argv[])
 #if CONFIG_LIBUKALLOC
 	struct uk_alloc *a = NULL;
 #endif
-#if CONFIG_LIBUKALLOC && CONFIG_LIBUKALLOCBBUDDY && CONFIG_LIBUKBOOT_INITALLOC
+#if !CONFIG_LIBUKBOOT_NOALLOC
 	struct ukplat_memregion_desc md;
 #endif
 #if CONFIG_LIBUKSCHED
 	struct uk_sched *s = NULL;
 	struct uk_thread *main_thread = NULL;
 #endif
+
+	/* We use a macro because if we were to use a function we
+	 * would not be able to return from the function if we have
+	 * changed the stack protector inside the function */
+#if CONFIG_LIBUKSP
+	UKSP_INIT_CANARY();
+#endif
+
 	uk_ctor_func_t *ctorfn;
 
 	uk_pr_info("Unikraft constructor table at %p - %p\n",
@@ -205,9 +218,9 @@ void ukplat_entry(int argc, char *argv[])
 	}
 #endif /* CONFIG_LIBUKLIBPARAM */
 
-#if CONFIG_LIBUKALLOC && CONFIG_LIBUKALLOCBBUDDY && CONFIG_LIBUKBOOT_INITALLOC
+#if !CONFIG_LIBUKBOOT_NOALLOC
 	/* initialize memory allocator
-	 * FIXME: ukallocbbuddy is hard-coded for now
+	 * FIXME: allocators are hard-coded for now
 	 */
 	uk_pr_info("Initialize memory allocator...\n");
 	ukplat_memregion_foreach(&md, UKPLAT_MEMRF_ALLOCATABLE) {
@@ -226,13 +239,15 @@ void ukplat_entry(int argc, char *argv[])
 		 * As soon we have an allocator, we simply add every
 		 * subsequent region to it
 		 */
-		if (unlikely(!a))
-			a = uk_allocbbuddy_init(md.base, md.len * 3 / 4);
-		else
-			uk_alloc_addmem(a, md.base, md.len * 3 / 4);
-
-        // TODO(steodorescu): move this
-        uk_pt_init(md.base + md.len * 3 / 4, md.len / 4);
+		if (!a) {
+#if CONFIG_LIBUKBOOT_INITBBUDDY
+			a = uk_allocbbuddy_init(md.base, md.len);
+#elif CONFIG_LIBUKBOOT_INITREGION
+			a = uk_allocregion_init(md.base, md.len);
+#endif
+		} else {
+			uk_alloc_addmem(a, md.base, md.len);
+		}
 	}
 	if (unlikely(!a))
 		uk_pr_warn("No suitable memory region for memory allocator. Continue without heap\n");

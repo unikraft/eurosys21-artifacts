@@ -41,31 +41,66 @@
 #include <uk/alloc.h>
 #include <uk/assert.h>
 
-/* Define macros to access IO registers */
-#define __IOREG_READ(bits) \
-static inline uint##bits##_t \
-	ioreg_read##bits(const volatile uint##bits##_t *addr) \
-		{ return *addr; }
+/*
+ * we should use inline assembly with volatile constraint to access mmio
+ * device memory to avoid compiler use load/store instructions of writeback
+ * addressing mode which will cause crash when running in hyper mode
+ * unless they will be decoded by hypervisor.
+ */
+static inline uint8_t ioreg_read8(const volatile uint8_t *address)
+{
+	uint8_t value;
 
-#define __IOREG_WRITE(bits) \
-static inline void \
-	ioreg_write##bits(volatile uint##bits##_t *addr, \
-						uint##bits##_t value) \
-		{ *addr = value; }
+	asm volatile ("ldrb %w0, [%1]" : "=r"(value) : "r"(address));
+	return value;
+}
 
+static inline uint16_t ioreg_read16(const volatile uint16_t *address)
+{
+	uint16_t value;
 
-#define __IOREG_READ_ALL() __IOREG_READ(8)  \
-			   __IOREG_READ(16) \
-			   __IOREG_READ(32) \
-			   __IOREG_READ(64) \
+	asm volatile ("ldrh %w0, [%1]" : "=r"(value) : "r"(address));
+	return value;
+}
 
-#define __IOREG_WRITE_ALL()	__IOREG_WRITE(8)  \
-			   __IOREG_WRITE(16) \
-			   __IOREG_WRITE(32) \
-			   __IOREG_WRITE(64) \
+static inline uint32_t ioreg_read32(const volatile uint32_t *address)
+{
+	uint32_t value;
 
-__IOREG_READ_ALL()
-__IOREG_WRITE_ALL()
+	asm volatile ("ldr %w0, [%1]" : "=r"(value) : "r"(address));
+	return value;
+}
+
+static inline uint64_t ioreg_read64(const volatile uint64_t *address)
+{
+	uint64_t value;
+
+	asm volatile ("ldr %0, [%1]" : "=r"(value) : "r"(address));
+	return value;
+}
+
+static inline void ioreg_write8(const volatile uint8_t *address, uint8_t value)
+{
+	asm volatile ("strb %w0, [%1]" : : "rZ"(value), "r"(address));
+}
+
+static inline void ioreg_write16(const volatile uint16_t *address,
+				 uint16_t value)
+{
+	asm volatile ("strh %w0, [%1]" : : "rZ"(value), "r"(address));
+}
+
+static inline void ioreg_write32(const volatile uint32_t *address,
+				 uint32_t value)
+{
+	asm volatile ("str %w0, [%1]" : : "rZ"(value), "r"(address));
+}
+
+static inline void ioreg_write64(const volatile uint64_t *address,
+				 uint64_t value)
+{
+	asm volatile ("str %0, [%1]" : : "rZ"(value), "r"(address));
+}
 
 static inline void _init_cpufeatures(void)
 {
@@ -116,6 +151,47 @@ void halt(void);
 void reset(void);
 void system_off(void);
 
+#ifdef CONFIG_FPSIMD
+struct fpsimd_state {
+	__u64		regs[32 * 2];
+	__u32		fpsr;
+	__u32		fpcr;
+};
+
+extern void fpsimd_save_state(uintptr_t ptr);
+extern void fpsimd_restore_state(uintptr_t ptr);
+
+static inline void save_extregs(struct sw_ctx *ctx)
+{
+	fpsimd_save_state(ctx->extregs);
+}
+
+static inline void restore_extregs(struct sw_ctx *ctx)
+{
+	fpsimd_restore_state(ctx->extregs);
+}
+
+static inline struct sw_ctx *arch_alloc_sw_ctx(struct uk_alloc *allocator)
+{
+	struct sw_ctx *ctx;
+
+	ctx = (struct sw_ctx *)uk_malloc(allocator,
+			sizeof(struct sw_ctx) + sizeof(struct fpsimd_state));
+	if (ctx)
+		ctx->extregs = (uintptr_t)((void *)ctx + sizeof(struct sw_ctx));
+
+	uk_pr_debug("Allocating %lu + %lu bytes for sw ctx at %p, extregs at %p\n",
+			sizeof(struct sw_ctx), sizeof(struct fpsimd_state),
+			ctx, (void *)ctx->extregs);
+
+	return ctx;
+}
+
+static inline void arch_init_extregs(struct sw_ctx *ctx __unused)
+{
+}
+
+#else /* !CONFIG_FPSIMD */
 static inline void save_extregs(struct sw_ctx *ctx __unused)
 {
 }
@@ -128,9 +204,9 @@ static inline struct sw_ctx *arch_alloc_sw_ctx(struct uk_alloc *allocator)
 {
 	struct sw_ctx *ctx;
 
-	ctx = uk_malloc(allocator, sizeof(struct sw_ctx));
+	ctx = (struct sw_ctx *)uk_malloc(allocator, sizeof(struct sw_ctx));
 	uk_pr_debug("Allocating %lu bytes for sw ctx at %p\n",
-		   sizeof(struct sw_ctx), ctx);
+		sizeof(struct sw_ctx), ctx);
 
 	return ctx;
 }
@@ -140,4 +216,5 @@ static inline void arch_init_extregs(struct sw_ctx *ctx)
 	ctx->extregs = (uintptr_t)ctx + sizeof(struct sw_ctx);
 }
 
+#endif /* CONFIG_FPSIMD */
 #endif /* __PLAT_COMMON_ARM64_CPU_H__ */

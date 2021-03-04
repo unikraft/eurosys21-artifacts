@@ -53,9 +53,6 @@ extern "C" {
 #define uk_zalloc(a, size)  uk_calloc(a, 1, size)
 #define uk_do_zalloc(a, size) uk_do_calloc(a, 1, size)
 
-struct uk_alloc *uk_alloc_get_default(void);
-int uk_alloc_set_default(struct uk_alloc *a);
-
 typedef void* (*uk_alloc_malloc_func_t)
 		(struct uk_alloc *a, size_t size);
 typedef void* (*uk_alloc_calloc_func_t)
@@ -88,6 +85,11 @@ struct uk_alloc {
 	uk_alloc_memalign_func_t memalign;
 	uk_alloc_free_func_t free;
 
+#if CONFIG_LIBUKALLOC_IFMALLOC
+	uk_alloc_free_func_t free_backend;
+	uk_alloc_malloc_func_t malloc_backend;
+#endif
+
 	/* page allocation interface */
 	uk_alloc_palloc_func_t palloc;
 	uk_alloc_pfree_func_t pfree;
@@ -102,6 +104,13 @@ struct uk_alloc {
 	struct uk_alloc *next;
 	int8_t priv[];
 };
+
+extern struct uk_alloc *_uk_alloc_head;
+
+static inline struct uk_alloc *uk_alloc_get_default(void)
+{
+	return _uk_alloc_head;
+}
 
 /* wrapper functions */
 static inline void *uk_do_malloc(struct uk_alloc *a, size_t size)

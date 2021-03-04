@@ -1,0 +1,7 @@
+$(eval $(call addlib_s,libcpio,$(CONFIG_LIBCPIO)))
+
+# LIBCPIO_CFLAGS-$(call gcc_version_ge,8,0) += -Wno-cast-function-type
+
+CINCLUDES-$(CONFIG_LIBCPIO) += -I$(LIBCPIO_BASE)/include
+CXXINCLUDES-$(CONFIG_LIBCPIO) += -I$(LIBCPIO_BASE)/include
+LIBCPIO_SRCS-y += $(LIBCPIO_BASE)/cpio.c

@@ -183,3 +183,8 @@ void *mremap(void *old_address __unused, size_t old_size __unused,
   {
       return 0;
   }
+
+int mlockall(int flags)
+{
+	return 0;
+}

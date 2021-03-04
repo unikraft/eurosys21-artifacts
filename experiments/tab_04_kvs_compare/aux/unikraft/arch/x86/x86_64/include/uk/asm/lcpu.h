@@ -32,6 +32,8 @@
 #error Do not include this header directly
 #endif
 
+#define CACHE_LINE_SIZE	64
+
 #ifndef __ASSEMBLY__
 struct __regs {
 	unsigned long pad; /* 8 bytes to make struct size multiple of 16 */
@@ -118,4 +120,10 @@ static inline unsigned long ukarch_read_sp(void)
 	__asm__ __volatile__("mov %%rsp, %0" : "=r"(sp));
 	return sp;
 }
+
+static inline void ukarch_spinwait(void)
+{
+	__asm__ __volatile__("pause" : : : "memory");
+}
+
 #endif /* !__ASSEMBLY__ */
