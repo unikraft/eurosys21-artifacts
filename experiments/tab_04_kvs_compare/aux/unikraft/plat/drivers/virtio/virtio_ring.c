@@ -269,12 +269,18 @@ __phys_addr virtqueue_physaddr(struct virtqueue *vq)
 	return ukplat_virt_to_phys(vrq->vring_mem);
 }
 
-static inline int _virtqueue_buffer_dequeue(struct virtqueue_vring *vrq,
+static inline int _virtqueue_buffer_dequeue(struct virtqueue *vq,
 					    void **cookie,
 					    __u32 *len)
 {
+	struct virtqueue_vring *vrq = NULL;
 	struct vring_used_elem *elem;
 	__u16 used_idx, head_idx;
+
+	vrq = to_virtqueue_vring(vq);
+	/* No new descriptor since last dequeue operation */
+	if (!virtqueue_hasdata(vq))
+		return -ENOMSG;
 
 	used_idx = vrq->last_used_desc_idx++ & (vrq->vring.num - 1);
 	elem = &vrq->vring.used->ring[used_idx];
@@ -282,8 +288,10 @@ static inline int _virtqueue_buffer_dequeue(struct virtqueue_vring *vrq,
 	 * We are reading from the used descriptor information updated by the
 	 * host.
 	 */
+	rmb();
 	head_idx = elem->id;
-	*len = elem->len;
+	if (len)
+		*len = elem->len;
 	*cookie = vrq->vq_info[head_idx].cookie;
 	virtqueue_detach_desc(vrq, head_idx);
 	vrq->vq_info[head_idx].cookie = NULL;
@@ -298,12 +306,10 @@ int virtqueue_buffer_dequeue(struct virtqueue *vq, void **cookie, __u32 *len)
 	UK_ASSERT(vq);
 	UK_ASSERT(cookie && len);
 
-	/* No new descriptor since last dequeue operation */
-	if (!virtqueue_hasdata(vq))
-		return -ENOMSG;
-
 	vrq = to_virtqueue_vring(vq);
-	rc = _virtqueue_buffer_dequeue(vrq, cookie, len);
+	rc = _virtqueue_buffer_dequeue(vq, cookie, len);
+	if (rc < 0)
+		return rc;
 	return (vrq->vring.num - vrq->desc_avail);
 }
 
@@ -312,25 +318,19 @@ int virtqueue_buffer_dequeue_burst(struct virtqueue *vq, void **cookie,
 {
 	struct virtqueue_vring *vrq = NULL;
 	int i, rc;
-	__u16 avail_desc, count;
 
 	UK_ASSERT(vq);
 	UK_ASSERT(cookie && len && cnt);
 
 	vrq = to_virtqueue_vring(vq);
+	for (i = 0; i < *cnt; i++) {
+		rc = _virtqueue_buffer_dequeue(vq, &cookie[i], &len[i]);
+		if (rc == -ENOMSG)
+			break;
 
-	avail_desc = vrq->vring.used->idx - vrq->last_used_desc_idx;
-	rmb();
-	count = MIN(avail_desc, *cnt);
+	}
 
-	for (i = 0; i < count; i++)
-		rc = _virtqueue_buffer_dequeue(vrq, &cookie[i], &len[i]);
-
-	*cnt = count;
-
-	if (vrq->vring.num < vrq->desc_avail)
-		printf("id: %d Num vs avail: %d vs %d\n", vq->queue_id,
-			vrq->vring.num, vrq->desc_avail);
+	*cnt = i;
 	return (vrq->vring.num - vrq->desc_avail);
 }
 
@@ -344,14 +344,15 @@ static int _virtqueue_buffer_enqueue(struct virtqueue *vq, void *cookie,
 
 	vrq = to_virtqueue_vring(vq);
 	total_desc = read_bufs + write_bufs;
-	if (vrq->desc_avail < total_desc) {
-#if 0
+	if (unlikely(total_desc < 1 || total_desc > vrq->vring.num)) {
+		uk_pr_err("%"__PRIu32" invalid number of descriptor\n",
+			  total_desc);
+		return -EINVAL;
+	} else if (vrq->desc_avail < total_desc) {
 		uk_pr_debug("queue: %d, Available descriptor:%"__PRIu16", Requested descriptor:%"__PRIu32"\n",
 			  vq->queue_id, vrq->desc_avail, total_desc);
-#endif
 		return -ENOSPC;
 	}
-
 	/* Get the head of free descriptor */
 	head_idx = vrq->head_free_desc;
 	UK_ASSERT(cookie);
@@ -388,13 +389,12 @@ int virtqueue_buffer_enqueue_burst(struct virtqueue *vq, void **cookies,
 
 	vrq = to_virtqueue_vring(vq);
 
+	uk_pr_info("Sending burst of : %d\n", *cnt);
 	for (i = 0; i < *cnt; i++) {
 		rc = _virtqueue_buffer_enqueue(vq, cookies[i], sg, total_desc,
 					       read_bufs[i] - read_desc,
 					       write_bufs[i] - write_desc);
-		if (unlikely(rc < 0 && i == 0))
-			return rc;
-		else if (unlikely(rc < 0))
+		if (rc < 0)
 			break;
 
 		read_desc = read_bufs[i];
@@ -402,97 +402,14 @@ int virtqueue_buffer_enqueue_burst(struct virtqueue *vq, void **cookies,
 		total_desc = read_desc + write_desc;
 	}
 
-	/* Update idx */
-	virtqueue_ring_update_avail_idx(vrq);
+	if (i > 0)
+		/* Update idx */
+		virtqueue_ring_update_avail_idx(vrq);
 	*cnt = i;
+	uk_pr_info("Sent : %d\n", i);
 
 	return rc;
 }
-
-static int _virtnet_buffer_enqueue(struct virtqueue_vring *vrq, struct uk_netbuf *nb,
-				   __u16 read_bufs, __u16 write_bufs)
-{
-	//struct virtqueue_vring *vrq = NULL;
-	__u32 total_desc = 0;
-	__u16 head_idx = 0, idx = 0, i;
-
-	//vrq = to_virtqueue_vring(vq);
-	total_desc = read_bufs + write_bufs;
-#if 0
-	if (vrq->desc_avail < total_desc) {
-		uk_pr_debug("queue: %d, Available descriptor:%"__PRIu16", Requested descriptor:%"__PRIu32"\n",
-			  vq->queue_id, vrq->desc_avail, total_desc);
-		return -ENOSPC;
-	}
-#endif
-
-	/* Get the head of free descriptor */
-	head_idx = vrq->head_free_desc;
-	UK_ASSERT(nb);
-	/* Additional information to reconstruct the data buffer */
-	vrq->vq_info[head_idx].cookie = nb;
-	vrq->vq_info[head_idx].desc_count = total_desc;
-
-	/**
-	 * We separate the descriptor management to enqueue segment(s).
-	 */
-#if 0
-	idx = virtqueue_buffer_enqueue_segments(vrq, head_idx, sg, off,
-			read_bufs, write_bufs);
-#endif
-	for (i = 0, idx = head_idx; i < total_desc; i++) {
-		vrq->vring.desc[idx].addr = nb->data;
-		vrq->vring.desc[idx].len = nb->len;
-		vrq->vring.desc[idx].flags = 0;
-		if (i >= read_bufs)
-			vrq->vring.desc[idx].flags |= VRING_DESC_F_WRITE;
-
-		if (i < total_desc - 1)
-			vrq->vring.desc[idx].flags |= VRING_DESC_F_NEXT;
-		idx = vrq->vring.desc[idx].next;
-	}
-	/* Metadata maintenance for the virtqueue */
-	vrq->head_free_desc = idx;
-	vrq->desc_avail -= total_desc;
-	UK_ASSERT(vrq->desc_avail < vrq->vring.num);
-
-	uk_pr_debug("Old head:%d, new head:%d, total_desc:%d\n",
-		    head_idx, idx, total_desc);
-
-	virtqueue_ring_update_avail(vrq, head_idx);
-	return vrq->desc_avail;
-}
-
-
-int virtnet_buffer_enqueue_burst(struct virtqueue *vq, struct uk_netbuf **nb,
-				 __u16 *cnt, __u16 *read_bufs, __u16 *write_bufs)
-{
-	int rc;
-	__u16 i;
-	struct virtqueue_vring *vrq = NULL;
-
-	UK_ASSERT(vq);
-	UK_ASSERT(nb && cnt && read_bufs && write_bufs);
-
-	vrq = to_virtqueue_vring(vq);
-
-	for (i = 0; i < *cnt; i++) {
-		rc = _virtnet_buffer_enqueue(vrq, nb[i], 
-					       read_bufs[i],
-					       write_bufs[i]);
-		if (unlikely(rc < 0 && i == 0))
-			return rc;
-		else if (unlikely(rc < 0))
-			break;
-	}
-
-	/* Update idx */
-	virtqueue_ring_update_avail_idx(vrq);
-	*cnt = i;
-
-	return rc;
-}
-
 
 int virtqueue_buffer_enqueue(struct virtqueue *vq, void *cookie,
 			     struct uk_sglist *sg, __u16 read_bufs,
@@ -500,18 +417,11 @@ int virtqueue_buffer_enqueue(struct virtqueue *vq, void *cookie,
 {
 	int rc;
 	struct virtqueue_vring *vrq = NULL;
-	__u16 total_desc = read_bufs + write_bufs;
 
 	UK_ASSERT(vq);
 	UK_ASSERT(cookie && sg);
 
 	vrq = to_virtqueue_vring(vq);
-
-	if (unlikely(total_desc < 1 || total_desc > vrq->vring.num)) {
-		uk_pr_err("%"__PRIu32" invalid number of descriptor\n",
-			  total_desc);
-		return -EINVAL;
-	}
 
 	rc = _virtqueue_buffer_enqueue(vq, cookie, sg, 0, read_bufs, write_bufs);
 	if (rc >= 0)

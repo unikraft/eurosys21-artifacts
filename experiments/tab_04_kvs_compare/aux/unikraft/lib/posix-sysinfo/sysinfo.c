@@ -43,11 +43,6 @@
 #include <sys/sysinfo.h>
 #include <uk/syscall.h>
 
-#if CONFIG_LIBVFSCORE
-/* For FDTABLE_MAX_FILES. */
-#include <vfscore/file.h>
-#endif
-
 static struct utsname utsname = {
 	.sysname	= "Unikraft",
 	.nodename	= "unikraft",
@@ -89,11 +84,6 @@ long sysconf(int name)
 
 	if (name == _SC_PAGESIZE)
 		return __PAGE_SIZE;
-
-#if CONFIG_LIBVFSCORE
-	if (name == _SC_OPEN_MAX)
-		return FDTABLE_MAX_FILES;
-#endif
 
 	return 0;
 }

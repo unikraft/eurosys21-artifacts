@@ -227,9 +227,12 @@ void ukplat_entry(int argc, char *argv[])
 		 * subsequent region to it
 		 */
 		if (unlikely(!a))
-			a = uk_allocbbuddy_init(md.base, md.len);
+			a = uk_allocbbuddy_init(md.base, md.len * 3 / 4);
 		else
-			uk_alloc_addmem(a, md.base, md.len);
+			uk_alloc_addmem(a, md.base, md.len * 3 / 4);
+
+        // TODO(steodorescu): move this
+        uk_pt_init(md.base + md.len * 3 / 4, md.len / 4);
 	}
 	if (unlikely(!a))
 		uk_pr_warn("No suitable memory region for memory allocator. Continue without heap\n");

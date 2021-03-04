@@ -39,94 +39,43 @@
 #include <uk/9pdev.h>
 #include <uk/9preq.h>
 #include <uk/9pfid.h>
-#include <uk/trace.h>
-
-UK_TRACEPOINT(uk_9p_trace_request_create, "");
-UK_TRACEPOINT(uk_9p_trace_request_allocated, "");
-UK_TRACEPOINT(uk_9p_trace_ready, "tag %u", uint16_t);
-UK_TRACEPOINT(uk_9p_trace_sent, "tag %u", uint16_t);
-UK_TRACEPOINT(uk_9p_trace_received, "tag %u", uint16_t);
-
-static inline int send_and_wait_zc(struct uk_9pdev *dev, struct uk_9preq *req,
-		enum uk_9preq_zcdir zc_dir, void *zc_buf, uint32_t zc_size,
-		uint32_t zc_offset)
-{
-	int rc;
-
-	if ((rc = uk_9preq_ready(req, zc_dir, zc_buf, zc_size, zc_offset)))
-		return rc;
-	uk_9p_trace_ready(req->tag);
-
-	if ((rc = uk_9pdev_request(dev, req)))
-		return rc;
-	uk_9p_trace_sent(req->tag);
-
-	if ((rc = uk_9preq_waitreply(req)))
-		return rc;
-	uk_9p_trace_received(req->tag);
-
-	return 0;
-}
-
-static inline int send_and_wait_no_zc(struct uk_9pdev *dev,
-		struct uk_9preq *req)
-{
-	return send_and_wait_zc(dev, req, UK_9PREQ_ZCDIR_NONE, NULL, 0, 0);
-}
-
-static struct uk_9preq *request_create(struct uk_9pdev *dev, uint8_t type)
-{
-	struct uk_9preq *req;
-
-	uk_9p_trace_request_create();
-	req = uk_9pdev_req_create(dev, type);
-	if (!PTRISERR(req))
-		uk_9p_trace_request_allocated();
-
-	return req;
-}
 
 struct uk_9preq *uk_9p_version(struct uk_9pdev *dev,
 		const char *requested, struct uk_9p_str *received)
 {
 	struct uk_9p_str requested_str;
 	struct uk_9preq *req;
-	int rc = 0;
+	int rc;
 	uint32_t new_msize;
 
 	uk_9p_str_init(&requested_str, requested);
 
-	req = request_create(dev, UK_9P_TVERSION);
-	if (PTRISERR(req))
-		return req;
-
 	uk_pr_debug("TVERSION msize %u version %s\n",
 			dev->msize, requested);
 
-	if ((rc = uk_9preq_write32(req, dev->msize)) ||
-		(rc = uk_9preq_writestr(req, &requested_str)) ||
-		(rc = send_and_wait_no_zc(dev, req)) ||
-		(rc = uk_9preq_read32(req, &new_msize)) ||
-		(rc = uk_9preq_readstr(req, received)))
-		goto free;
+	req = uk_9pdev_call(dev, UK_9P_TVERSION, __PAGE_SIZE, "ds",
+			dev->msize, &requested_str);
+	if (PTRISERR(req))
+		return req;
+
+	rc = uk_9preq_deserialize(req, "ds", &new_msize, received);
+
+	if (rc)
+		return ERR2PTR(rc);
 
 	uk_pr_debug("RVERSION msize %u version %.*s\n", new_msize,
 			received->size, received->data);
 
 	/*
 	 * Note: the 9P specification mentions that new_msize <= dev->msize.
-	 * However, execution can continue even if the invariant is violated
+	 * Howevver, execution can continue even if the invariant is violated
 	 * and set_msize() fails, as the old message size is always within the
 	 * accepted limit.
 	 */
 	if (!uk_9pdev_set_msize(dev, new_msize))
-		uk_pr_warn("Invalid new message size.\n");
+		uk_pr_debug("Invalid new message size.\n");
 
 	return req;
-
-free:
-	uk_9pdev_req_remove(dev, req);
-	return ERR2PTR(rc);
 }
 
 struct uk_9pfid *uk_9p_attach(struct uk_9pdev *dev, uint32_t afid,
@@ -145,56 +94,43 @@ struct uk_9pfid *uk_9p_attach(struct uk_9pdev *dev, uint32_t afid,
 	if (PTRISERR(fid))
 		return fid;
 
-	req = request_create(dev, UK_9P_TATTACH);
+	uk_pr_debug("TATTACH fid %u afid %u uname %s aname %s n_uname %u\n",
+			fid->fid, afid, uname, aname, n_uname);
+
+	req = uk_9pdev_call(dev, UK_9P_TATTACH, __PAGE_SIZE, "ddssd",
+			fid->fid, afid, &uname_str, &aname_str, n_uname);
 	if (PTRISERR(req)) {
 		uk_9pdev_fid_release(fid);
 		return (void *)req;
 	}
 
-	uk_pr_debug("TATTACH fid %u afid %u uname %s aname %s n_uname %u\n",
-			fid->fid, afid, uname, aname, n_uname);
-
-	rc = 0;
-	if ((rc = uk_9preq_write32(req, fid->fid)) ||
-		(rc = uk_9preq_write32(req, afid)) ||
-		(rc = uk_9preq_writestr(req, &uname_str)) ||
-		(rc = uk_9preq_writestr(req, &aname_str)) ||
-		(rc = uk_9preq_write32(req, n_uname)) ||
-		(rc = send_and_wait_no_zc(dev, req)) ||
-		(rc = uk_9preq_readqid(req, &fid->qid)))
-		goto free;
-
+	rc = uk_9preq_deserialize(req, "Q", &fid->qid);
 	uk_9pdev_req_remove(dev, req);
 
 	uk_pr_debug("RATTACH qid type %u version %u path %lu\n",
 			fid->qid.type, fid->qid.version, fid->qid.path);
 
-	return fid;
+	if (rc < 0) {
+		uk_9pdev_fid_release(fid);
+		return ERR2PTR(rc);
+	}
 
-free:
-	uk_9pdev_fid_release(fid);
-	uk_9pdev_req_remove(dev, req);
-	return ERR2PTR(rc);
+	return fid;
 }
 
 int uk_9p_flush(struct uk_9pdev *dev, uint16_t oldtag)
 {
 	struct uk_9preq *req;
-	int rc = 0;
 
-	req = request_create(dev, UK_9P_TFLUSH);
+	uk_pr_debug("TFLUSH oldtag %u\n", oldtag);
+	req = uk_9pdev_call(dev, UK_9P_TFLUSH, __PAGE_SIZE, "w", oldtag);
 	if (PTRISERR(req))
 		return PTR2ERR(req);
 
-	uk_pr_debug("TFLUSH oldtag %u\n", oldtag);
-	if ((rc = uk_9preq_write16(req, oldtag)) ||
-		(rc = send_and_wait_no_zc(dev, req)))
-		goto out;
 	uk_pr_debug("RFLUSH\n");
-
-out:
 	uk_9pdev_req_remove(dev, req);
-	return rc;
+
+	return 0;
 }
 
 struct uk_9pfid *uk_9p_walk(struct uk_9pdev *dev, struct uk_9pfid *fid,
@@ -205,7 +141,7 @@ struct uk_9pfid *uk_9p_walk(struct uk_9pdev *dev, struct uk_9pfid *fid,
 	struct uk_9p_str name_str;
 	uint16_t nwqid;
 	uint16_t nwname;
-	int rc = 0;
+	int rc;
 
 	uk_9p_str_init(&name_str, name);
 
@@ -215,49 +151,51 @@ struct uk_9pfid *uk_9p_walk(struct uk_9pdev *dev, struct uk_9pfid *fid,
 
 	nwname = name ? 1 : 0;
 
-	req = request_create(dev, UK_9P_TWALK);
-	if (PTRISERR(req)) {
-		rc = PTR2ERR(req);
-		goto out;
+	if (name) {
+		uk_pr_debug("TWALK fid %u newfid %u nwname %d name %s\n",
+				fid->fid, newfid->fid, nwname, name);
+		req = uk_9pdev_call(dev, UK_9P_TWALK, __PAGE_SIZE, "ddws",
+				fid->fid, newfid->fid, nwname, &name_str);
+	} else {
+		uk_pr_debug("TWALK fid %u newfid %u nwname %d\n",
+				fid->fid, newfid->fid, nwname);
+		req = uk_9pdev_call(dev, UK_9P_TWALK, __PAGE_SIZE, "ddw",
+				fid->fid, newfid->fid, nwname);
 	}
 
-	uk_pr_debug("TWALK fid %u newfid %u nwname %d name %s\n",
-		fid->fid, newfid->fid, nwname, name ? name : "<NULL>");
-
-	if ((rc = uk_9preq_write32(req, fid->fid)) ||
-		(rc = uk_9preq_write32(req, newfid->fid)) ||
-		(rc = uk_9preq_write16(req, nwname)))
-		goto out;
-	if (name && (rc = uk_9preq_writestr(req, &name_str)))
-		goto out;
-
-	if ((rc = send_and_wait_no_zc(dev, req))) {
+	if (PTRISERR(req)) {
 		/*
 		 * Don't clunk if request has finished with error, as the fid
 		 * is invalid.
 		 */
 		newfid->was_removed = 1;
+		rc = PTR2ERR(req);
 		goto out;
 	}
 
-	if ((rc = uk_9preq_read16(req, &nwqid)))
-		goto out;
+	rc = uk_9preq_deserialize(req, "w", &nwqid);
+	if (rc < 0)
+		goto out_req;
 
 	uk_pr_debug("RWALK nwqid %u\n", nwqid);
 
 	if (nwqid != nwname) {
 		rc = -ENOENT;
-		goto out;
+		goto out_req;
 	}
 
+
 	if (nwname) {
-		if ((rc = uk_9preq_readqid(req, &newfid->qid)))
-			goto out;
+		rc = uk_9preq_deserialize(req, "Q", &newfid->qid);
+		if (rc < 0)
+			goto out_req;
 	} else
 		newfid->qid = fid->qid;
 
-out:
+	rc = 0;
+out_req:
 	uk_9pdev_req_remove(dev, req);
+out:
 	if (rc) {
 		uk_9pdev_fid_release(newfid);
 		return ERR2PTR(rc);
@@ -269,27 +207,22 @@ out:
 int uk_9p_open(struct uk_9pdev *dev, struct uk_9pfid *fid, uint8_t mode)
 {
 	struct uk_9preq *req;
-	int rc = 0;
-
-	req = request_create(dev, UK_9P_TOPEN);
-	if (PTRISERR(req))
-		return PTR2ERR(req);
+	int rc;
 
 	uk_pr_debug("TOPEN fid %u mode %u\n", fid->fid, mode);
 
-	if ((rc = uk_9preq_write32(req, fid->fid)) ||
-		(rc = uk_9preq_write8(req, mode)) ||
-		(rc = send_and_wait_no_zc(dev, req)) ||
-		(rc = uk_9preq_readqid(req, &fid->qid)) ||
-		(rc = uk_9preq_read32(req, &fid->iounit)))
-		goto out;
+	req = uk_9pdev_call(dev, UK_9P_TOPEN, __PAGE_SIZE, "db",
+			fid->fid, mode);
+	if (PTRISERR(req))
+		return PTR2ERR(req);
+
+	rc = uk_9preq_deserialize(req, "Qd", &fid->qid, &fid->iounit);
+	uk_9pdev_req_remove(dev, req);
 
 	uk_pr_debug("ROPEN qid type %u version %u path %lu iounit %u\n",
 			fid->qid.type, fid->qid.version, fid->qid.path,
 			fid->iounit);
 
-out:
-	uk_9pdev_req_remove(dev, req);
 	return rc;
 }
 
@@ -300,80 +233,63 @@ int uk_9p_create(struct uk_9pdev *dev, struct uk_9pfid *fid,
 	struct uk_9preq *req;
 	struct uk_9p_str name_str;
 	struct uk_9p_str extension_str;
-	int rc = 0;
+	int rc;
 
 	uk_9p_str_init(&name_str, name);
 	uk_9p_str_init(&extension_str, extension);
 
-	req = request_create(dev, UK_9P_TCREATE);
+	uk_pr_debug("TCREATE fid %u name %s perm %u mode %u ext %s\n",
+			fid->fid, name, perm, mode, extension);
+
+	req = uk_9pdev_call(dev, UK_9P_TCREATE, __PAGE_SIZE, "dsdbs",
+			fid->fid, &name_str, perm, mode, &extension_str);
 	if (PTRISERR(req))
 		return PTR2ERR(req);
 
-	uk_pr_debug("TOPEN fid %u mode %u\n", fid->fid, mode);
-
-	if ((rc = uk_9preq_write32(req, fid->fid)) ||
-		(rc = uk_9preq_writestr(req, &name_str)) ||
-		(rc = uk_9preq_write32(req, perm)) ||
-		(rc = uk_9preq_write8(req, mode)) ||
-		(rc = uk_9preq_writestr(req, &extension_str)) ||
-		(rc = send_and_wait_no_zc(dev, req)) ||
-		(rc = uk_9preq_readqid(req, &fid->qid)) ||
-		(rc = uk_9preq_read32(req, &fid->iounit)))
-		goto out;
+	rc = uk_9preq_deserialize(req, "Qd", &fid->qid, &fid->iounit);
+	uk_9pdev_req_remove(dev, req);
 
 	uk_pr_debug("RCREATE qid type %u version %u path %lu iounit %u\n",
 			fid->qid.type, fid->qid.version, fid->qid.path,
 			fid->iounit);
 
-out:
-	uk_9pdev_req_remove(dev, req);
 	return rc;
 }
 
 int uk_9p_remove(struct uk_9pdev *dev, struct uk_9pfid *fid)
 {
 	struct uk_9preq *req;
-	int rc = 0;
 
 	/* The fid is considered invalid even if the remove fails. */
 	fid->was_removed = 1;
 
-	req = request_create(dev, UK_9P_TREMOVE);
+	uk_pr_debug("TREMOVE fid %u\n", fid->fid);
+	req = uk_9pdev_call(dev, UK_9P_TREMOVE, __PAGE_SIZE, "d", fid->fid);
 	if (PTRISERR(req))
 		return PTR2ERR(req);
 
-	uk_pr_debug("TREMOVE fid %u\n", fid->fid);
-	if ((rc = uk_9preq_write32(req, fid->fid)) ||
-		(rc = send_and_wait_no_zc(dev, req)))
-		goto out;
+	uk_9pdev_req_remove(dev, req);
 	uk_pr_debug("RREMOVE\n");
 
-out:
-	uk_9pdev_req_remove(dev, req);
-	return rc;
+	return 0;
 }
 
 int uk_9p_clunk(struct uk_9pdev *dev, struct uk_9pfid *fid)
 {
 	struct uk_9preq *req;
-	int rc = 0;
 
 	if (fid->was_removed)
 		return 0;
 
-	req = request_create(dev, UK_9P_TCLUNK);
+	uk_pr_debug("TCLUNK fid %u\n", fid->fid);
+	req = uk_9pdev_call(dev, UK_9P_TCLUNK, __PAGE_SIZE, "d", fid->fid);
 	if (PTRISERR(req))
 		return PTR2ERR(req);
 
-	uk_pr_debug("TCLUNK fid %u\n", fid->fid);
-	if ((rc = uk_9preq_write32(req, fid->fid)) ||
-		(rc = send_and_wait_no_zc(dev, req)))
-		goto out;
+	uk_9pdev_req_remove(dev, req);
 	uk_pr_debug("RCLUNK\n");
 
-out:
-	uk_9pdev_req_remove(dev, req);
-	return rc;
+	return 0;
 }
 
 int64_t uk_9p_read(struct uk_9pdev *dev, struct uk_9pfid *fid,
@@ -389,16 +305,28 @@ int64_t uk_9p_read(struct uk_9pdev *dev, struct uk_9pfid *fid,
 	uk_pr_debug("TREAD fid %u offset %lu count %u\n", fid->fid,
 			offset, count);
 
-	req = request_create(dev, UK_9P_TREAD);
+	req = uk_9pdev_req_create(dev, UK_9P_TREAD, __PAGE_SIZE);
 	if (PTRISERR(req))
 		return PTR2ERR(req);
 
-	if ((rc = uk_9preq_write32(req, fid->fid)) ||
-		(rc = uk_9preq_write64(req, offset)) ||
-		(rc = uk_9preq_write32(req, count)) ||
-		(rc = send_and_wait_zc(dev, req, UK_9PREQ_ZCDIR_READ, buf,
-				       count, 11)) ||
-		(rc = uk_9preq_read32(req, &count)))
+	rc = uk_9preq_serialize(req, "dqd", fid->fid, offset, count);
+	if (rc < 0)
+		goto out;
+
+	rc = uk_9preq_ready(req, UK_9PREQ_ZCDIR_READ, buf, count, 11);
+	if (rc < 0)
+		goto out;
+
+	rc = uk_9pdev_request(dev, req);
+	if (rc < 0)
+		goto out;
+
+	rc = uk_9preq_waitreply(req);
+	if (rc < 0)
+		goto out;
+
+	rc = uk_9preq_deserialize(req, "d", &count);
+	if (rc < 0)
 		goto out;
 
 	uk_pr_debug("RREAD count %u\n", count);
@@ -421,16 +349,28 @@ int64_t uk_9p_write(struct uk_9pdev *dev, struct uk_9pfid *fid,
 
 	uk_pr_debug("TWRITE fid %u offset %lu count %u\n", fid->fid,
 			offset, count);
-	req = request_create(dev, UK_9P_TWRITE);
+	req = uk_9pdev_req_create(dev, UK_9P_TWRITE, __PAGE_SIZE);
 	if (PTRISERR(req))
 		return PTR2ERR(req);
 
-	if ((rc = uk_9preq_write32(req, fid->fid)) ||
-		(rc = uk_9preq_write64(req, offset)) ||
-		(rc = uk_9preq_write32(req, count)) ||
-		(rc = send_and_wait_zc(dev, req, UK_9PREQ_ZCDIR_WRITE,
-				(void *)buf, count, 23)) ||
-		(rc = uk_9preq_read32(req, &count)))
+	rc = uk_9preq_serialize(req, "dqd", fid->fid, offset, count);
+	if (rc < 0)
+		goto out;
+
+	rc = uk_9preq_ready(req, UK_9PREQ_ZCDIR_WRITE, (void *)buf, count, 23);
+	if (rc < 0)
+		goto out;
+
+	rc = uk_9pdev_request(dev, req);
+	if (rc < 0)
+		goto out;
+
+	rc = uk_9preq_waitreply(req);
+	if (rc < 0)
+		goto out;
+
+	rc = uk_9preq_deserialize(req, "d", &count);
+	if (rc < 0)
 		goto out;
 
 	uk_pr_debug("RWRITE count %u\n", count);
@@ -446,58 +386,45 @@ struct uk_9preq *uk_9p_stat(struct uk_9pdev *dev, struct uk_9pfid *fid,
 		struct uk_9p_stat *stat)
 {
 	struct uk_9preq *req;
-	int rc = 0;
+	int rc;
 	uint16_t dummy;
 
-	req = request_create(dev, UK_9P_TSTAT);
+	uk_pr_debug("TSTAT fid %u\n", fid->fid);
+	req = uk_9pdev_call(dev, UK_9P_TSTAT, __PAGE_SIZE, "d", fid->fid);
 	if (PTRISERR(req))
 		return req;
 
-	uk_pr_debug("TSTAT fid %u\n", fid->fid);
-
-	if ((rc = uk_9preq_write32(req, fid->fid)) ||
-		(rc = send_and_wait_no_zc(dev, req)) ||
-		(rc = uk_9preq_read16(req, &dummy)) ||
-		(rc = uk_9preq_readstat(req, stat)))
-		goto out;
-
+	rc = uk_9preq_deserialize(req, "wS", &dummy, stat);
+	if (rc)
+		return ERR2PTR(rc);
 	uk_pr_debug("RSTAT\n");
 
 	return req;
-
-out:
-	uk_9pdev_req_remove(dev, req);
-	return ERR2PTR(rc);
 }
 
 int uk_9p_wstat(struct uk_9pdev *dev, struct uk_9pfid *fid,
 		struct uk_9p_stat *stat)
 {
 	struct uk_9preq *req;
-	int rc = 0;
-	uint16_t *dummy;
 
-	req = request_create(dev, UK_9P_TWSTAT);
-	if (PTRISERR(req))
-		return PTR2ERR(req);
+	/*
+	 * The packed size of stat is 61 bytes + the size occupied by the
+	 * strings.
+	 */
+	stat->size = 61;
+	stat->size += stat->name.size;
+	stat->size += stat->uid.size;
+	stat->size += stat->gid.size;
+	stat->size += stat->muid.size;
+	stat->size += stat->extension.size;
 
 	uk_pr_debug("TWSTAT fid %u\n", fid->fid);
-
-	if ((rc = uk_9preq_write32(req, fid->fid)))
-		goto out;
-
-	dummy = (uint16_t *)(req->xmit.buf + req->xmit.offset);
-	if ((rc = uk_9preq_write16(req, 0)) ||
-		(rc = uk_9preq_writestat(req, stat)))
-		goto out;
-	*dummy = stat->size + 2;
-
-	if ((rc = send_and_wait_no_zc(dev, req)))
-		goto out;
-
-	uk_pr_debug("RWSTAT\n");
-
-out:
+	req = uk_9pdev_call(dev, UK_9P_TWSTAT, __PAGE_SIZE, "dwS", fid->fid,
+			stat->size + 2, stat);
+	if (PTRISERR(req))
+		return PTR2ERR(req);
 	uk_9pdev_req_remove(dev, req);
-	return rc;
+	uk_pr_debug("RWSTAT");
+
+	return 0;
 }

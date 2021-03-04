@@ -56,8 +56,6 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <ctype.h>
-#include <uk/print.h>
-#include <uk/plat/bootstrap.h>
 
 #define __DECONST(type, var) ((type)(uintptr_t)(const void *)(var))
 
@@ -413,10 +411,4 @@ int atoi(const char *s)
 	atoll = (atoll < __I_MIN) ? __I_MIN : atoll;
 
 	return (int) atoll;
-}
-
-void abort(void)
-{
-	uk_pr_crit("Abnormal termination!\n");
-	ukplat_crash();
 }

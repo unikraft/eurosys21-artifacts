@@ -1,11 +1,8 @@
 /* SPDX-License-Identifier: BSD-3-Clause */
 /*
- * Internal helper for text output redirection
+ * Authors: Stefan Teodorescu <stefanl.teodorescu@gmail.com
  *
- * Authors: Simon Kuenzer <simon.kuenzer@neclab.eu>
- *
- *
- * Copyright (c) 2017, NEC Europe Ltd., NEC Corporation. All rights reserved.
+ * Copyright (c) 2020, University Politehnica of Bucharest. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -31,55 +28,37 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * THIS HEADER MAY NOT BE EXTRACTED OR MODIFIED IN ANY WAY.
  */
 
-#include "outf.h"
+#ifndef __POSIX_MMAP__
+#define __POSIX_MMAP__
 
-#include <string.h>
-#include <stdarg.h>
-#include <uk/assert.h>
-#include "snprintf.h"
+/* TODO: change this */
+#define MMAP_MIN_ADDR (unsigned long) 0x40000000
 
-int outf(struct out_dev *dev, const char *fmt, ...)
-{
-	int ret = 0;
-	va_list ap;
+#define MAP_FAILED ((void *) -1)
 
-	UK_ASSERT(dev);
+#define PROT_READ 0x1
+#define PROT_WRITE 0x2
+#define PROT_EXEC 0x4
+#define PROT_NONE 0x8
 
-	va_start(ap, fmt);
-	switch (dev->type) {
-	case OUTDEV_FILE:
-		/* Use standard libc approach when printing to a file */
-		ret = vfprintf(dev->file.fp, fmt, ap);
-		break;
-	case OUTDEV_BUFFER:
-		ret = __uk_vsnprintf(dev->buffer.pos, dev->buffer.left, fmt, ap);
+#define MAP_SHARED 0x1
+#define MAP_PRIVATE 0x2
 
-		if (ret > 0) {
-			/* in order to overwrite '\0' by successive calls,
-			 * we move the buffer pointer by (ret-1) characters
-			 */
-			dev->buffer.pos  += (ret - 1);
-			dev->buffer.left -= (ret - 1);
-		}
-		break;
-	case OUTDEV_DEBUG:
-		_uk_vprintd(dev->uk_pr.libname,
-			    dev->uk_pr.srcname, dev->uk_pr.srcline,
-			    fmt, ap);
-		break;
-#if CONFIG_LIBUKDEBUG_PRINTK
-	case OUTDEV_KERN:
-		_uk_vprintk(dev->uk_pr.lvl, dev->uk_pr.libname,
-			    dev->uk_pr.srcname, dev->uk_pr.srcline,
-			    fmt, ap);
-		break;
-#endif
-	default:
-		break;
-	}
-	va_end(ap);
+#define MAP_ANONYMOUS 0x20
+#define MAP_ANON MAP_ANONYMOUS
+#define MAP_FIXED 0x8
 
-	return ret;
-}
+void *mmap(void *addr, size_t length, int prot, int flags,
+                  int fd, off_t offset);
+
+int munmap(void *addr, size_t length);
+
+int mprotect(void *addr, size_t len, int prot);
+
+int msync(void *addr, size_t length, int flags);
+
+#endif  // __POSIX_MMAP__
