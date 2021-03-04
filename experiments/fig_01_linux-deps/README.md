@@ -1,12 +1,21 @@
-In order to run this experiment you have to run run.sh. This will download linux from github and checkout to commit c85fb28b6f999db9928b841f63f1beeb3074eeca.
-This program will return a .dot and a .pdf output in the output folder.
-For cleaning we use the scrip `clean.sh`
+# Linux Dependency Graph
 
-Note: We can use `dot fis.dot -Tpdf -o fis.pdf` to generate a pdf from the.dor
+In order to run this experiment you have to run run.sh.  This will download
+Linux from github and checkout to commit `c85fb28`.  This program will return a
+`.dot` and a .pdf output in the output folder.  For cleaning we use the script
+`clean.sh`
 
-Note2: We use the following two aesthetic options in the .dot file from the paper:
-edge [ fontname=Helvetica, fontcolor=blue, fontsize=35 ];
-node [ fontname=Helvetica, fontcolor=black, fontsize=80,shape=box];	
+  **N.B.**: We can use:the following to generete a pdf from the.dor:
+  ```bash
+  dot fis.dot -Tpdf -o fis.pdf
+  ```
+
+  **N.B.B.**: We use the following two aesthetic options in the `.dot` file from
+  the paper:
+  ```
+  edge [ fontname=Helvetica, fontcolor=blue, fontsize=35 ];
+  node [ fontname=Helvetica, fontcolor=black, fontsize=80,shape=box];	
+  ```
 
 Dependencies:
 * cscope
