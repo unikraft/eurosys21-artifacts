@@ -79,6 +79,8 @@ function install_dependencies() {
         uuid-runtime \
         bridge-utils \
         net-tools \
+        libmhash-dev \
+        libmhash2 \
         gawk \
         musl-tools \
         qemu-utils
