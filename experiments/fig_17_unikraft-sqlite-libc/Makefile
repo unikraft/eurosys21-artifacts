@@ -1,18 +1,36 @@
-all:
-	@./sqlite_experiments.sh --prepare
-	@./sqlite_experiments.sh --run
-	@./sqlite_experiments.sh --plot
+#
+# Files and directories
+#
+WORKDIR ?= $(CURDIR)
+RESULTS ?= $(WORKDIR)/results
+PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 
-clean:
-	@./sqlite_experiments.sh --clean
+#
+# Tools
+#
+SNAKE ?= python3
 
-plot:
-	@./sqlite_experiments.sh --plot
+#
+# Targets
+#
+.PHONY: all
+all: prepare run plot
 
+.PHONY: prepare
 prepare:
-	@./sqlite_experiments.sh --prepare
+	$(WORKDIR)/sqlite_experiments.sh --prepare
 
+.PHONY: run
 run:
-	@./sqlite_experiments.sh --run
+	$(WORKDIR)/sqlite_experiments.sh --run
 
-.PHONY:	all clean plot prepare run
+.PHONY: plot
+plot:
+	$(SNAKE) $(WORKDIR)/plot.py $(RESULTS) $(PLOT)
+
+.PHONY: clean
+clean:
+	$(WORKDIR)/sqlite_experiments.sh --clean
+
+.PHONY: properclean
+properclean: clean
