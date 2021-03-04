@@ -8,9 +8,8 @@ dot.attr(ranksep="0")
 dot.attr(concentrate="true")
 dot.attr(size="50,20")
 dot.attr(rankdir="LR")
-
-#for i in components:
-#    dot.node(i)
+dot.attr("node", fontname="Helvetica", fontcolor="black", fontsize="80",shape="box")
+dot.attr("edge", fontname="Helvetica", fontcolor="blue", fontsize="35")
 
 adj_list = {}
 
@@ -83,4 +82,10 @@ for i, value in G.items():
         if i != j:
             dot.edge(i,j, label=str(value2))
 
+# indirect calls are missing, we add them manually
+dot.edge("posix-layer", "mm", "6")
+dot.edge("sched", "mm", "2")
+dot.attr("node", fontcolor="white", fontsize="80", shape="box", style="filled", color="black")
+dot.edge("nginx", "posix-layer")
+dot.edge("nginx", "net")
 dot.render('output/unikraft_nginx.gv')
