@@ -18,7 +18,7 @@ all: prepare run plot
 
 .PHONY: prepare
 prepare:
-	@-
+	@./clone-deps.sh "$(WORKDIR)"
 
 .PHONY: run
 run:
