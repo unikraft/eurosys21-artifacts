@@ -17,7 +17,11 @@ against 4 Unikraft unikernels:
 These image permutations are constructed using
 [kraft](https://github.com/unikraft/kraft) via a [`Dockerfile`](/Dockerfile).
 
-  N.B. You may need to set `UK_KRAFT_GITHUB_TOKEN` as a prefix to `make docker`.
+  N.B. You may need to set `UK_KRAFT_GITHUB_TOKEN` as a prefix to `make
+  docker` in the top-level directory if you are rate-limited by kraft, e.g.:
+  ```
+  DOCKER_BUILD_EXTRA="--build-arg UK_KRAFT_GITHUB_TOKEN=<mytoken>" make docker-kraft
+  ```
 
 | Target             | Estimated time |
 |--------------------|----------------|
