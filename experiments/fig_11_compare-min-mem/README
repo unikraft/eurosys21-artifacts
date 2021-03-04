@@ -1,8 +1,0 @@
-This experiment provides data for Fig. 13.
-
-Run instructions:
- - cd experiments/13_compare-min-mem
- - ./genimages.sh
- - ./benchmark.sh
-
-./benchmark.sh takes about 45-50 minutes in average.
