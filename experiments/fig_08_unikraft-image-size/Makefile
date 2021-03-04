@@ -71,7 +71,7 @@ sqlite_%:
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v list pull -w .unikraft lib/sqlite@0.4)
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft build)
-	cp $(CONFIGSDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@
+	cp $(CONFIGSDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@_$(PLAT)-$(ARCH)
 
 .PHONY: run
 run: $(addprefix checksize-,$(IMAGES))
