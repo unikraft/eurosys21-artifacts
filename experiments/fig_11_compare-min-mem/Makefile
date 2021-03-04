@@ -4,6 +4,7 @@
 WORKDIR ?= $(CURDIR)
 ROOTDIR ?= $(WORKDIR)/../..
 LUPINEDIR ?= $(WORKDIR)/build/lupine
+RESULTS ?= $(WORKDIR)/results
 PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 
 #
