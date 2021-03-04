@@ -30,6 +30,8 @@ environment to test the ABI compatibility. Once the setup is done, you
 have three possibilities. Note that the setup takes time since each
 application must be compiled with Unikraft.
 
+After this setup go to `/tmp/abi` for the remaining procedures.
+
 ### Test with musl
 
 To test with `musl`, enter the following commands from the experiment
