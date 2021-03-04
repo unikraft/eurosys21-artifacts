@@ -2,6 +2,7 @@
 # Files and directories
 #
 WORKDIR ?= $(CURDIR)
+RESULTS ?= $(WORKDIR)/paperresults
 PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 
 #
