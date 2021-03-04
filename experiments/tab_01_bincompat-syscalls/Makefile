@@ -13,6 +13,7 @@ all: prepare run plot
 prepare:
 	@./clone-deps.sh "$(WORKDIR)"
 	@./build-elfloader.sh "$(WORKDIR)"
+	@./build-benchmark.sh "$(WORKDIR)"
 
 .PHONY: run
 run:
