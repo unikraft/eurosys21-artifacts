@@ -166,7 +166,7 @@ fi
 # Do we need Docker?
 if [[ $LIST_ALL != 'y' && $NO_DOCKER == 'n' ]]; then
   log_inf "Building utility containers..."
-  make -C $WORKDIR docker
+  DOCKER_FORCE_BUILD=y make -C $WORKDIR docker
 fi
 
 # Gather list of experiments
