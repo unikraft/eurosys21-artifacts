@@ -6,8 +6,8 @@ This repository contains the experiments for Table 2 (ABI
 compatibility). Since these experiments have a heavy size, we decided
 to host the zip file which contains the setup on another server.
 
-**APPROXIMATIVE EXECUTION TIME=1/2hour(s)**
-**NOTE THAT THIS EXPERIMENT REQUIRES CONSIDERABLE DISK SPACE**
+**APPROXIMATIVE EXECUTION TIME=3h**
+**NOTE THAT THIS EXPERIMENT REQUIRES CONSIDERABLE DISK SPACE (+/-15GB in the /tmp folder)**
 
 ## How to Use (automatic test)
 
