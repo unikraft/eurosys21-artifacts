@@ -8,8 +8,6 @@ RESULTS ?= $(WORKDIR)/results.csv
 PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 
 KRAFT_IMAGE ?= unikraft/eurosys21-artifacts-kraft:latest
-KRAFT_VERSION ?= 913a31bb45cc4be6b69133473842ad3622065342
-UK_KRAFT_GITHUB_TOKEN ?= 
 
 IMAGES ?= $(sort $(notdir $(wildcard $(CONFIGSDIR)/*)))
 
