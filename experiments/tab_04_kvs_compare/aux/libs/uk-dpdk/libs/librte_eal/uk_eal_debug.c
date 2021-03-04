@@ -3,6 +3,7 @@
 #include <uk/print.h>
 #include <uk/essentials.h>
 #include <uk/plat/bootstrap.h>
+#include <uk/plat/lcpu.h>
 
 void __rte_panic(const char *funcname, const char *format, ...)
 {
@@ -16,4 +17,10 @@ void __rte_panic(const char *funcname, const char *format, ...)
 	va_end(ap);
 
 	ukplat_terminate(UKPLAT_CRASH);
+}
+
+
+void rte_exit(int exit_code, const char *format, ...)
+{
+	ukplat_halt();
 }

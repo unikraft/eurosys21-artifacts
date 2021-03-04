@@ -34,6 +34,7 @@ CFLAGS-y += $(LIBUKDPDKBUILD_CFLAGS-y)
 
 ##DPDK Source variables
 DPDK_SRC_BASE:=$(LIBUKDPDKBUILD_ORIGIN)/$(DPDK_NAME)/
+SRCDIR:=$(DPDK_SRC_BASE)
 RTE_SDK:=$(DPDK_SRC_BASE)
 LIBUKDPDKBUILD_CPUFLAGS := SSE SSE2 SSE3 SSE4_1 SSE4_2 AES PCLMULQDQ AVX\
 		 RDRAND FSGSBASE F16C AVX2 AVX512F NEON CRC32 AES\
@@ -52,7 +53,9 @@ $(eval $(call _import_dpdk_lib,librte_eal,$(LIBUKDPDKBUILD_BASE)/libs/librte_eal
 $(eval $(call _import_dpdk_lib,librte_ring,$(LIBUKDPDKBUILD_BASE)/libs/librte_ring))
 $(eval $(call _import_dpdk_lib,librte_mempool,$(LIBUKDPDKBUILD_BASE)/libs/librte_mempool))
 $(eval $(call _import_dpdk_lib,librte_mbuf,$(LIBUKDPDKBUILD_BASE)/libs/librte_mbuf))
-$(eval $(call _import_dpdk_lib,librte_net,$(LIBUKDPDKBUILD_BASE)/libs/librte_net))
+#$(eval $(call _import_dpdk_lib,librte_net,$(LIBUKDPDKBUILD_BASE)/libs/librte_net))
 $(eval $(call  _import_dpdk_lib,librte_meter,$(LIBUKDPDKBUILD_BASE)/libs/librte_meter))
 $(eval $(call  _import_dpdk_lib,librte_ethdev,$(LIBUKDPDKBUILD_BASE)/libs/librte_ethdev))
+#$(eval $(call _import_dpdk_lib,librte_hash,$(LIBUKDPDKBUILD_BASE)/libs/librte_hash))
+#$(eval $(call _import_dpdk_lib,librte_ip_frag,$(LIBUKDPDKBUILD_BASE)/libs/librte_ip_frag))
 $(eval $(call  _import_dpdk_lib,libuk_pmd,$(LIBUKDPDKBUILD_BASE)/libs/libuk_pmd))

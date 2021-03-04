@@ -60,5 +60,14 @@ if UKDPDK
 		bool "dpdk: PMD Unikraft driver"
 		default y
 
+	config RTE_LIBRTE_HASH
+		bool "dpdk: Hash library"
+		default y
+
+
+	config RTE_LIBRTE_IP_FRAG
+		bool "dpdk: IP Frag Library"
+		default y
+
 endif
 

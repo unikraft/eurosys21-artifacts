@@ -58,7 +58,10 @@ int uk_netbuf_mbuf_dtor(struct uk_netbuf *nb)
 
 	mbuf = (struct rte_mbuf *)nb->priv;
 	pool = mbuf->pool;
+
+#if 0
 	user_mbp_priv = rte_mempool_get_priv(pool);
+#endif
 	uk_refcount_init(&nb->refcount, 1);
 #if 0
 	uk_netbuf_init_indir(nb, mbuf->buf_addr, mbuf->buf_len, RTE_PKTMBUF_HEADROOM,
@@ -68,6 +71,37 @@ int uk_netbuf_mbuf_dtor(struct uk_netbuf *nb)
 
 	/* Reinit the netbuf structure */
 	rte_pktmbuf_free(mbuf);
+	//rte_mempool_put(pool, mbuf);
+#if 0
+	printf("mempool: %prte_mempool_size: %d\n", pool,
+		rte_mempool_avail_count(pool));
+#endif
+
+	return 1;
+}
+
+int uk_netbuf_pool_dtor(struct uk_netbuf **nb, int cnt)
+{
+        struct rte_mbuf *mbuf[CONFIG_LIBUKNETDEV_MAX_PKT_BURST];
+	struct rte_mempool *pool;
+	struct rte_pktmbuf_pool_private *user_mbp_priv;
+	int i = 0;
+
+	for (i = 0; i < cnt; i++) {
+		uk_refcount_init(&nb[i]->refcount, 1);
+		mbuf[i] = (struct rte_mbuf *)nb[i]->priv;
+		//rte_pktmbuf_free(mbuf[i]);
+	}
+	pool = mbuf[0]->pool;
+#if 0
+	uk_netbuf_init_indir(nb, mbuf->buf_addr, mbuf->buf_len, RTE_PKTMBUF_HEADROOM,
+			     nb->priv, uk_netbuf_mbuf_dtor);
+	free_desc_cnt++;
+#endif
+
+	/* Reinit the netbuf structure */
+	//rte_pktmbuf_free(mbuf);
+	rte_mempool_put_bulk(pool, mbuf, cnt);
 #if 0
 	printf("mempool: %prte_mempool_size: %d\n", pool,
 		rte_mempool_avail_count(pool));
@@ -112,6 +146,7 @@ int uk_ring_mempool_populate(struct rte_mempool *mp,
 	static int header_append = 0;
 	struct uk_netbuf *nb;
 	void *pkt_metadata,  *mbuf;
+	struct rte_mbuf *m;
 	uint64_t iova_addr;
 	struct rte_pktmbuf_pool_private *user_mbp_priv;
 
@@ -154,7 +189,11 @@ int uk_ring_mempool_populate(struct rte_mempool *mp,
 #endif
 	}
 
-	if (!header_append) {
+	/**
+	 * TODO:
+	 * Find a better way to append the netbuf header
+	 */
+	if (mp->header_size < sizeof(struct uk_netbuf)) {
 		mp->header_size += sizeof(struct uk_netbuf);
 		header_append++;
 	}
