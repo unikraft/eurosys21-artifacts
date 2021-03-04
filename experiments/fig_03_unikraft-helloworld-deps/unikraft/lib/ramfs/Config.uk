@@ -1,4 +1,0 @@
-config LIBRAMFS
-	bool "ramfs: simple RAM file system"
-	default n
-	depends on LIBVFSCORE

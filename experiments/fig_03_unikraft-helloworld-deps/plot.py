@@ -8,6 +8,9 @@ dot.attr(ranksep="0")
 dot.attr(concentrate="true")
 dot.attr(size="50,20")
 dot.attr(rankdir="LR")
+dot.attr("node", fontname="Helvetica", fontcolor="black", fontsize="30",shape="box")
+dot.attr("edge", fontname="Helvetica", fontcolor="blue", fontsize="15")
+
 #for i in components:
 #    dot.node(i)
 
@@ -72,4 +75,7 @@ for i, value in G.items():
         if i != j:
             dot.edge("cluster"+i,"cluster"+j, label=str(value2))
 
-dot.render('output/unikraft_hello.gv', view=True)
+dot.edge("clusterposix-layer", "clustermm", "6")
+dot.attr("node", fontcolor="white", fontsize="25", shape="box", style="filled", color="black")
+dot.edge("Hello World", "clusterposix-layer")
+dot.render('output/unikraft_hello.gv')

@@ -1,5 +1,0 @@
-config LIBUKLIBPARAM
-       bool "uklibparam: Library arguments"
-       default n
-       select LIBUKDEBUG
-       select LIBNOLIBC if !HAVE_LIBC
