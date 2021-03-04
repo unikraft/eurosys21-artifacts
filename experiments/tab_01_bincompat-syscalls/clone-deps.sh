@@ -1,5 +1,5 @@
 #!/bin/bash
-CLONED="${1:-./cloned}"
+CLONED="${1:-.}/cloned"
 
 if [ -e "$CLONED" -a ! -d "$CLONED" ]; then
 	echo "Target '$CLONED' does exist but is not a directory"

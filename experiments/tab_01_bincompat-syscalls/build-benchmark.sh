@@ -1,5 +1,5 @@
 #!/bin/bash
-SRC="${1:-./src}"
+SRC="${1:-.}/src"
 set -e
 set -x
 
