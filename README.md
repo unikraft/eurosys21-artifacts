@@ -106,6 +106,10 @@ care of manually).
 For [`fig_22`](/experiments/fig_22_compare-vfs/README.md) we made changes to
 Linux kernel (TODO: Simon).
 
+#### Xen
+
+For 
+
 #### DPDK
 
 For [`fig_19`](/experiments/fig_19_compare-dpdk/README.md), we installed
@@ -168,17 +172,6 @@ Each experiment, and therefore directory listed in `experiments/`, is populated
 with a `README.md` which includes more detail about the individual experiment.
 
 <!--
-
-# System requirements
-
-```
-apt install -y  curl python3 python3-click python3-tabulate \
-		git python3-numpy python3-matplotlib musl-tools \
-		texlive-fonts-recommended texlive-fonts-extra \
-		dvipng qemu-system-x86 redis-utils socat \
-		uuid-runtime bridge-utils net-tools gawk \
-		qemu-utils
-```
 
 Experiments which require host precision (and therefore `ukbench`):
 

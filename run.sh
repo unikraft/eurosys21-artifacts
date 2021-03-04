@@ -53,8 +53,54 @@ Influential Environmental Variables
 EOF
 }
 
+# Dependency management
+function install_dependencies() {
+  local DISTRO=$(lsb_release -c -s)
+
+  case $DISTRO in
+    buster)
+      apt-get update
+      apt-get install -y \
+        git \
+        clang \
+        bsdcpio \
+        doxygen \
+        libhugetlbfs-bin \
+        build-essential \
+        qemu-system-x86 \
+        redis-utils \
+        socat \
+        uuid-runtime \
+        bridge-utils \
+        net-tools \
+        gawk \
+        qemu-utils
+      
+      # Plot script requirements
+      if [[ $NO_DOCKER == 'n' ]]; then
+        apt-get install -y \
+          python3 \
+          python3-click \
+          python3-tabulate \
+          python3-numpy \
+          python3-matplotlib \
+          musl-tools \
+          texlive-fonts-recommended \
+          texlive-fonts-extra \
+          dvipng
+
+        pip3 install -r $WORKDIR/requirements.txt
+      fi
+      ;;
+    *)
+      log_err "This script is not yet compatible with $DISTRO"
+      exit 1
+      ;;
+  esac
+}
+
 # Perform an action on an experiment
-_perform() {
+function perform() {
   local BASENAME=$1
   local ACTION=$2
 
@@ -106,9 +152,13 @@ ACTION=$2
 # Are we outputting the list?
 if [[ $LIST_ALL == 'y' ]]; then
   printf "FIGURE_ID  TEST_NAME\n"
+else
+  log_inf "Installing dependencies"
+  install_dependencies
+fi
 
 # Do we need Docker?
-elif [[ $NO_DOCKER == 'n' ]]; then
+if [[ $LIST_ALL != 'y' && $NO_DOCKER == 'n' ]]; then
   log_dbg "Building utility containers..."
   make -C $WORKDIR docker
 fi
@@ -148,8 +198,8 @@ for E in $EXPERIMENTS_DIR/*; do
 
   # Run all experiments?
   if [[ -z "$REQUEST" ]]; then
-    _perform $BASENAME $ACTION
+    perform $BASENAME $ACTION
   elif [[ $FIGURE_ID == $REQUEST || $EXPERIMENT == $REQUEST ]]; then
-    _perform $BASENAME $ACTION
+    perform $BASENAME $ACTION
   fi
 done
