@@ -17,3 +17,5 @@ echo "Running native..."
 ./impl/native-size.sh
 echo "Running mirage..."
 ./impl/mirage-size.sh
+echo "Running unikraft..."
+./impl/unikraft-size.sh

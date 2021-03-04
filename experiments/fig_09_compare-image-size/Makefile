@@ -3,6 +3,7 @@
 #
 WORKDIR ?= $(CURDIR)
 IMPLDIR ?= $(WORKDIR)/impl
+IMAGESDIR ?= $(WORKDIR)/images
 RESULTSDIR ?= $(WORKDIR)/results
 PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 
@@ -11,12 +12,18 @@ PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 #
 NGINX_VERSION ?= 1.15.6
 REDIS_VERSION ?= 5.0.6
+KRAFT_IMAGE ?= unikraft/eurosys21-artifacts-kraft:latest
+ARCH ?= x86_64
+PLAT ?= kvm
 
 #
 # Tools
 #
 SNAKE ?= python3
 DOCKER ?= docker
+DRUN ?= $(DOCKER) run -it --rm \
+        -v $(1):/usr/src/unikraft/apps/app \
+				-w /usr/src/unikraft/apps/app $(KRAFT_IMAGE) $(2)
 
 #
 # Targets
@@ -25,13 +32,58 @@ DOCKER ?= docker
 all: prepare run plot
 
 .PHONY: prepare
-prepare:
+prepare: unikraft
 	$(DOCKER) pull olivierpierre/hermitux
 	$(DOCKER) pull nginx:$(NGINX_VERSION)-alpine
 	$(DOCKER) pull redis:$(REDIS_VERSION)-alpine
 	$(DOCKER) pull hlefeuvre/alpine-sqlite
 	$(DOCKER) pull hlefeuvre/rump
 	$(DOCKER) pull hlefeuvre/osv
+
+.PHONY: unikraft
+unikraft: unikraft-helloworld unikraft-nginx unikraft-redis unikraft-sqlite
+
+.PHONY: unikraft-helloworld
+unikraft-helloworld:
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft unikraft@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
+	$(call DRUN,$(IMPLDIR)/$@,kraft build)
+	cp $(IMPLDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@
+
+.PHONY: unikraft-nginx
+unikraft-nginx:
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft unikraft@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/pthread-embedded@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/newlib@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/pcre@5f7140e)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/lwip@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/openssl@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/nginx@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
+	$(call DRUN,$(IMPLDIR)/$@,kraft build)
+	cp $(IMPLDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@
+
+.PHONY: unikraft-redis
+unikraft-redis:
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft unikraft@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/pthread-embedded@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/newlib@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/lwip@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/redis@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft redis@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
+	$(call DRUN,$(IMPLDIR)/$@,kraft build)
+	cp $(IMPLDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@
+
+.PHONY: unikraft-sqlite
+unikraft-sqlite:
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft unikraft@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/pthread-embedded@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/newlib@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/sqlite@0.4)
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
+	$(call DRUN,$(IMPLDIR)/$@,kraft build)
+	cp $(IMPLDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@
 
 .PHONY: run
 run:
@@ -42,6 +94,7 @@ run:
 	$(IMPLDIR)/native-size.sh
 	$(IMPLDIR)/osv-size.sh
 	$(IMPLDIR)/rump-size.sh
+	$(IMPLDIR)/unikraft-size.sh
 
 .PHONY: plot
 plot:
@@ -61,6 +114,18 @@ clean:
 	$(RM) -rf $(IMPLDIR)/mirage-helloworld/Makefile
 	$(RM) -rf $(IMPLDIR)/mirage-helloworld/*.opam
 	$(RM) -rf $(IMPLDIR)/mirage-helloworld/myocamlbuild.ml
+	$(RM) -rf $(IMPLDIR)/unikraft-helloworld/build
+	$(RM) -rf $(IMPLDIR)/unikraft-helloworld/.config
+	$(RM) -rf $(IMPLDIR)/unikraft-helloworld/.unikraft
+	$(RM) -rf $(IMPLDIR)/unikraft-nginx/build
+	$(RM) -rf $(IMPLDIR)/unikraft-nginx/.config
+	$(RM) -rf $(IMPLDIR)/unikraft-nginx/.unikraft
+	$(RM) -rf $(IMPLDIR)/unikraft-redis/build
+	$(RM) -rf $(IMPLDIR)/unikraft-redis/.config
+	$(RM) -rf $(IMPLDIR)/unikraft-redis/.unikraft
+	$(RM) -rf $(IMPLDIR)/unikraft-sqlite/build
+	$(RM) -rf $(IMPLDIR)/unikraft-sqlite/.config
+	$(RM) -rf $(IMPLDIR)/unikraft-sqlite/.unikraft
 
 .PHONY: properclean
 properclean:
