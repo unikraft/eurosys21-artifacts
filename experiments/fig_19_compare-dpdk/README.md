@@ -50,9 +50,20 @@ The client is running on uktut2.
 ```
 ./build.sh
 cd client
+./prepare.sh
 ./run_client.sh
+```
+We now enter the following commands in the interactive test-pmd shell:
+```
+set fwd rxonly
+start
+```
+
+After 10 seconds or so:
+```
+show port stats all
 ```
 
 ## Cleaning
-
+Run this command on both client and server
 `./clean.sh`
