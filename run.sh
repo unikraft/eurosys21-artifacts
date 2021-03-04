@@ -14,6 +14,7 @@ SHOW_HELP=n
 LIST_ALL=n
 DRY_RUN=n
 NO_DOCKER=n
+NO_DEPS=n
 VERBOSE=n
 
 _help() {
@@ -38,6 +39,7 @@ Actions:
   clean              Clean intermediate build files from an experiment.
 
 Options:
+     --no-deps       Do not try to install dependencies.
   -D --no-docker     Do not use Docker for plotting.
   -l --list          List all tests and exit.
   -v --verbose       Be verbose.
@@ -139,6 +141,8 @@ for i in "$@"; do
       LIST_ALL=y; shift;;
     -D|--no-docker)
       NO_DOCKER=y; shift;;
+    --no-deps)
+      NO_DEPS=y; shift;;
     -h|--help)
       _help; exit 0;;
     *)
@@ -153,7 +157,8 @@ ACTION=$2
 # Are we outputting the list?
 if [[ $LIST_ALL == 'y' ]]; then
   printf "FIGURE_ID  TEST_NAME\n"
-else
+
+elif [[ $NO_DEPS != 'y' ]]; then
   log_inf "Installing dependencies"
   install_dependencies
 fi
