@@ -83,11 +83,6 @@ CSV files respectively called `newlib-compat.csv` (in the folder
 `apps_newlib_compat/`) and `newlib-std.csv` (in the folder
 `apps_newlib_std/`).
 
-
-Sizes of all entries will be computed automatically by the script and
-will be printed on stdout. In addition, there are also saved into a
-CSV file called `newlib-abi.csv` and located at `apps_newlib/`.
-
 ### Getting LoC
 
 To get the #LoC which is displayed on Table 2, enter the following
