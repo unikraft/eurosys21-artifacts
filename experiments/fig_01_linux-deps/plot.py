@@ -9,6 +9,9 @@ dot.attr(concentrate="true")
 dot.attr(size="50,20")
 dot.attr(rankdir="LR")
 
+dot.attr("node", fontname="Helvetica", fontcolor="black", fontsize="80",shape="box")
+dot.attr("edge", fontname="Helvetica", fontcolor="blue", fontsize="35")
+
 adj_list = {}
 
 for i in components:
