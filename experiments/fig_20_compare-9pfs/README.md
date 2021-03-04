@@ -9,10 +9,6 @@ contains the Linux VM on another server.
 
 [Unikraft]: https://github.com/unikraft/unikraft
 
-This experiment takes some time and requires
-a very few human interaction (entering `root` as login and password
-and running the `./script` when launching the Linux VM).
-
 **APPROXIMATIVE EXECUTION TIME=2hours**
 
 ## How to Use (automatic test)
@@ -58,16 +54,13 @@ procedure below:
 
 1. Go to the `vm` folder;
 2. Run the launcher script (`./launcher.sh`);
-3. Enter login/pwd: `root/root` in the guest VM;
-4. In the VM prompt, only run the `./script.sh` script;
-    - Raw results will be saved into `linux-kvm_read.txt` and
-    `linux-kvm_write.txt`;
+3. The VM and the experiment are automatically started:
     - Formatted results will be saved into `test/linux-kvm_read.csv`
     and `test/linux-kvm_write.csv`. They will be accessible from the
-    host;
+    host in the `test/`;
     - The guest VM will be automatically stopped at the end of the
     script;
-    - Note that this experiment takes some time.
+    - Note that this experiment takes a lot of time.
 
 ### Generate the graph
 

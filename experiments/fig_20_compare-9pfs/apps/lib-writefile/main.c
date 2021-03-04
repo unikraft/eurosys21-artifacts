@@ -23,15 +23,15 @@ int main(int argc, char *argv[])
 	block_size = atoi(argv[2]) * 1024;
 	printf("Test with file %s, block size %lu\n", filename, block_size);
 
-	buf = malloc(block_size);
-	if (!buf) {
-		printf("malloc failed\n");
-		return 1;
-	}
-    
 	fd = open(filename, O_CREAT | O_WRONLY |O_DIRECT|O_SYNC);
 	if (fd < 0) {
 		printf("open failed\n");
+		return 1;
+	}
+
+	buf = malloc(block_size);
+	if (!buf) {
+		printf("malloc failed\n");
 		return 1;
 	}
 

@@ -1,6 +1,6 @@
 #!/bin/bash
-CLONED="${1:-./cloned}"
-CONFIG="${1:-./src/config.app-elfloader}"
+CLONED="${1:-.}/cloned"
+CONFIG="${1:-.}/src/config.app-elfloader"
 
 if [ ! -d "$CLONED/elfloader" ]; then
 	echo "'elfloader' not found. Did you run 'clone-deps.sh'?"

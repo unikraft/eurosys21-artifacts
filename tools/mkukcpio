@@ -6,8 +6,8 @@ usage()
 }
 
 [ -z "$1" -o -z "$2" ] && usage
-if [ -e "$1" ]; then
-	echo "Output '$1' does already exist" 1>&2
+if [ -e "$1" -a ! -f "$1" ]; then
+	echo "Output '$1' does already exist and is not a file" 1>&2
 	usage
 fi
 if [ ! -d "$2" ]; then
