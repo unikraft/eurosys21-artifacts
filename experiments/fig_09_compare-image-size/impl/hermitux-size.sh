@@ -34,10 +34,10 @@ docker container stop $CONTAINER
 docker rm -f $CONTAINER
 
 TOTAL_SIZE=$((${KERNEL_SIZE} + ${HELLO_SIZE}))
-echo ${TOTAL_SIZE} > results/hermituxlight-hello.csv
+echo ${TOTAL_SIZE} > results/hermitux-hello.csv
 
 TOTAL_SIZE=$((${KERNEL_SIZE} + ${REDIS_SIZE}))
-echo ${TOTAL_SIZE} > results/hermituxlight-redis.csv
+echo ${TOTAL_SIZE} > results/hermitux-redis.csv
 
 TOTAL_SIZE=$((${KERNEL_SIZE} + ${SQLITE_SIZE}))
-echo ${TOTAL_SIZE} > results/hermituxlight-sqlite.csv
+echo ${TOTAL_SIZE} > results/hermitux-sqlite.csv
