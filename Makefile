@@ -9,6 +9,7 @@ IMAGE_PREFFIX ?= unikraft/eurosys21-artifacts-
 
 .PHONY: docker
 docker: $(addprefix docker-,$(IMAGES))
+docker-%: DOCKER_BUILD_EXTRA ?=
 docker-%:
 	$(DOCKER) pull $(IMAGE_PREFFIX)$*:latest || true
 ifeq ($(DOCKER_FORCE_BUILD),y)
@@ -16,5 +17,6 @@ ifeq ($(DOCKER_FORCE_BUILD),y)
 		-f $(WORKDIR)/support/Dockerfile.$* \
 		--tag $(IMAGE_PREFFIX)$*:latest \
 		--cache-from $(IMAGE_PREFFIX)$*:latest \
+		$(DOCKER_BUILD_EXTRA) \
 		.
 endif
