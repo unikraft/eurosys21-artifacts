@@ -1,6 +1,11 @@
 apps/lib-readfile/.config.old
+apps/lib-readfile/rhea-kvm_read.csv
+apps/lib-readfile/rhea-kvm_read.txt
 apps/lib-readfile/test
 apps/lib-writefile/.config.old
+apps/lib-writefile/rhea-kvm_write.csv
+apps/lib-writefile/rhea-kvm_write.txt
+apps/lib-writefile/test
 unikraft
 vm
 vm.zip
