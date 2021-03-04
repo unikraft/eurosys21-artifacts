@@ -101,13 +101,15 @@ function redis_unikraft_with_mem {
     docker run --rm --privileged --name=$CONTAINER --cpuset-cpus="${CPU1}-${CPU4}" \
 			-dt hlefeuvre/unikraft-eurosys21
     docker exec $CONTAINER bash -c \
-	"cd app-redis && cp configs/tlsf.conf .config" 2> /dev/null
+	"cd app-redis && cp configs/tlsf.conf .config" &> /dev/null
     docker exec $CONTAINER bash -c \
-	"cd app-nginx && \
-	 sed -i 's/CONFIG_LWIP_POOLS=y/# CONFIG_LWIP_POOLS is not set/g'" 2> /dev/null
+	"cd app-redis && \
+	 sed -i 's/CONFIG_LWIP_POOLS=y/# CONFIG_LWIP_POOLS is not set/g' .config" \
+	 &> /dev/null
+    # note: CONFIG_LWIP_HEAP will auto select
     docker exec $CONTAINER bash -c \
-	"cd app-redis && make prepare && make -j" 2> /dev/null
-    docker exec $CONTAINER /root/setup-networking.sh 2> /dev/null
+	"cd app-redis && make prepare && make -j" &> /dev/null
+    docker exec $CONTAINER /root/setup-networking.sh &> /dev/null
 
     {
       sleep 6
@@ -157,7 +159,8 @@ function nginx_unikraft_with_mem {
 	"cd app-nginx && cp configs/tlsf.conf .config"
     docker exec $CONTAINER bash -c \
 	"cd app-nginx && \
-	 sed -i 's/CONFIG_LWIP_POOLS=y/# CONFIG_LWIP_POOLS is not set/g'"
+	 sed -i 's/CONFIG_LWIP_POOLS=y/# CONFIG_LWIP_POOLS is not set/g' .config"
+    # note: CONFIG_LWIP_HEAP will auto select
     docker exec $CONTAINER bash -c \
 	"cd app-nginx && make prepare && make -j"
     docker exec $CONTAINER bash -c \
