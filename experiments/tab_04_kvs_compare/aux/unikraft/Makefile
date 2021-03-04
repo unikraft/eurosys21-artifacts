@@ -235,6 +235,7 @@ MV    := mv -f
 CP    := cp -f
 MKDIR := mkdir
 TOUCH := touch
+XARGS := xargs
 
 # kconfig uses CONFIG_SHELL
 CONFIG_SHELL := $(SHELL)
