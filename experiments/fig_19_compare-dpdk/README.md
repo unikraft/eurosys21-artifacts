@@ -53,4 +53,6 @@ cd client
 ./run_client.sh
 ```
 
+## Cleaning
 
+`./clean.sh`
