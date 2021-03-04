@@ -7,6 +7,7 @@ compatibility). Since these experiments have a heavy size, we decided
 to host the zip file which contains the setup on another server.
 
 **APPROXIMATIVE EXECUTION TIME=1/2hour(s)**
+**NOTE THAT THIS EXPERIMENT REQUIRES CONSIDERABLE DISK SPACE**
 
 ## How to Use (automatic test)
 
@@ -34,23 +35,55 @@ application must be compiled with Unikraft.
 To test with `musl`, enter the following commands from the experiment
 folder:
 ```
-cp script_abi/script_run.sh abi/apps_musl/
-cd abi/apps_musl/
-./script_run.sh musl-abi
+cp script_abi/script_run.sh abi/apps_musl_compat/
+cd abi/apps_musl_compat/
+./script_run.sh musl-compat
+
+cp script_abi/script_check.sh abi/apps_musl_std/
+cd abi/apps_musl_std/
+./script_check.sh musl-std
 ```
-Sizes of all entries will be computed automatically by the script and
-will be printed on stdout. In addition, there are also saved into a
-CSV file called `musl-abi.csv` and located at `apps_musl/`.
+
+The first part will compute the size of all unikernels when the
+compatibility layer is enabled.
+The second part will display a checkmark (V) or a fail (V) when the
+compatibility is disabled. A checkmark means that the application has
+been successfully built. Otherwise, it will display a fail.
+
+Info of all entries will be computed automatically by the script and
+will be printed on stdout. In addition, there are also saved into
+CSV files respectively called `musl-compat.csv` (in the folder
+`apps_musl_compat/`) and `musl-std.csv` (in the folder
+`apps_musl_std/`).
+
 
 ### Test with newlib
 
 To test with `newlib`, enter the following commands from the experiment
 folder:
 ```
-cp script_abi/script_run.sh abi/apps_newlib/
-cd abi/apps_newlib/
-./script_run.sh newlib-abi
+cp script_abi/script_run.sh abi/apps_newlib_compat/
+cd abi/apps_newlib_compat/
+./script_run.sh newlib-compat
+
+cp script_abi/script_check.sh abi/apps_newlib_std/
+cd abi/apps_newlib_std/
+./script_check.sh newlib-std
 ```
+
+The first part will compute the size of all unikernels when the
+compatibility layer is enabled.
+The second part will display a checkmark (V) or a fail (V) when the
+compatibility is disabled. A checkmark means that the application has
+been successfully built. Otherwise, it will display a fail.
+
+Info of all entries will be computed automatically by the script and
+will be printed on stdout. In addition, there are also saved into
+CSV files respectively called `newlib-compat.csv` (in the folder
+`apps_newlib_compat/`) and `newlib-std.csv` (in the folder
+`apps_newlib_std/`).
+
+
 Sizes of all entries will be computed automatically by the script and
 will be printed on stdout. In addition, there are also saved into a
 CSV file called `newlib-abi.csv` and located at `apps_newlib/`.

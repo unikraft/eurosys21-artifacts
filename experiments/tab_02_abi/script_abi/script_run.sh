@@ -16,7 +16,7 @@ for d in *; do
             size="$size"
         fi
         echo "Size of $d: $size" 
-        echo "$d,$size" >> "../$CSV_FILE"
+        echo "$d,$size,V" >> "../$CSV_FILE"
         cd ..
         echo "---------------------------------------------"
     fi
