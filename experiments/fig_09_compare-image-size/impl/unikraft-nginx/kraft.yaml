@@ -1,0 +1,50 @@
+---
+specification: '0.5'
+name: app
+unikraft:
+  version: '0.4'
+  kconfig:
+    - CONFIG_LIBUKSCHEDCOOP=y
+    - CONFIG_LIBPOSIX_LIBDL=y
+    - CONFIG_LIBPOSIX_PROCESS=y
+    - CONFIG_LIBPOSIX_USER=y
+    - CONFIG_UKSYSINFO=y
+    - CONFIG_LIBUKMMAP=y
+    - CONFIG_LIBUKTIME=y
+targets:
+  - architecture: x86_64
+    platform: kvm
+libraries:
+  pthread-embedded:
+    version: '0.4'
+  newlib:
+    version: '0.4'
+  pcre:
+    version: 5f7140e
+  lwip:
+    version: '0.4'
+    kconfig:
+      - CONFIG_LWIP_UKNETDEV=y
+      - CONFIG_LWIP_TCP=y
+      - CONFIG_LWIP_WND_SCALE=y
+      - CONFIG_LWIP_TCP_KEEPALIVE=y
+      - CONFIG_LWIP_THREADS=y
+      - CONFIG_LWIP_SOCKET=y
+      - CONFIG_LWIP_AUTOIFACE=y
+      - CONFIG_LWIP_IPV4=y
+      - CONFIG_LWIP_DHCP=y
+      - CONFIG_LWIP_DNS=y
+  openssl:
+    version: '0.4'
+  nginx:
+    version: '0.4'
+    kconfig:
+      - CONFIG_LIBNGINX_MAIN_FUNCTION=y
+      - CONFIG_LIBNGINX_HTTP_SSL=y
+      - CONFIG_LIBNGINX_HTTP_REWRITE=y
+volumes:
+  fs0:
+    driver: 9pfs
+    source: ./fs0
+networks:
+  net0: {}
