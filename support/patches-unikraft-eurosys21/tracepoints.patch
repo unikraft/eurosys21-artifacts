@@ -1,0 +1,168 @@
+diff --git a/lib/ukboot/boot.c b/lib/ukboot/boot.c
+index 960fdd31..129204ec 100644
+--- a/lib/ukboot/boot.c
++++ b/lib/ukboot/boot.c
+@@ -68,6 +68,22 @@
+ #endif
+ #include "banner.h"
+ 
++#ifndef UK_DEBUG_TRACE
++#define UK_DEBUG_TRACE
++#endif
++
++#include <uk/trace.h>
++
++UK_TRACEPOINT(trace_boot_end, "");
++UK_TRACEPOINT(trace_boot_sched_beg, "");
++UK_TRACEPOINT(trace_boot_sched_end, "");
++UK_TRACEPOINT(trace_boot_alloc_beg, "");
++UK_TRACEPOINT(trace_boot_alloc_end, "");
++UK_TRACEPOINT(trace_boot_inittab_beg, "%p()", void*);
++UK_TRACEPOINT(trace_boot_inittab_end, "%p()", void*);
++UK_TRACEPOINT(trace_boot_ctor_beg,  "%p()", void*);
++UK_TRACEPOINT(trace_boot_ctor_end,  "%p()", void*);
++
+ int main(int argc, char *argv[]) __weak;
+ 
+ static void main_thread_func(void *arg) __noreturn;
+@@ -91,6 +107,7 @@ static void main_thread_func(void *arg)
+ 	uk_pr_info("Init Table @ %p - %p\n",
+ 		   &uk_inittab_start[0], &uk_inittab_end);
+ 	uk_inittab_foreach(initfn, uk_inittab_start, uk_inittab_end) {
++		trace_boot_inittab_beg(*initfn);
+ 		UK_ASSERT(*initfn);
+ 		uk_pr_debug("Call init function: %p()...\n", *initfn);
+ 		ret = (*initfn)();
+@@ -100,6 +117,7 @@ static void main_thread_func(void *arg)
+ 			ret = UKPLAT_CRASH;
+ 			goto exit;
+ 		}
++		trace_boot_inittab_end(*initfn);
+ 	}
+ 
+ 	print_banner(stdout);
+@@ -118,21 +136,25 @@ static void main_thread_func(void *arg)
+ 		   &__preinit_array_start[0], &__preinit_array_end);
+ 	uk_ctortab_foreach(ctorfn,
+ 			   __preinit_array_start, __preinit_array_end) {
++		trace_boot_ctor_beg(*ctorfn);
+ 		if (!*ctorfn)
+ 			continue;
+ 
+ 		uk_pr_debug("Call pre-init constructor: %p()...\n", *ctorfn);
+ 		(*ctorfn)();
++		trace_boot_ctor_end(*ctorfn);
+ 	}
+ 
+ 	uk_pr_info("Constructor table at %p - %p\n",
+ 		   &__init_array_start[0], &__init_array_end);
+ 	uk_ctortab_foreach(ctorfn, __init_array_start, __init_array_end) {
++		trace_boot_ctor_beg(*ctorfn);
+ 		if (!*ctorfn)
+ 			continue;
+ 
+ 		uk_pr_debug("Call constructor: %p()...\n", *ctorfn);
+ 		(*ctorfn)();
++		trace_boot_ctor_end(*ctorfn);
+ 	}
+ 
+ 	uk_pr_info("Calling main(%d, [", tma->argc);
+@@ -143,6 +165,7 @@ static void main_thread_func(void *arg)
+ 	}
+ 	uk_pr_info("])\n");
+ 
++	trace_boot_end();
+ 	ret = main(tma->argc, tma->argv);
+ 	uk_pr_info("main returned %d, halting system\n", ret);
+ 	ret = (ret != 0) ? UKPLAT_CRASH : UKPLAT_HALT;
+@@ -198,9 +221,11 @@ void ukplat_entry(int argc, char *argv[])
+ 	uk_pr_info("Unikraft constructor table at %p - %p\n",
+ 		   &uk_ctortab_start[0], &uk_ctortab_end);
+ 	uk_ctortab_foreach(ctorfn, uk_ctortab_start, uk_ctortab_end) {
++		trace_boot_ctor_beg(*ctorfn);
+ 		UK_ASSERT(*ctorfn);
+ 		uk_pr_debug("Call constructor: %p())...\n", *ctorfn);
+ 		(*ctorfn)();
++		trace_boot_ctor_end(*ctorfn);
+ 	}
+ 
+ #ifdef CONFIG_LIBUKLIBPARAM
+@@ -213,6 +238,7 @@ void ukplat_entry(int argc, char *argv[])
+ 	}
+ #endif /* CONFIG_LIBUKLIBPARAM */
+ 
++	trace_boot_alloc_beg();
+ #if !CONFIG_LIBUKBOOT_NOALLOC
+ 	/* initialize memory allocator
+ 	 * FIXME: allocators are hard-coded for now
+@@ -254,6 +280,7 @@ void ukplat_entry(int argc, char *argv[])
+ 			UK_CRASH("Could not set the platform memory allocator\n");
+ 	}
+ #endif
++	trace_boot_alloc_end();
+ 
+ #if CONFIG_LIBUKALLOC
+ 	uk_pr_info("Initialize IRQ subsystem...\n");
+@@ -262,12 +289,9 @@ void ukplat_entry(int argc, char *argv[])
+ 		UK_CRASH("Could not initialize the platform IRQ subsystem\n");
+ #endif
+ 
+-	/* On most platforms the timer depend on an initialized IRQ subsystem */
+-	uk_pr_info("Initialize platform time...\n");
+-	ukplat_time_init();
+-
+ #if CONFIG_LIBUKSCHED
+ 	/* Init scheduler. */
++	trace_boot_sched_beg();
+ 	s = uk_sched_default_init(a);
+ 	if (unlikely(!s))
+ 		UK_CRASH("Could not initialize the scheduler\n");
+@@ -280,6 +304,7 @@ void ukplat_entry(int argc, char *argv[])
+ 	main_thread = uk_thread_create("main", main_thread_func, &tma);
+ 	if (unlikely(!main_thread))
+ 		UK_CRASH("Could not create main thread\n");
++	trace_boot_sched_end();
+ 	uk_sched_start(s);
+ #else
+ 	/* Enable interrupts before starting the application */
+diff --git a/plat/kvm/x86/setup.c b/plat/kvm/x86/setup.c
+index fbc5c0d2..55d98b5c 100644
+--- a/plat/kvm/x86/setup.c
++++ b/plat/kvm/x86/setup.c
+@@ -41,6 +41,14 @@
+ #include <uk/assert.h>
+ #include <uk/essentials.h>
+ 
++#ifndef UK_DEBUG_TRACE
++#define UK_DEBUG_TRACE
++#endif
++#include <uk/trace.h>
++
++UK_TRACEPOINT(trace_boot_time_init, "");
++UK_TRACEPOINT(trace_boot_plat_init, "");
++
+ #define PLATFORM_MEM_START 0x100000
+ #define PLATFORM_MAX_MEM_ADDR 0x40000000
+ 
+@@ -253,15 +261,21 @@ no_initrd:
+ 
+ static void _libkvmplat_entry2(void *arg __attribute__((unused)))
+ {
++	trace_boot_plat_init();
+ 	ukplat_entry_argp(NULL, cmdline, sizeof(cmdline));
+ }
+ 
+ void _libkvmplat_entry(void *arg)
+ {
++        outb(1112, 1);
+ 	struct multiboot_info *mi = (struct multiboot_info *)arg;
+ 
++	ukplat_time_init();
++	trace_boot_time_init();
++
+ 	_init_cpufeatures();
+ 	_libkvmplat_init_console();
++
+ 	traps_init();
+ 	intctrl_init();
+ 

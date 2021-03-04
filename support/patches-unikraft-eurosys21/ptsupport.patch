@@ -1,0 +1,3321 @@
+diff --git a/arch/x86/x86_64/include/uk/asm/mm.h b/arch/x86/x86_64/include/uk/asm/mm.h
+new file mode 100644
+index 00000000..94cbab77
+--- /dev/null
++++ b/arch/x86/x86_64/include/uk/asm/mm.h
+@@ -0,0 +1,174 @@
++/* SPDX-License-Identifier: BSD-3-Clause */
++/*
++ * Authors: Stefan Teodorescu <stefanl.teodorescu@gmail.com>
++ *
++ * Copyright (c) 2021, University Politehnica of Bucharest. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holder nor the names of its
++ *    contributors may be used to endorse or promote products derived from
++ *    this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * Some of these macros here were inspired from Xen code.
++ * For example, from "xen/include/asm-x86/x86_64/page.h" file.
++ */
++
++#ifndef __UKARCH_X86_64_MM__
++#define __UKARCH_X86_64_MM__
++
++#include <uk/assert.h>
++#include <uk/bitmap.h>
++#include <uk/essentials.h>
++#include "page.h"
++
++#define PAGETABLE_LEVELS	4
++
++#define L1_PAGETABLE_SHIFT	12
++#define L2_PAGETABLE_SHIFT	21
++#define L3_PAGETABLE_SHIFT	30
++#define L4_PAGETABLE_SHIFT	39
++
++#define L1_PAGETABLE_ENTRIES	512
++#define L2_PAGETABLE_ENTRIES	512
++#define L3_PAGETABLE_ENTRIES	512
++#define L4_PAGETABLE_ENTRIES	512
++
++static unsigned long pagetable_entries[PAGETABLE_LEVELS] = {
++	L1_PAGETABLE_ENTRIES,
++	L2_PAGETABLE_ENTRIES,
++	L3_PAGETABLE_ENTRIES,
++	L4_PAGETABLE_ENTRIES,
++};
++
++static unsigned long pagetable_shifts[PAGETABLE_LEVELS] __used = {
++	L1_PAGETABLE_SHIFT,
++	L2_PAGETABLE_SHIFT,
++	L3_PAGETABLE_SHIFT,
++	L4_PAGETABLE_SHIFT,
++};
++
++#define L1_OFFSET(vaddr) \
++	(((vaddr) >> L1_PAGETABLE_SHIFT) & (L1_PAGETABLE_ENTRIES - 1))
++#define L2_OFFSET(vaddr) \
++	(((vaddr) >> L2_PAGETABLE_SHIFT) & (L2_PAGETABLE_ENTRIES - 1))
++#define L3_OFFSET(vaddr) \
++	(((vaddr) >> L3_PAGETABLE_SHIFT) & (L3_PAGETABLE_ENTRIES - 1))
++#define L4_OFFSET(vaddr) \
++	(((vaddr) >> L4_PAGETABLE_SHIFT) & (L4_PAGETABLE_ENTRIES - 1))
++
++#define Lx_OFFSET(vaddr, lvl) \
++	(((vaddr) >> pagetable_shifts[lvl - 1]) \
++		 & (pagetable_entries[lvl - 1] - 1))
++
++#define L1_PROT    (_PAGE_PRESENT | _PAGE_RW | _PAGE_ACCESSED)
++#define L1_PROT_RO (_PAGE_PRESENT | _PAGE_ACCESSED)
++#define L2_PROT    (_PAGE_PRESENT | _PAGE_RW | _PAGE_ACCESSED | _PAGE_DIRTY)
++#define L3_PROT    (_PAGE_PRESENT | _PAGE_RW | _PAGE_ACCESSED | _PAGE_DIRTY)
++#define L4_PROT    (_PAGE_PRESENT | _PAGE_RW | _PAGE_ACCESSED | _PAGE_DIRTY)
++
++static unsigned long pagetable_protections[PAGETABLE_LEVELS] = {
++	L1_PROT,
++	L2_PROT,
++	L3_PROT,
++	L4_PROT,
++};
++
++/* This variable represents the offset between the virtual address of the page
++ * table memory area and the physical address of it. This offset changes at
++ * runtime between the booting phase and the running phase after that.
++ *
++ * While booting, the physical addresses and the virtual addresses are equal
++ * (either running with paging disabled or with a linear mapping), which means
++ * this variable has the value 0.
++ *
++ * After initializing the new set of page tables, these can be placed at any
++ * virtual address. The offset in this case is PAGETABLES_VIRT_OFFSET, defined
++ * in include/uk/mem_layout.h
++ *
++ * Functions of the page table API use this variable to be agnostic of whether
++ * they are used in the booting phase or afterwards.
++ *
++ * TODO: find if there is a better way to achieve this behavior
++ */
++extern unsigned long _virt_offset;
++
++/**
++ * Create a PTE (page table entry) that maps to a given physical address with
++ * given protections and for the given page table level.
++ *
++ * @param paddr: physical address where the PTE points to
++ * @param prot: protection flags (values defined in include/uk/plat/mm.h)
++ * (e.g. page readable, writeable, executable)
++ * @param level: the level of the page table where the PTE will be written to
++ * (if we create a PTE inside a level 2 page table, for example, it means
++ * that it points to a large page, and the large page flag is set
++ * accordingly)
++ *
++ * @return: PTE with flags set accordingly
++ */
++static inline unsigned long ukarch_pte_create(unsigned long paddr,
++					      unsigned long prot, size_t level)
++{
++	unsigned long flags = 0;
++
++	/* For level == 2 it is a large page and level == 3 huge page */
++	if (level >= 2)
++		flags |= _PAGE_PSE;
++
++	if (prot == PAGE_PROT_NONE)
++		flags |= _PAGE_ACCESSED | _PAGE_PROTNONE;
++	else
++		flags |= pagetable_protections[level - 1];
++
++	if (!(prot & PAGE_PROT_WRITE))
++		flags &= ~_PAGE_RW;
++
++	if (!(prot & PAGE_PROT_EXEC))
++		flags |= _PAGE_NX;
++
++	return paddr | flags;
++}
++
++static inline int _ukarch_pte_write_raw(unsigned long pt, size_t offset,
++		unsigned long val, size_t level)
++{
++	UK_ASSERT(level >= 1 && level <= PAGETABLE_LEVELS);
++	UK_ASSERT(PAGE_ALIGNED(pt));
++	UK_ASSERT(offset < pagetable_entries[level - 1]);
++
++	*((unsigned long *) pt + offset) = val;
++
++	return 0;
++}
++
++static inline unsigned long ukarch_pte_read(unsigned long pt, size_t offset,
++		size_t level)
++{
++	UK_ASSERT(level >= 1 && level <= PAGETABLE_LEVELS);
++	UK_ASSERT(PAGE_ALIGNED(pt));
++	UK_ASSERT(offset < pagetable_entries[level - 1]);
++
++	return *((unsigned long *) pt + offset);
++}
++
++#endif	/* __UKARCH_X86_64_MM__ */
+diff --git a/arch/x86/x86_64/include/uk/asm/mm_native.h b/arch/x86/x86_64/include/uk/asm/mm_native.h
+new file mode 100644
+index 00000000..e9400110
+--- /dev/null
++++ b/arch/x86/x86_64/include/uk/asm/mm_native.h
+@@ -0,0 +1,85 @@
++/* SPDX-License-Identifier: BSD-3-Clause */
++/*
++ * Authors: Stefan Teodorescu <stefanl.teodorescu@gmail.com>
++ *
++ * Copyright (c) 2021, University Politehnica of Bucharest. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holder nor the names of its
++ *    contributors may be used to endorse or promote products derived from
++ *    this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * Some of these macros here were inspired from Xen code.
++ * For example, from "xen/include/asm-x86/x86_64/page.h" file.
++ */
++
++#ifndef __UKARCH_X86_64_MM_NATIVE__
++#define __UKARCH_X86_64_MM_NATIVE__
++
++#include "mm.h"
++#include <uk/bitmap.h>
++#include <uk/assert.h>
++#include <uk/print.h>
++
++#include <uk/mem_layout.h>
++
++#define pt_pte_to_virt(pte) (PTE_REMOVE_FLAGS(pte) + _virt_offset)
++#define pt_virt_to_mfn(vaddr) ((vaddr - _virt_offset) >> PAGE_SHIFT)
++#define pfn_to_mfn(pfn) (pfn)
++
++#define pte_to_pfn(pte) (PTE_REMOVE_FLAGS(pte) >> PAGE_SHIFT)
++#define pfn_to_mframe(pfn) (pfn << PAGE_SHIFT)
++#define mframe_to_pframe(mframe) (mframe)
++
++static inline unsigned long ukarch_read_pt_base(void)
++{
++	unsigned long cr3;
++
++	__asm__ __volatile__("movq %%cr3, %0" : "=r"(cr3)::);
++
++	/*
++	 * For consistency with Xen implementation, which returns a virtual
++	 * address, this should return the same.
++	 */
++	return pt_pte_to_virt(cr3);
++}
++
++static inline void ukarch_write_pt_base(unsigned long cr3)
++{
++	__asm__ __volatile__("movq %0, %%cr3" :: "r"(cr3) : );
++}
++
++static inline int ukarch_flush_tlb_entry(unsigned long vaddr)
++{
++	__asm__ __volatile__("invlpg (%0)" ::"r" (vaddr) : "memory");
++
++	return 0;
++}
++
++static inline int ukarch_pte_write(unsigned long pt, size_t offset,
++		unsigned long val, size_t level)
++{
++	return _ukarch_pte_write_raw(pt, offset, val, level);
++}
++
++#endif	/* __UKARCH_X86_64_MM_NATIVE__ */
+diff --git a/arch/x86/x86_64/include/uk/asm/mm_pv.h b/arch/x86/x86_64/include/uk/asm/mm_pv.h
+new file mode 100644
+index 00000000..2b735a2c
+--- /dev/null
++++ b/arch/x86/x86_64/include/uk/asm/mm_pv.h
+@@ -0,0 +1,145 @@
++/* SPDX-License-Identifier: BSD-3-Clause */
++/*
++ * Authors: Stefan Teodorescu <stefanl.teodorescu@gmail.com>
++ *
++ * Copyright (c) 2021, University Politehnica of Bucharest. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holder nor the names of its
++ *    contributors may be used to endorse or promote products derived from
++ *    this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * Some of these macros here were inspired from Xen code.
++ * For example, from "xen/include/asm-x86/x86_64/page.h" file.
++ */
++
++#ifndef __UKARCH_X86_64_MM_PV__
++#define __UKARCH_X86_64_MM_PV__
++
++#include "mm.h"
++
++#include <stdint.h>
++#include <common/hypervisor.h>
++#include <uk/bitmap.h>
++#include <uk/assert.h>
++#include <uk/print.h>
++#include <xen/xen.h>
++#include <xen-x86/setup.h>
++#include <xen-x86/mm.h>
++#include <xen-x86/mm_pv.h>
++#include <uk/mem_layout.h>
++
++extern unsigned long *phys_to_machine_mapping;
++
++#define pte_to_pfn(pte) (mfn_to_pfn(pte_to_mfn(pte)))
++#define pfn_to_mframe(pfn) (pfn_to_mfn(pfn) << PAGE_SHIFT)
++#define mframe_to_pframe(mframe) (mfn_to_pfn(mframe >> PAGE_SHIFT) << PAGE_SHIFT)
++#define pt_pte_to_virt(pte) ((pte_to_pfn(pte) << PAGE_SHIFT) + _virt_offset)
++#define pt_virt_to_mfn(vaddr) (pfn_to_mfn((vaddr - _virt_offset) >> PAGE_SHIFT))
++
++static inline unsigned long ukarch_read_pt_base(void)
++{
++	return HYPERVISOR_start_info->pt_base;
++}
++
++static inline void ukarch_write_pt_base(unsigned long cr3)
++{
++	mmuext_op_t uops[1];
++	int rc;
++
++	uops[0].cmd = MMUEXT_UNPIN_TABLE;
++	uops[0].arg1.mfn = pfn_to_mfn(ukarch_read_pt_base() >> PAGE_SHIFT);
++	rc = HYPERVISOR_mmuext_op(uops, 1, NULL, DOMID_SELF);
++	if (rc < 0) {
++		uk_pr_err("Could not unpin old PT base:"
++				"mmuext_op failed with rc=%d\n", rc);
++		return;
++	}
++
++	uops[0].cmd = MMUEXT_PIN_L4_TABLE;
++	uops[0].arg1.mfn = pfn_to_mfn(cr3 >> PAGE_SHIFT);
++	rc = HYPERVISOR_mmuext_op(uops, 1, NULL, DOMID_SELF);
++	if (rc < 0) {
++		uk_pr_err("Could not pin new PT base:"
++				"mmuext_op failed with rc=%d\n", rc);
++		return;
++	}
++
++	uops[0].cmd = MMUEXT_NEW_BASEPTR;
++	uops[0].arg1.mfn = pfn_to_mfn(cr3 >> PAGE_SHIFT);
++	rc = HYPERVISOR_mmuext_op(uops, 1, NULL, DOMID_SELF);
++	if (rc < 0) {
++		uk_pr_err("Could not set new PT base:"
++				"mmuext_op failed with rc=%d\n", rc);
++		return;
++	}
++
++	HYPERVISOR_start_info->pt_base = PAGETABLES_AREA_START;
++	// pt_base = PAGETABLES_AREA_START;
++}
++
++static inline int ukarch_flush_tlb_entry(unsigned long vaddr)
++{
++	/*
++	 * XXX(optimization): use HYPERVISOR_update_va_mapping for L1 to update
++	 * and flush at the same time.
++	 */
++	mmuext_op_t uops[1];
++	int rc;
++
++	uops[0].cmd = MMUEXT_INVLPG_ALL;
++	uops[0].arg1.linear_addr = vaddr;
++	rc = HYPERVISOR_mmuext_op(uops, 1, NULL, DOMID_SELF);
++	if (rc < 0) {
++		uk_pr_err("Could not flush TLB entry for 0x%016lx:"
++				"mmuext_op failed with rc=%d\n", vaddr, rc);
++		return rc;
++	}
++
++	return 0;
++}
++
++static inline int ukarch_pte_write(unsigned long pt_vaddr, size_t offset,
++		unsigned long val, size_t level)
++{
++	mmu_update_t mmu_updates[1];
++	int rc;
++
++	UK_ASSERT(level >= 1 && level <= PAGETABLE_LEVELS);
++	UK_ASSERT(PAGE_ALIGNED(pt_vaddr));
++	UK_ASSERT(offset < pagetable_entries[level - 1]);
++
++	mmu_updates[0].ptr = (pt_virt_to_mfn(pt_vaddr) << PAGE_SHIFT)
++			     + sizeof(unsigned long) * offset;
++	mmu_updates[0].val = val;
++	rc = HYPERVISOR_mmu_update(mmu_updates, 1, NULL, DOMID_SELF);
++	if (rc < 0) {
++		uk_pr_err("Could not write PTE: mmu_update failed with rc=%d\n",
++			rc);
++		return rc;
++	}
++
++	return 0;
++}
++
++#endif	/* __UKARCH_X86_64_MM_PV__ */
+diff --git a/arch/x86/x86_64/include/uk/asm/page.h b/arch/x86/x86_64/include/uk/asm/page.h
+new file mode 100644
+index 00000000..5eb81bb5
+--- /dev/null
++++ b/arch/x86/x86_64/include/uk/asm/page.h
+@@ -0,0 +1,96 @@
++/* SPDX-License-Identifier: BSD-3-Clause */
++/*
++ * Authors: Stefan Teodorescu <stefanl.teodorescu@gmail.com>
++ *
++ * Copyright (c) 2020, University Politehnica of Bucharest. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holder nor the names of its
++ *    contributors may be used to endorse or promote products derived from
++ *    this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * THIS HEADER MAY NOT BE EXTRACTED OR MODIFIED IN ANY WAY.
++ *
++ * Some of these macros here were inspired from Xen code.
++ * For example, from "xen/include/asm-x86/x86_64/page.h" file.
++ */
++#include <uk/essentials.h>
++
++/* TODO: fix duplicate definitions of these macros */
++#define PAGE_SIZE		0x1000UL
++#define PAGE_SHIFT		12
++#define PAGE_MASK		(~(PAGE_SIZE - 1))
++
++#define PAGE_LARGE_SIZE		0x200000UL
++#define PAGE_LARGE_SHIFT	21
++#define PAGE_LARGE_MASK		 (~(PAGE_LARGE_SIZE - 1))
++
++#define PADDR_BITS		44
++#define PADDR_MASK		((1UL << PADDR_BITS) - 1)
++
++#define _PAGE_PRESENT	0x001UL
++#define _PAGE_RW	0x002UL
++#define _PAGE_USER	0x004UL
++#define _PAGE_PWT	0x008UL
++#define _PAGE_PCD	0x010UL
++#define _PAGE_ACCESSED	0x020UL
++#define _PAGE_DIRTY	0x040UL
++#define _PAGE_PAT	0x080UL
++#define _PAGE_PSE	0x080UL
++#define _PAGE_GLOBAL	0x100UL
++#define _PAGE_NX	(1UL << 63)
++#define _PAGE_PROTNONE	(1UL << 58) /* one of the user available bits */
++
++/*
++ * If the user maps the page with PROT_NONE, the _PAGE_PRESENT bit is not set,
++ * but PAGE_PRESENT must return true, so no other page is mapped on top.
++ */
++#define PAGE_PRESENT(vaddr)	((vaddr) & (_PAGE_PRESENT | _PAGE_PROTNONE))
++#define PAGE_LARGE(vaddr)	((vaddr) & _PAGE_PSE)
++#define PAGE_HUGE(vaddr)	((vaddr) & _PAGE_PSE)
++
++/* round down to nearest page address */
++#define PAGE_ALIGN_DOWN(vaddr)		ALIGN_DOWN(vaddr, PAGE_SIZE)
++#define PAGE_LARGE_ALIGN_DOWN(vaddr)	ALIGN_DOWN(vaddr, PAGE_LARGE_SIZE)
++
++/* round up to nearest page address */
++#define PAGE_ALIGN_UP(vaddr)		ALIGN_UP(vaddr, PAGE_SIZE)
++#define PAGE_LARGE_ALIGN_UP(vaddr)	ALIGN_UP(vaddr, PAGE_LARGE_SIZE)
++
++#define PAGE_ALIGNED(vaddr)		(!((vaddr) & (PAGE_SIZE - 1)))
++#define PAGE_LARGE_ALIGNED(vaddr)	(!((vaddr) & (PAGE_LARGE_SIZE - 1)))
++
++#define PTE_REMOVE_FLAGS(pte)		(((pte) & PADDR_MASK) & PAGE_MASK)
++
++/* Definitions for the API */
++#define PAGE_PROT_NONE	0x0
++#define PAGE_PROT_READ	0x1
++#define PAGE_PROT_WRITE 0x2
++#define PAGE_PROT_EXEC	0x4
++
++#define PAGE_FLAG_LARGE 0x1
++
++#define PAGE_PADDR_ANY	((unsigned long) -1)
++
++#define PAGE_INVALID	((unsigned long) -1)
++#define PAGE_NOT_MAPPED 0
+diff --git a/include/uk/mem_layout.h b/include/uk/mem_layout.h
+new file mode 100644
+index 00000000..a42bdebc
+--- /dev/null
++++ b/include/uk/mem_layout.h
+@@ -0,0 +1,154 @@
++/* SPDX-License-Identifier: BSD-3-Clause */
++/*
++ * Authors: Stefan Teodorescu <stefanl.teodorescu@gmail.com>
++ *
++ * Copyright (c) 2021, University Politehnica of Bucharest. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holder nor the names of its
++ *    contributors may be used to endorse or promote products derived from
++ *    this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#ifndef __UK_MEM_LAYOUT__
++#define __UK_MEM_LAYOUT__
++
++#include <uk/arch/limits.h>
++#include <uk/sections.h>
++
++/* These regions exist only for KVM and are mapped 1:1 */
++#ifdef CONFIG_PLAT_KVM
++/*
++ * The VGA buffer is always mapped at this physical address (0xb8000)
++ * (https://wiki.osdev.org/Printing_To_Screen) and we map it at the same
++ * virtual address for convenience.
++ */
++#define VGABUFFER_AREA_START	0xb8000
++#define VGABUFFER_AREA_END	0xc0000
++#define VGABUFFER_AREA_SIZE	(VGABUFFER_AREA_END - VGABUFFER_AREA_START)
++
++/*
++ * This area is reserved by QEMU for the multiboot info struct
++ * (https://github.com/qemu/qemu/blob/master/hw/i386/multiboot.c#L44)
++ * See more about this struct in in plat/kvm/include/kvm-x86/multiboot.h
++ */
++#define MBINFO_AREA_START	0x9000
++#define MBINFO_AREA_END		0xa000
++#define MBINFO_AREA_SIZE	(MBINFO_AREA_END - MBINFO_AREA_START)
++#endif /* CONFIG_PLAT_KVM */
++
++#ifdef CONFIG_PARAVIRT
++#define SHAREDINFO_PAGE		0x1000
++#endif /* CONFIG_PARAVIRT */
++
++/*
++ * This is the area where the kernel binary is mapped, starting from 1MB in the
++ * virtual space.
++ * Here are the regions: Code + Data + BSS + Rodata etc.
++ *
++ * TODO: This has to be broken down further into the composing regions:
++ * Code   - R-X
++ * Data   - RW-
++ * Rodata - R--
++ * etc.
++ */
++#define KERNEL_AREA_START	(1UL << 20) /* 1MB */
++#define KERNEL_AREA_END		PAGE_LARGE_ALIGN_UP(__END)
++#define KERNEL_AREA_SIZE	(KERNEL_AREA_END - KERNEL_AREA_START)
++
++/*
++ * The virtual memory area for storing the page tables. The size is hardcoded
++ * for now to 16MB. TODO: figure out a way to dynamically alloc this.
++ */
++#define BOOKKEEP_AREA_START	(1UL << 32) /* 4GB */
++#define BOOKKEEP_AREA_END	(BOOKKEEP_AREA_START + 0x1000000) /* 16MB */
++#define BOOKKEEP_AREA_SIZE	(BOOKKEEP_AREA_END - BOOKKEEP_AREA_START)
++
++/*
++ * TODO this number has depends on how much memory we have
++ * On Xen it can't be too high because not much memory is initially mapped.
++ */
++#define PAGETABLES_AREA_START	(BOOKKEEP_AREA_START + 0x200000) /* 2MB */
++#define PAGETABLES_AREA_END	BOOKKEEP_AREA_END
++#define PAGETABLES_AREA_SIZE	(PAGETABLES_AREA_END - PAGETABLES_AREA_START)
++
++/*
++ * The virtual memory area where all stacks will be allocated from. It is now
++ * hardcoded for 256 stacks. These are not actually mapped from the beginning,
++ * they are allocated as they are needed. The number of available stacks
++ * directly gives the number of threads that can be created (one stack per
++ * thread). TODO: check if this number needs to be increased or dynamically
++ * calculated.
++ */
++#define STACK_COUNT		256
++#define STACK_AREA_END		(1UL << 47) /* 128TB */
++#define STACK_AREA_START	(STACK_AREA_END - STACK_COUNT * __STACK_SIZE)
++#define STACK_AREA_SIZE		(STACK_COUNT * __STACK_SIZE)
++
++/*
++ * This is a general use area that is reserved to be used when creating
++ * mappings with the internal API, for example by drivers that need to create
++ * mappings with page granularity for IO, or any other pages by the kernel.
++ */
++#define MAPPINGS_AREA_START	(1UL << 33) /* 8GB */
++#define MAPPINGS_AREA_END	(1UL << 34) /* 16GB */
++#define MAPPINGS_AREA_SIZE	(MAPPINGS_AREA_END - MAPPINGS_AREA_START)
++
++/*
++ * Next are the heap and the mmap areas.
++ *
++ * The heap memory is the one managed by the memory allocator(s).
++ *
++ * If the POSIX mmap library is included, the chunk of virtual memory
++ * address space is divided between the heap and the mmap area, with 32TB for
++ * the heap and the rest ~96TB for mmap. When an mmap() call is done, the
++ * returned address is in this area (calls with MAP_FIXED outside of this area
++ * will fail).
++ *
++ * If POSIX mmap is not included, this chunk between the general use mappings
++ * area and the stack is reserved for the heap.
++ *
++ * Immediately after these areas is the heap, at the end of the virtual
++ * address space.
++ */
++#define HEAP_AREA_START		MAPPINGS_AREA_END
++#ifdef CONFIG_LIBPOSIX_MMAP
++#define HEAP_AREA_END		(1UL << 45) /* 32TB */
++#define HEAP_AREA_SIZE		(HEAP_AREA_END - HEAP_AREA_START)
++
++#define MMAP_AREA_START		HEAP_AREA_END
++#define MMAP_AREA_END		STACK_AREA_START
++#define MMAP_AREA_SIZE		(MMAP_AREA_END - MMAP_AREA_START)
++
++#else /* CONFIG_LIBPOSIX_MMAP */
++/* When we don't use mmap, heap is the rest of the memory */
++#define HEAP_AREA_END		STACK_AREA_START
++#define HEAP_AREA_SIZE		(HEAP_AREA_END - HEAP_AREA_START)
++
++#define MMAP_AREA_START		0x0
++#define MMAP_AREA_END		0x0
++#define MMAP_AREA_SIZE		0x0
++#endif /* CONFIG_LIBPOSIX_MMAP */
++
++#endif /* __UK_MEM_LAYOUT__ */
++
+diff --git a/include/uk/plat/mm.h b/include/uk/plat/mm.h
+new file mode 100644
+index 00000000..6abd8982
+--- /dev/null
++++ b/include/uk/plat/mm.h
+@@ -0,0 +1,353 @@
++/* SPDX-License-Identifier: BSD-3-Clause */
++/*
++ * Authors: Stefan Teodorescu <stefanl.teodorescu@gmail.com>
++ *
++ * Copyright (c) 2021, University Politehnica of Bucharest. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holder nor the names of its
++ *    contributors may be used to endorse or promote products derived from
++ *    this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#ifndef __UKPLAT_MM__
++#define __UKPLAT_MM__
++
++#include <sys/types.h>
++#include <uk/config.h>
++
++#ifndef CONFIG_PT_API
++#error Using this header requires enabling the virtual memory management API
++#endif /* CONFIG_PT_API */
++
++#define MEM_REGIONS_NUMBER	4
++
++struct phys_mem_region
++{
++	unsigned long start_addr;
++	size_t length;
++
++	unsigned long bitmap_start_addr;
++	size_t bitmap_length;
++
++	// TODO
++	size_t last_offset;
++};
++
++extern size_t _phys_mem_region_list_size;
++extern struct phys_mem_region _phys_mem_region_list[MEM_REGIONS_NUMBER];
++
++#ifdef CONFIG_PARAVIRT
++#include <uk/asm/mm_pv.h>
++#else
++#include <uk/asm/mm_native.h>
++#endif	/* CONFIG_PARAVIRT */
++
++/**
++ * Get a free frame in the physical memory where a new mapping can be created.
++ *
++ * @param flags: specify any criteria that the frame has to meet (e.g. a 2MB
++ * frame for a large page). These are constructed by or'ing PAGE_FLAG_* flags.
++ *
++ * @return: physical address of an unused frame or PAGE_INVALID on failure.
++ */
++static inline unsigned long uk_get_next_free_frame(unsigned long flags)
++{
++	size_t i;
++	unsigned long offset;
++	unsigned long pfn;
++	unsigned long frame_size;
++
++	unsigned long phys_bitmap_start_addr;
++	size_t phys_bitmap_length;
++
++	unsigned long phys_mem_start_addr;
++	size_t phys_mem_length;
++
++	size_t last_offset;
++
++#ifdef CONFIG_PARAVIRT
++	/*
++	 * Large/Huge pages are not supported in PV guests on Xen.
++	 * https://wiki.xenproject.org/wiki/Huge_Page_Support
++	 */
++	if (flags & PAGE_FLAG_LARGE) {
++		uk_pr_err("Large pages are not supported on PV guest\n");
++		return PAGE_INVALID;
++	}
++#endif /* CONFIG_PARAVIRT */
++
++	if (flags & PAGE_FLAG_LARGE)
++		frame_size = PAGE_LARGE_SIZE >> PAGE_SHIFT;
++	else
++		frame_size = 1;
++
++	for (i = 0; i < _phys_mem_region_list_size; i++) {
++		phys_mem_start_addr =
++			_phys_mem_region_list[i].start_addr;
++		phys_mem_length =
++			_phys_mem_region_list[i].length;
++		phys_bitmap_start_addr =
++			_phys_mem_region_list[i].bitmap_start_addr;
++		phys_bitmap_length =
++			_phys_mem_region_list[i].bitmap_length;
++		last_offset =
++			_phys_mem_region_list[i].last_offset;
++
++		if (phys_bitmap_length - last_offset <= 1) {
++			last_offset = 0;
++			_phys_mem_region_list[i].last_offset = 0;
++		}
++
++		offset = uk_bitmap_find_next_zero_area(
++				(unsigned long *) phys_bitmap_start_addr,
++				phys_bitmap_length,
++				last_offset /* start */,
++				frame_size /* nr */,
++				frame_size - 1 /* align_mask */);
++
++		if (offset * PAGE_SIZE > phys_mem_length)
++			continue;
++
++		uk_bitmap_set((unsigned long *) phys_bitmap_start_addr, offset,
++			      frame_size);
++		_phys_mem_region_list[i].last_offset = offset + frame_size - 1;
++
++		pfn = (phys_mem_start_addr >> PAGE_SHIFT) + offset;
++
++		return pfn_to_mframe(pfn);
++	}
++
++	uk_pr_err("Out of physical memory\n");
++	return PAGE_INVALID;
++}
++
++static inline int uk_frame_reserve(unsigned long paddr, unsigned long frame_size,
++		int val)
++{
++	size_t i;
++	unsigned long offset;
++
++	unsigned long bitmap_start_addr;
++
++	unsigned long mem_start_addr;
++	unsigned long mem_length;
++
++	/* TODO: add huge pages */
++	if (frame_size != PAGE_SIZE && frame_size != PAGE_LARGE_SIZE)
++		return -1;
++
++	if (paddr & (frame_size - 1))
++		return -1;
++
++	frame_size >>= PAGE_SHIFT;
++
++	for (i = 0; i < _phys_mem_region_list_size; i++) {
++		mem_start_addr =
++			_phys_mem_region_list[i].start_addr;
++		mem_length =
++			_phys_mem_region_list[i].length;
++		bitmap_start_addr =
++			_phys_mem_region_list[i].bitmap_start_addr;
++
++		if (!IN_RANGE(paddr, mem_start_addr, mem_length))
++			continue;
++
++		offset = (paddr - mem_start_addr) >> PAGE_SHIFT;
++		if (val) {
++			uk_bitmap_set((unsigned long *) bitmap_start_addr,
++				offset, frame_size);
++		} else {
++			uk_bitmap_clear((unsigned long *) bitmap_start_addr,
++				offset, frame_size);
++		}
++		return 0;
++	}
++
++	return -1;
++}
++
++/**
++ * Create a mapping from a virtual address to a physical address, with given
++ * protections and flags.
++ *
++ * @param vaddr: the virtual address of the page that is to be mapped.
++ * @param paddr: the physical address of the frame to which the virtual page
++ * is mapped to. This parameter can be equal to PAGE_PADDR_ANY when the caller
++ * is not interested in the physical address where the mapping is created.
++ * @param prot: protection permissions of the page (obtained by or'ing
++ * PAGE_PROT_* flags).
++ * @param flags: flags of the page (obtained by or'ing PAGE_FLAG_* flags).
++ *
++ * @return: 0 on success and -1 on failure. The uk_page_map call can fail if:
++ * - the given physical or virtual addresses are not aligned to page size;
++ * - any page in the region is already mapped to another frame;
++ * - if PAGE_PADDR_ANY flag is selected and there are no more available
++ *   free frames in the physical memory;
++ * - (on Xen PV) if flags contains PAGE_FLAG_LARGE - large pages are not
++ *   supported on PV guests;
++ * - (on Xen PV) the hypervisor rejected the mapping.
++ *
++ * In case of failure, the mapping is not created.
++ */
++int uk_page_map(unsigned long vaddr, unsigned long paddr, unsigned long prot,
++		unsigned long flags);
++
++/**
++ * Create a mapping from a region starting at a virtual address to a physical
++ * address, with given protections and flags.
++ *
++ * @param vaddr: the virtual address of the page where the region that is to be
++ * mapped starts.
++ * @param paddr: the physical address of the starting frame of the region to
++ * which the virtual region is mapped to. This parameter can be equal to
++ * PAGE_PADDR_ANY when the caller is not interested in the physical address
++ * where the mappings are created.
++ * @param prot: protection permissions of the pages (obtained by or'ing
++ * PAGE_PROT_* flags).
++ * @param flags: flags of the page (obtained by or'ing PAGE_FLAG_* flags).
++ *
++ * @return: 0 on success and -1 on failure. The uk_page_map call can fail if:
++ * - the given physical or virtual addresses are not aligned to page size;
++ * - any page in the region is already mapped to another frame;
++ * - if PAGE_PADDR_ANY flag is selected and there are no more available
++ *   free frames in the physical memory;
++ * - (on Xen PV) if flags contains PAGE_FLAG_LARGE - large pages are not
++ *   supported on PV guests;
++ * - (on Xen PV) the hypervisor rejected any of the mappings.
++ *
++ * In case of failure, no new mapping is created.
++ */
++int uk_map_region(unsigned long vaddr, unsigned long paddr,
++		unsigned long pages, unsigned long prot, unsigned long flags);
++
++/**
++ * Frees a mapping for a page.
++ *
++ * @param vaddr: the virtual address of the page that is to be unmapped.
++ *
++ * @return: 0 in case of success and -1 on failure. The call fails if:
++ * - the given page is not mapped to any frame;
++ * - the virtual address given is not aligned to page (simple/large/huge) size.
++ * - (on Xen PV) the hypervisor rejected the unmapping.
++ */
++int uk_page_unmap(unsigned long vaddr);
++
++/**
++ * Sets new protections for a given page.
++ *
++ * @param vaddr: the virtual address of the page whose protections are updated.
++ * @param new_prot: new protections that will be set to the page (obtained by
++ * or'ing PAGE_PROT_* flags).
++ *
++ * @return: 0 in case of success and -1 on failure. The call fails if:
++ * - the given page is not mapped to any frame;
++ * - the virtual address given is not aligned to page (simple/large/huge) size.
++ * - (on Xen PV) the hypervisor rejected the unmapping.
++ */
++int uk_page_set_prot(unsigned long vaddr, unsigned long new_prot);
++
++/**
++ * Return page table entry corresponding to given virtual address.
++ * @param vaddr: the virtual address, aligned to the corresponding page
++ * dimesion (simple, large or huge) size.
++ * @return: page table entry (PTE) obtained by doing a page table walk.
++ */
++unsigned long uk_virt_to_pte(unsigned long vaddr);
++
++/**
++ * Initialize internal page table bookkeeping for using the PT API when
++ * attaching to an existing page table.
++ * @param pt_area_start: the virtual address of the area for page tables and
++ * internal bookkeeping.
++ * @param paddr_start: the physical address of the beginning of the area that
++ * should be managed by the API.
++ * @param len: the length of the (physical) memory area that should be managed.
++ */
++void uk_pt_init(unsigned long pt_area_start, unsigned long paddr_start,
++		size_t len);
++
++/**
++ * TODO: params
++ */
++int uk_pt_add_mem(unsigned long paddr_start, unsigned long len);
++
++/**
++ * Build page table structure from scratch
++ * @param paddr_start: the first address in the usable physical memory.
++ * @param len: the length (in bytes) of the physical memory that will be
++ * managed by the API.
++ * TODO params
++ *
++ * This function builds a structure of page tables (by calling _pt_create),
++ * initializes the page table API (by calling uk_pt_init), maps the kernel in
++ * the virtual address space (with _mmap_kernel), switches to the new address
++ * space and sets the _virt_offset variable.
++ */
++void uk_pt_build(unsigned long paddr_start, unsigned long len,
++		unsigned long kernel_start_vaddr,
++		unsigned long kernel_start_paddr,
++		unsigned long kernel_area_size);
++
++/**
++ * Allocate a new stack and return address to its lower address.
++ *
++ * @return: the lower address of the stack. If the returned address is `addr`,
++ * then the allocated stack region is [`addr`, `addr + __STACK_SIZE`]. The
++ * maximum number of stacks that can be allocated denotes the maximum number
++ * of threads that can co-exist. More details about the number of stacks in
++ * include/uk/mem_layout.h. Returns NULL in case of failure.
++ */
++void *uk_stack_alloc();
++
++/**
++ * Frees a stack previously allocated with uk_stack_alloc().
++ *
++ * @param vaddr: the virtual address of the beginning of the stack (i.e. the
++ * address returned by uk_stack_alloc()).
++ *
++ * @return: 0 in case of success and -1 on failure. The call can fail if:
++ * - the given address is not a stack address previously returned by
++ *   uk_stack_alloc (which is between STACK_AREA_BEGIN and STACK_AREA_END);
++ * - the given address is not page aligned;
++ * - (on Xen) the hypervisor rejected the unmapping.
++ */
++int uk_stack_free(void *vaddr);
++
++/**
++ * Create virtual mappings for a new heap of a given length at a given virtual
++ * address.
++ *
++ * @param vaddr: the virtual address of the beginning of the area where the
++ * heap will be mapped.
++ * @param len: the length (in bytes) of the heap.
++ *
++ * @return: 0 in case of success and -1 on failure. The call can fail if:
++ * - the given interval [vaddr, vaddr + len] is not contained in the interval
++ *   [HEAP_AREA_BEGIN, HEAP_AREA_END];
++ * - uk_mmap_region fails.
++ */
++int uk_heap_map(unsigned long vaddr, unsigned long len);
++
++#endif /* __UKPLAT_MM__ */
++
+diff --git a/plat/common/include/uk/plat/common/sections.h b/include/uk/sections.h
+similarity index 100%
+rename from plat/common/include/uk/plat/common/sections.h
+rename to include/uk/sections.h
+diff --git a/lib/Makefile.uk b/lib/Makefile.uk
+index 6b653fdd..2a24ae26 100644
+--- a/lib/Makefile.uk
++++ b/lib/Makefile.uk
+@@ -39,3 +39,4 @@ $(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/ukblkdev))
+ $(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/posix-process))
+ $(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/uksp))
+ $(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/uksignal))
++$(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/posix-mmap))
+diff --git a/lib/posix-mmap/Config.uk b/lib/posix-mmap/Config.uk
+new file mode 100644
+index 00000000..a7ceb044
+--- /dev/null
++++ b/lib/posix-mmap/Config.uk
+@@ -0,0 +1,4 @@
++config LIBPOSIX_MMAP
++	bool "POSIX mmap functions"
++	default n
++	select PT_API
+diff --git a/lib/posix-mmap/Makefile.uk b/lib/posix-mmap/Makefile.uk
+new file mode 100644
+index 00000000..d7193f39
+--- /dev/null
++++ b/lib/posix-mmap/Makefile.uk
+@@ -0,0 +1,8 @@
++$(eval $(call addlib_s,libposix_mmap,$(CONFIG_LIBPOSIX_MMAP)))
++
++CINCLUDES-$(CONFIG_LIBPOSIX_MMAP)    += -I$(LIBPOSIX_MMAP_BASE)/include
++CXXINCLUDES-$(CONFIG_LIBPOSIX_MMAP)  += -I$(LIBPOSIX_MMAP_BASE)/include
++
++LIBPOSIX_MMAP_SRCS-y += $(LIBPOSIX_MMAP_BASE)/mm.c
++LIBPOSIX_MMAP_CINCLUDES-$(CONFIG_PLAT_XEN) += $(LIBXENPLAT_CINCLUDES-y)
++UK_PROVIDED_SYSCALLS-$(CONFIG_LIBPOSIX_MMAP) += mmap-6 munmap-2 mprotect-3
+diff --git a/lib/posix-mmap/exportsyms.uk b/lib/posix-mmap/exportsyms.uk
+new file mode 100644
+index 00000000..c2ea8894
+--- /dev/null
++++ b/lib/posix-mmap/exportsyms.uk
+@@ -0,0 +1,9 @@
++mmap
++uk_syscall_e_mmap
++uk_syscall_r_mmap
++munmap
++uk_syscall_e_munmap
++uk_syscall_r_munmap
++mprotect
++uk_syscall_e_mprotect
++uk_syscall_r_mprotect
+diff --git a/lib/posix-mmap/include/sys/mman.h b/lib/posix-mmap/include/sys/mman.h
+new file mode 100644
+index 00000000..0c4755cb
+--- /dev/null
++++ b/lib/posix-mmap/include/sys/mman.h
+@@ -0,0 +1,59 @@
++/* SPDX-License-Identifier: BSD-3-Clause */
++/*
++ * Authors: Stefan Teodorescu <stefanl.teodorescu@gmail.com>
++ *
++ * Copyright (c) 2021, University Politehnica of Bucharest. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holder nor the names of its
++ *    contributors may be used to endorse or promote products derived from
++ *    this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#ifndef __POSIX_MMAP__
++#define __POSIX_MMAP__
++
++#define MAP_FAILED	((void *) -1)
++
++#define PROT_NONE	0x0
++#define PROT_READ	0x1
++#define PROT_WRITE	0x2
++#define PROT_EXEC	0x4
++
++#define MAP_SHARED	0x1
++#define MAP_PRIVATE	0x2
++
++#define MAP_FIXED	0x10
++#define MAP_ANONYMOUS	0x20
++#define MAP_ANON	MAP_ANONYMOUS
++
++void *mmap(void *addr, size_t length, int prot, int flags,
++		   int fd, off_t offset);
++
++int munmap(void *addr, size_t length);
++
++int mprotect(void *addr, size_t len, int prot);
++
++int msync(void *addr, size_t length, int flags);
++
++#endif /* __POSIX_MMAP__ */
+diff --git a/lib/posix-mmap/mm.c b/lib/posix-mmap/mm.c
+new file mode 100644
+index 00000000..b4da96e9
+--- /dev/null
++++ b/lib/posix-mmap/mm.c
+@@ -0,0 +1,234 @@
++/* SPDX-License-Identifier: BSD-3-Clause */
++/*
++ * Authors: Stefan Teodorescu <stefanl.teodorescu@gmail.com>
++ *
++ * Copyright (c) 2021, University Politehnica of Bucharest. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holder nor the names of its
++ *    contributors may be used to endorse or promote products derived from
++ *    this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include <errno.h>
++#include <string.h>
++#include <unistd.h>
++
++#include <uk/bitmap.h>
++#include <uk/print.h>
++#include <uk/plat/mm.h>
++#include <uk/mem_layout.h>
++#include <uk/syscall.h>
++
++#include <sys/mman.h>
++
++/*
++ * XXX
++ * This does for now a linear search, starting from |start|, looking for a
++ * memory area with |length| bytes (aligned to page size)
++ */
++static unsigned long get_free_virtual_area(unsigned long start, size_t length)
++{
++	unsigned long page;
++
++	if (!PAGE_ALIGNED(length))
++		return -1;
++
++	while (start <= MMAP_AREA_END - length) {
++		for (page = start; page < start + length; page += PAGE_SIZE) {
++			if (PAGE_PRESENT(uk_virt_to_pte(page)))
++				break;
++		}
++
++		if (page == start + length)
++			return start;
++
++		start = page + PAGE_SIZE;
++	}
++
++	return -1;
++}
++
++static int libc_to_internal_prot(int prot)
++{
++	int page_prot = PAGE_PROT_NONE;
++
++	if (prot & PROT_READ)
++		page_prot |= PAGE_PROT_READ;
++	if (prot & PROT_WRITE)
++		page_prot |= PAGE_PROT_WRITE;
++	if (prot & PROT_EXEC)
++		page_prot |= PAGE_PROT_EXEC;
++
++	return page_prot;
++}
++UK_SYSCALL_DEFINE(void *, mmap, void *, addr, size_t, length, int, prot,
++		int, flags, int, fd, off_t, offset)
++{
++	unsigned long page_addr = (unsigned long) addr;
++	unsigned long area_to_map, page_prot, page;
++	size_t i;
++
++	if (flags & MAP_ANONYMOUS) {
++		if (fd != -1 || offset) {
++			errno = EINVAL;
++			return MAP_FAILED;
++		}
++	} else {
++		/* TODO: We don't currently support mapping files */
++		errno = ENOTSUP;
++		return MAP_FAILED;
++	}
++
++
++	/* At least one of MAP_SHARED or MAP_PRIVATE has to be specified */
++	if (!(flags & MAP_SHARED) && !(flags & MAP_PRIVATE)) {
++		errno = EINVAL;
++		return MAP_FAILED;
++	}
++
++	if (!length) {
++		errno = EINVAL;
++		return MAP_FAILED;
++	}
++
++	length = PAGE_ALIGN_UP(length);
++	if (!length) {
++		errno = ENOMEM;
++		return MAP_FAILED;
++	}
++
++	if (flags & MAP_FIXED) {
++		/* Discard any overlapping mappings */
++		// TODO: bug when unmapping memory from static pagetable
++		/*
++		if (munmap(addr, length)) {
++			errno = EINVAL;
++			return MAP_FAILED;
++		}
++		*/
++		page_addr = PAGE_ALIGN_UP(page_addr);
++		area_to_map = page_addr;
++	} else {
++		if ((void *) page_addr == NULL || page_addr < MMAP_AREA_START)
++			page_addr = MMAP_AREA_START;
++		else
++			page_addr = PAGE_ALIGN_UP(page_addr);
++
++		area_to_map = get_free_virtual_area(page_addr, length);
++	}
++
++	if (area_to_map == (unsigned long) -1) {
++		errno = ENOMEM;
++		return MAP_FAILED;
++	}
++
++	for (i = 0; i < length; i += PAGE_SIZE) {
++		page = area_to_map + i;
++		if (uk_page_map(page, PAGE_PADDR_ANY,
++				PAGE_PROT_READ | PAGE_PROT_WRITE, 0)) {
++			munmap((void *) area_to_map, length);
++			errno = ENOMEM;
++			return MAP_FAILED;
++		}
++	}
++
++	if (flags & MAP_ANONYMOUS) {
++		/* MAP_ANONYMOUS pages are zeroed out */
++		/*
++		 * XXX: there is a bug when building with performance
++		 * optimizations flag that make this memset loop infintely.
++		 * Using for loop for now.
++		 */
++		/* memset((void *) area_to_map, 0, length); */
++		for (i = 0; i < length / sizeof(unsigned long); i++)
++			*((unsigned long *) area_to_map + i) = 0;
++	} else {
++		/* TODO: file mapping */
++	}
++
++	page_prot = libc_to_internal_prot(prot);
++	for (page = area_to_map; page < area_to_map + length; page += PAGE_SIZE)
++		uk_page_set_prot(page, page_prot);
++
++	return (void *) area_to_map;
++}
++
++UK_SYSCALL_DEFINE(int, munmap, void *, addr, size_t, length)
++{
++	unsigned long start = (unsigned long) addr;
++	unsigned long page;
++
++	if (!PAGE_ALIGNED(start)) {
++		errno = EINVAL;
++		return -1;
++	}
++
++	if (!length)
++		return 0;
++
++	length = PAGE_ALIGN_UP(length);
++	for (page = start; page < start + length; page += PAGE_SIZE)
++		uk_page_unmap(page);
++
++	return 0;
++}
++
++UK_SYSCALL_DEFINE(int, mprotect, void*, addr, size_t, length, int, prot)
++{
++	unsigned long start = (unsigned long) addr;
++	unsigned long page_prot, page;
++
++	if (PAGE_ALIGNED(start)) {
++		errno = EINVAL;
++		return -1;
++	}
++
++	if (!length)
++		return 0;
++
++	if ((prot & PROT_NONE) && (prot != PROT_NONE)) {
++		errno = EINVAL;
++		return -1;
++	}
++
++	page_prot = PAGE_PROT_NONE;
++	if (prot & PROT_READ)
++		page_prot |= PAGE_PROT_READ;
++	if (prot & PROT_WRITE)
++		page_prot |= PAGE_PROT_WRITE;
++	if (prot & PROT_EXEC)
++		page_prot |= PAGE_PROT_EXEC;
++
++	length = PAGE_ALIGN_UP(length);
++	for (page = start; page < start + length; page += PAGE_SIZE)
++		uk_page_set_prot(page, page_prot);
++
++	return 0;
++}
++
++int msync(void *addr __unused, size_t length __unused, int flags __unused)
++{
++	errno = ENOTSUP;
++	return -1;
++}
+diff --git a/lib/ukboot/boot.c b/lib/ukboot/boot.c
+index 960fdd31..ea862987 100644
+--- a/lib/ukboot/boot.c
++++ b/lib/ukboot/boot.c
+@@ -68,6 +68,26 @@
+ #endif
+ #include "banner.h"
+ 
++#ifdef CONFIG_DYNAMIC_PT
++#include <uk/plat/mm.h>
++#endif /* CONFIG_DYNAMIC_PT */
++
++#ifndef UK_DEBUG_TRACE
++#define UK_DEBUG_TRACE
++#endif
++
++#include <uk/trace.h>
++
++UK_TRACEPOINT(trace_boot_end, "");
++UK_TRACEPOINT(trace_boot_sched_beg, "");
++UK_TRACEPOINT(trace_boot_sched_end, "");
++UK_TRACEPOINT(trace_boot_alloc_beg, "");
++UK_TRACEPOINT(trace_boot_alloc_end, "");
++UK_TRACEPOINT(trace_boot_inittab_beg, "%p()", void*);
++UK_TRACEPOINT(trace_boot_inittab_end, "%p()", void*);
++UK_TRACEPOINT(trace_boot_ctor_beg,  "%p()", void*);
++UK_TRACEPOINT(trace_boot_ctor_end,  "%p()", void*);
++
+ int main(int argc, char *argv[]) __weak;
+ 
+ static void main_thread_func(void *arg) __noreturn;
+@@ -91,6 +111,7 @@ static void main_thread_func(void *arg)
+ 	uk_pr_info("Init Table @ %p - %p\n",
+ 		   &uk_inittab_start[0], &uk_inittab_end);
+ 	uk_inittab_foreach(initfn, uk_inittab_start, uk_inittab_end) {
++		trace_boot_inittab_beg(*initfn);
+ 		UK_ASSERT(*initfn);
+ 		uk_pr_debug("Call init function: %p()...\n", *initfn);
+ 		ret = (*initfn)();
+@@ -100,6 +121,7 @@ static void main_thread_func(void *arg)
+ 			ret = UKPLAT_CRASH;
+ 			goto exit;
+ 		}
++		trace_boot_inittab_end(*initfn);
+ 	}
+ 
+ 	print_banner(stdout);
+@@ -118,21 +140,25 @@ static void main_thread_func(void *arg)
+ 		   &__preinit_array_start[0], &__preinit_array_end);
+ 	uk_ctortab_foreach(ctorfn,
+ 			   __preinit_array_start, __preinit_array_end) {
++		trace_boot_ctor_beg(*ctorfn);
+ 		if (!*ctorfn)
+ 			continue;
+ 
+ 		uk_pr_debug("Call pre-init constructor: %p()...\n", *ctorfn);
+ 		(*ctorfn)();
++		trace_boot_ctor_end(*ctorfn);
+ 	}
+ 
+ 	uk_pr_info("Constructor table at %p - %p\n",
+ 		   &__init_array_start[0], &__init_array_end);
+ 	uk_ctortab_foreach(ctorfn, __init_array_start, __init_array_end) {
++		trace_boot_ctor_beg(*ctorfn);
+ 		if (!*ctorfn)
+ 			continue;
+ 
+ 		uk_pr_debug("Call constructor: %p()...\n", *ctorfn);
+ 		(*ctorfn)();
++		trace_boot_ctor_end(*ctorfn);
+ 	}
+ 
+ 	uk_pr_info("Calling main(%d, [", tma->argc);
+@@ -143,6 +169,7 @@ static void main_thread_func(void *arg)
+ 	}
+ 	uk_pr_info("])\n");
+ 
++	trace_boot_end();
+ 	ret = main(tma->argc, tma->argv);
+ 	uk_pr_info("main returned %d, halting system\n", ret);
+ 	ret = (ret != 0) ? UKPLAT_CRASH : UKPLAT_HALT;
+@@ -198,9 +225,11 @@ void ukplat_entry(int argc, char *argv[])
+ 	uk_pr_info("Unikraft constructor table at %p - %p\n",
+ 		   &uk_ctortab_start[0], &uk_ctortab_end);
+ 	uk_ctortab_foreach(ctorfn, uk_ctortab_start, uk_ctortab_end) {
++		trace_boot_ctor_beg(*ctorfn);
+ 		UK_ASSERT(*ctorfn);
+ 		uk_pr_debug("Call constructor: %p())...\n", *ctorfn);
+ 		(*ctorfn)();
++		trace_boot_ctor_end(*ctorfn);
+ 	}
+ 
+ #ifdef CONFIG_LIBUKLIBPARAM
+@@ -213,6 +242,7 @@ void ukplat_entry(int argc, char *argv[])
+ 	}
+ #endif /* CONFIG_LIBUKLIBPARAM */
+ 
++	trace_boot_alloc_beg();
+ #if !CONFIG_LIBUKBOOT_NOALLOC
+ 	/* initialize memory allocator
+ 	 * FIXME: allocators are hard-coded for now
+@@ -236,13 +266,37 @@ void ukplat_entry(int argc, char *argv[])
+ 		 */
+ 		if (!a) {
+ #if CONFIG_LIBUKBOOT_INITBBUDDY
++			// TODO(fane)
++#ifdef CONFIG_DYNAMIC_PT
++			/*
++			 * The buddy allocator uses the whole memory it is
++			 * given from the beginning, so the whole heap has to
++			 * be mapped before initializing the allocator if
++			 * dynamic initialization of page tables is chosen.
++			 */
++			if (unlikely(uk_heap_map((unsigned long) md.base,
++							md.len)))
++				UK_CRASH("Could not map heap\n");
++#endif /* CONFIG_DYNAMIC_PT */
+ 			a = uk_allocbbuddy_init(md.base, md.len);
+ #elif CONFIG_LIBUKBOOT_INITREGION
++			if (unlikely(uk_heap_map((unsigned long) md.base,
++							md.len)))
++				UK_CRASH("Could not map heap\n");
+ 			a = uk_allocregion_init(md.base, md.len);
+ #elif CONFIG_LIBUKBOOT_INITTLSF
+ 			a = uk_tlsf_init(md.base, md.len);
+ #endif
+ 		} else {
++#if defined(CONFIG_DYNAMIC_PT) && defined(CONFIG_LIBUKBOOT_INITBBUDDY)
++			/*
++			 * Same as above, when adding memory to the buddy
++			 * allocator, it has to be already mapped
++			 */
++			if (unlikely(uk_heap_map((unsigned long) md.base,
++							md.len)))
++				UK_CRASH("Could not map heap\n");
++#endif /* CONFIG_DYNAMIC_PT && CONFIG_LIB_UKBOOT_INITBBUDDY */
+ 			uk_alloc_addmem(a, md.base, md.len);
+ 		}
+ 	}
+@@ -254,6 +308,7 @@ void ukplat_entry(int argc, char *argv[])
+ 			UK_CRASH("Could not set the platform memory allocator\n");
+ 	}
+ #endif
++	trace_boot_alloc_end();
+ 
+ #if CONFIG_LIBUKALLOC
+ 	uk_pr_info("Initialize IRQ subsystem...\n");
+@@ -262,12 +317,9 @@ void ukplat_entry(int argc, char *argv[])
+ 		UK_CRASH("Could not initialize the platform IRQ subsystem\n");
+ #endif
+ 
+-	/* On most platforms the timer depend on an initialized IRQ subsystem */
+-	uk_pr_info("Initialize platform time...\n");
+-	ukplat_time_init();
+-
+ #if CONFIG_LIBUKSCHED
+ 	/* Init scheduler. */
++	trace_boot_sched_beg();
+ 	s = uk_sched_default_init(a);
+ 	if (unlikely(!s))
+ 		UK_CRASH("Could not initialize the scheduler\n");
+@@ -280,6 +332,7 @@ void ukplat_entry(int argc, char *argv[])
+ 	main_thread = uk_thread_create("main", main_thread_func, &tma);
+ 	if (unlikely(!main_thread))
+ 		UK_CRASH("Could not create main thread\n");
++	trace_boot_sched_end();
+ 	uk_sched_start(s);
+ #else
+ 	/* Enable interrupts before starting the application */
+diff --git a/lib/ukschedcoop/schedcoop.c b/lib/ukschedcoop/schedcoop.c
+index 5e7dbe89..ea9fc1e9 100644
+--- a/lib/ukschedcoop/schedcoop.c
++++ b/lib/ukschedcoop/schedcoop.c
+@@ -114,6 +114,7 @@ static void schedcoop_schedule(struct uk_sched *s)
+ 		/* block until the next timeout expires, or for 10 secs,
+ 		 * whichever comes first
+ 		 */
++
+ 		ukplat_lcpu_halt_to(min_wakeup_time);
+ 		/* handle pending events if any */
+ 		ukplat_lcpu_irqs_handle_pending();
+diff --git a/plat/Config.uk b/plat/Config.uk
+index 76a3f318..747c42e8 100644
+--- a/plat/Config.uk
++++ b/plat/Config.uk
+@@ -5,6 +5,22 @@ config UKPLAT_MEMRNAME
+ 	help
+ 		Enable name field in memory region descriptors
+ 
++config PT_API
++	bool "Virtual memory management API"
++	default n
++	depends on ARCH_X86_64
++	help
++		Provide functions for managing virtual memory
++
++config DYNAMIC_PT
++	bool "Boot-time initialization of page tables"
++	default n
++	depends on ARCH_X86_64
++	help
++		Build page tables at boot time and provide API for managing
++		virtual mappings.
++	select PT_API
++
+ config EARLY_PRINT_PL011_UART_ADDR
+ 	hex "Early debug console pl011 serial address"
+ 	default 0x09000000
+diff --git a/plat/common/mm.c b/plat/common/mm.c
+new file mode 100644
+index 00000000..5b2cb3d8
+--- /dev/null
++++ b/plat/common/mm.c
+@@ -0,0 +1,1021 @@
++/* SPDX-License-Identifier: BSD-3-Clause */
++/*
++ * Authors: Stefan Teodorescu <stefanl.teodorescu@gmail.com>
++ *
++ * Copyright (c) 2021, University Politehnica of Bucharest. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holder nor the names of its
++ *    contributors may be used to endorse or promote products derived from
++ *    this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ */
++
++#include <errno.h>
++#include <stdio.h>
++#include <string.h>
++#include <unistd.h>
++
++#include <uk/assert.h>
++#include <uk/list.h>
++#include <uk/print.h>
++#include <uk/plat/mm.h>
++#include <uk/mem_layout.h>
++
++static unsigned long pt_bitmap_start_addr;
++static unsigned long pt_bitmap_length;
++
++static unsigned long pt_mem_start_addr;
++static unsigned long pt_mem_length;
++
++static unsigned long stack_bitmap_start_addr[UK_BITS_TO_LONGS(STACK_COUNT)];
++static unsigned long stack_bitmap_length = UK_BITS_TO_LONGS(STACK_COUNT);
++
++size_t _phys_mem_region_list_size;
++struct phys_mem_region _phys_mem_region_list[MEM_REGIONS_NUMBER];
++
++unsigned long _virt_offset;
++
++/*
++ * Variable used in the initialization phase during booting when allocating
++ * page tables does not use the page table API function uk_pt_alloc_table.
++ * The initial page tables are allocated sequantially and this variable is the
++ * counter of used page tables.
++ */
++static size_t _used_pts_count;
++
++/* TODO fix duplicate with POSIX mmap */
++static unsigned long get_free_virtual_area(unsigned long start, size_t length,
++		unsigned long interval_end)
++{
++	unsigned long page;
++
++	if (!PAGE_ALIGNED(length))
++		return -1;
++
++	while (start <= interval_end - length) {
++		for (page = start; page < start + length; page += PAGE_SIZE) {
++			if (PAGE_PRESENT(uk_virt_to_pte(page)))
++				break;
++		}
++
++		if (page == start + length)
++			return start;
++
++		start = page + PAGE_SIZE;
++	}
++
++	return -1;
++}
++
++/**
++ * Allocate a page table for a given level (in the PT hierarchy).
++ *
++ * @param level: the level of the needed page table.
++ *
++ * @return: virtual address of newly allocated page table or PAGE_INVALID
++ * on failure.
++ */
++static unsigned long uk_pt_alloc_table(size_t level, int is_initmem)
++{
++	unsigned long offset, pt_vaddr;
++#ifdef CONFIG_PARAVIRT
++	int rc;
++#endif	/* CONFIG_PARAVIRT */
++
++	offset = uk_bitmap_find_next_zero_area(
++	    (unsigned long *) pt_bitmap_start_addr,
++	    pt_bitmap_length,
++	    0 /* start */, 1 /* nr */, 0 /* align_mask */);
++
++	if (offset * PAGE_SIZE > pt_mem_length) {
++		uk_pr_err("Filled up all available space for page tables\n");
++		return PAGE_INVALID;
++	}
++
++	uk_bitmap_set((unsigned long *) pt_bitmap_start_addr, offset, 1);
++	pt_vaddr = pt_mem_start_addr + (offset << PAGE_SHIFT) + _virt_offset;
++
++#ifdef CONFIG_PARAVIRT
++	rc = uk_page_set_prot(pt_vaddr, PAGE_PROT_READ | PAGE_PROT_WRITE);
++	if (rc)
++		return PAGE_INVALID;
++#endif	/* CONFIG_PARAVIRT */
++
++	memset((void *) pt_vaddr, 0,
++		sizeof(unsigned long) * pagetable_entries[level - 1]);
++
++	/* Xen requires that PTs are mapped read-only */
++#ifdef CONFIG_PARAVIRT
++	/*
++	 * When using this function on Xen for the initmem part, the page
++	 * must not be set to read-only, as we are currently writing
++	 * directly into it. All page tables will be set later to read-only
++	 * before setting the new pt_base.
++	 */
++	if (!is_initmem) {
++		rc = uk_page_set_prot(pt_vaddr, PAGE_PROT_READ);
++		if (rc)
++			return PAGE_INVALID;
++	}
++#endif	/* CONFIG_PARAVIRT */
++
++	/*
++	 * This is an L(n + 1) entry, so we set L(n + 1) flags
++	 * (Index in pagetable_protections is level of PT - 1)
++	 */
++	return (pt_virt_to_mfn(pt_vaddr) << PAGE_SHIFT)
++		| pagetable_protections[level];
++}
++
++static int uk_pt_release_if_unused(unsigned long vaddr, unsigned long pt,
++	unsigned long parent_pt, size_t level)
++{
++	unsigned long offset;
++	size_t i;
++	int rc;
++
++	if (!PAGE_ALIGNED(pt) || !PAGE_ALIGNED(parent_pt)) {
++		uk_pr_err("Table's address must be aligned to page size\n");
++		return -1;
++	}
++
++	for (i = 0; i < pagetable_entries[level - 1]; i++) {
++		if (PAGE_PRESENT(ukarch_pte_read(pt, i, level)))
++			return 0;
++	}
++
++	rc = ukarch_pte_write(parent_pt, Lx_OFFSET(vaddr, level + 1), 0,
++		level + 1);
++	if (rc)
++		return -1;
++
++	ukarch_flush_tlb_entry(parent_pt);
++
++	offset = (pt - pt_mem_start_addr - _virt_offset) >> PAGE_SHIFT;
++	uk_bitmap_clear((unsigned long *) pt_bitmap_start_addr, offset, 1);
++
++	return 0;
++}
++
++static int _page_map(unsigned long pt, unsigned long vaddr, unsigned long paddr,
++	  unsigned long prot, unsigned long flags, int is_initmem,
++	  int (*pte_write)(unsigned long, size_t, unsigned long, size_t))
++{
++	unsigned long pte;
++	int rc;
++
++	if (!PAGE_ALIGNED(vaddr)) {
++		uk_pr_err("Virt address must be aligned to page size\n");
++		return -1;
++	}
++	if (flags & PAGE_FLAG_LARGE && !PAGE_LARGE_ALIGNED(vaddr)) {
++		uk_pr_err("Virt ddress must be aligned to large page size\n");
++		return -1;
++	}
++
++#ifdef CONFIG_PARAVIRT
++	if (flags & PAGE_FLAG_LARGE) {
++		uk_pr_err("Large pages are not supported on PV guest\n");
++		return -1;
++	}
++#endif /* CONFIG_PARAVIRT */
++
++	if (paddr == PAGE_PADDR_ANY) {
++		paddr = uk_get_next_free_frame(flags);
++
++		if (paddr == PAGE_INVALID)
++			return -1;
++	} else if (!PAGE_ALIGNED(paddr)) {
++		uk_pr_err("Phys address must be aligned to page size\n");
++		return -1;
++	} else if ((flags & PAGE_FLAG_LARGE) && !PAGE_LARGE_ALIGNED(paddr)) {
++		uk_pr_err("Phys address must be aligned to large page size\n");
++		return -1;
++	}
++
++	/*
++	 * XXX: On 64-bits architectures (x86_64 and arm64) the hierarchical
++	 * page tables have a 4 level layout. This implementation will need a
++	 * revision when introducing support for 32-bits architectures, since
++	 * there are only 3 levels of page tables.
++	 */
++	pte = ukarch_pte_read(pt, L4_OFFSET(vaddr), 4);
++	if (!PAGE_PRESENT(pte)) {
++		pte = uk_pt_alloc_table(3, is_initmem);
++		if (pte == PAGE_INVALID)
++			return -1;
++
++		rc = pte_write(pt, L4_OFFSET(vaddr), pte, 4);
++		if (rc)
++			return -1;
++	}
++
++	pt = (unsigned long) pt_pte_to_virt(pte);
++	pte = ukarch_pte_read(pt, L3_OFFSET(vaddr), 3);
++	if (!PAGE_PRESENT(pte)) {
++		pte = uk_pt_alloc_table(2, is_initmem);
++		if (pte == PAGE_INVALID)
++			return -1;
++
++		rc = pte_write(pt, L3_OFFSET(vaddr), pte, 3);
++		if (rc)
++			return -1;
++	}
++
++	pt = (unsigned long) pt_pte_to_virt(pte);
++	pte = ukarch_pte_read(pt, L2_OFFSET(vaddr), 2);
++	if (flags & PAGE_FLAG_LARGE) {
++		if (PAGE_PRESENT(pte))
++			return -1;
++
++		pte = ukarch_pte_create(PTE_REMOVE_FLAGS(paddr), prot, 2);
++		rc = pte_write(pt, L2_OFFSET(vaddr), pte, 2);
++		if (rc)
++			return -1;
++
++		uk_frame_reserve(paddr, PAGE_LARGE_SIZE, 1);
++		return 0;
++	}
++	if (!PAGE_PRESENT(pte)) {
++		pte = uk_pt_alloc_table(1, is_initmem);
++		if (pte == PAGE_INVALID)
++			return -1;
++
++		rc = pte_write(pt, L2_OFFSET(vaddr), pte, 2);
++		if (rc)
++			return -1;
++	}
++
++	pt = (unsigned long) pt_pte_to_virt(pte);
++	pte = ukarch_pte_read(pt, L1_OFFSET(vaddr), 1);
++	/* TODO rethink here */
++	//if (!PAGE_PRESENT(pte)) {
++	if (1) {
++		pte = ukarch_pte_create(
++			paddr,
++			prot, 1);
++		rc = pte_write(pt, L1_OFFSET(vaddr), pte, 1);
++		if (rc)
++			return -1;
++		uk_frame_reserve(mframe_to_pframe(paddr), PAGE_SIZE, 1);
++	} else {
++		uk_pr_info("Virtual address 0x%08lx is already mapped\n",
++			vaddr);
++		return -1;
++	}
++
++	return 0;
++}
++
++int _initmem_page_map(unsigned long pt, unsigned long vaddr,
++		unsigned long paddr, unsigned long prot,
++		unsigned long flags)
++{
++	return _page_map(pt, vaddr, paddr, prot, flags, 1,
++		_ukarch_pte_write_raw);
++}
++
++int uk_page_map(unsigned long vaddr, unsigned long paddr, unsigned long prot,
++	unsigned long flags)
++{
++	return _page_map(ukarch_read_pt_base(), vaddr, paddr, prot, flags, 0,
++		ukarch_pte_write);
++}
++
++static int _page_unmap(unsigned long pt, unsigned long vaddr,
++	int (*pte_write)(unsigned long, size_t, unsigned long, size_t))
++{
++	unsigned long l1_table, l2_table, l3_table, l4_table, pte;
++	unsigned long pfn;
++	unsigned long frame_size = PAGE_SIZE;
++	int rc;
++
++	if (!PAGE_ALIGNED(vaddr)) {
++		uk_pr_err("Address must be aligned to page size\n");
++		return -1;
++	}
++
++	l4_table = pt;
++	pte = ukarch_pte_read(l4_table, L4_OFFSET(vaddr), 4);
++	if (!PAGE_PRESENT(pte))
++		return -1;
++
++	l3_table = (unsigned long) pt_pte_to_virt(pte);
++	pte = ukarch_pte_read(l3_table, L3_OFFSET(vaddr), 3);
++	if (!PAGE_PRESENT(pte))
++		return -1;
++
++	l2_table = (unsigned long) pt_pte_to_virt(pte);
++	pte = ukarch_pte_read(l2_table, L2_OFFSET(vaddr), 2);
++	if (!PAGE_PRESENT(pte))
++		return -1;
++	if (PAGE_LARGE(pte)) {
++		if (!PAGE_LARGE_ALIGNED(vaddr))
++			return -1;
++
++		pfn = pte_to_pfn(pte);
++		rc = pte_write(l2_table, L2_OFFSET(vaddr), 0, 2);
++		if (rc)
++			return -1;
++		frame_size = PAGE_LARGE_SIZE;
++	} else {
++		l1_table = (unsigned long) pt_pte_to_virt(pte);
++		pte = ukarch_pte_read(l1_table, L1_OFFSET(vaddr), 1);
++		if (!PAGE_PRESENT(pte))
++			return -1;
++
++		pfn = pte_to_pfn(pte);
++		rc = pte_write(l1_table, L1_OFFSET(vaddr), 0, 1);
++		if (rc)
++			return -1;
++		rc = uk_pt_release_if_unused(vaddr, l1_table, l2_table, 1);
++		if (rc)
++			return -1;
++		}
++
++	ukarch_flush_tlb_entry(vaddr);
++
++	uk_frame_reserve(pfn << PAGE_SHIFT, frame_size, 0);
++
++	rc = uk_pt_release_if_unused(vaddr, l2_table, l3_table, 2);
++	if (rc)
++		return -1;
++	rc = uk_pt_release_if_unused(vaddr, l3_table, l4_table, 3);
++	if (rc)
++		return -1;
++
++	return 0;
++}
++
++int uk_page_unmap(unsigned long vaddr)
++{
++	return _page_unmap(ukarch_read_pt_base(), vaddr, ukarch_pte_write);
++}
++
++static int _map_region(unsigned long pt, unsigned long vaddr,
++	unsigned long paddr, unsigned long pages, unsigned long prot,
++	unsigned long flags, int is_initmem,
++	int (*pte_write)(unsigned long, size_t, unsigned long, size_t))
++{
++	size_t i;
++	unsigned long increment;
++	int rc;
++
++	if (flags & PAGE_FLAG_LARGE)
++		increment = PAGE_LARGE_SIZE;
++	else
++		increment = PAGE_SIZE;
++
++	for (i = 0; i < pages; i++) {
++		unsigned long current_paddr;
++
++		if (paddr == PAGE_PADDR_ANY)
++			current_paddr = PAGE_PADDR_ANY;
++		else
++			current_paddr = pfn_to_mfn((paddr + i * increment) >> PAGE_SHIFT) << PAGE_SHIFT;
++
++		rc = _page_map(pt, vaddr + i * increment, current_paddr, prot,
++			flags, is_initmem, pte_write);
++		if (rc) {
++			size_t j;
++
++			uk_pr_err("Could not map page 0x%08lx\n",
++				vaddr + i * increment);
++
++			for (j = 0; j < i; j++)
++				_page_unmap(pt, vaddr, pte_write);
++			return -1;
++		}
++	}
++
++	return 0;
++}
++
++int uk_map_region(unsigned long vaddr, unsigned long paddr,
++	unsigned long pages, unsigned long prot, unsigned long flags)
++{
++	return _map_region(ukarch_read_pt_base(), vaddr, paddr, pages,
++		prot, flags, 0, ukarch_pte_write);
++}
++
++int _initmem_map_region(unsigned long pt, unsigned long vaddr,
++	unsigned long paddr, unsigned long pages, unsigned long prot,
++	unsigned long flags)
++{
++	return _map_region(pt, vaddr, paddr, pages, prot, flags, 1,
++		_ukarch_pte_write_raw);
++}
++
++int _page_set_prot(unsigned long pt, unsigned long vaddr,
++	unsigned long new_prot,
++	int (*pte_write)(unsigned long, size_t, unsigned long, size_t))
++{
++	unsigned long pte, new_pte;
++	int rc;
++
++	if (!PAGE_ALIGNED(vaddr)) {
++		uk_pr_info("Address must be aligned to page size\n");
++		return -1;
++	}
++
++	pte = ukarch_pte_read(pt, L4_OFFSET(vaddr), 4);
++	if (!PAGE_PRESENT(pte))
++		return -1;
++
++	pt = (unsigned long) pt_pte_to_virt(pte);
++	pte = ukarch_pte_read(pt, L3_OFFSET(vaddr), 3);
++	if (!PAGE_PRESENT(pte))
++		return -1;
++
++	pt = (unsigned long) pt_pte_to_virt(pte);
++	pte = ukarch_pte_read(pt, L2_OFFSET(vaddr), 2);
++	if (!PAGE_PRESENT(pte))
++		return -1;
++	if (PAGE_LARGE(pte)) {
++		new_pte = ukarch_pte_create(PTE_REMOVE_FLAGS(pte), new_prot, 2);
++		rc = pte_write(pt, L2_OFFSET(vaddr), new_pte, 2);
++		if (rc)
++			return -1;
++		ukarch_flush_tlb_entry(vaddr);
++
++		return 0;
++	}
++
++	pt = (unsigned long) pt_pte_to_virt(pte);
++	pte = ukarch_pte_read(pt, L1_OFFSET(vaddr), 1);
++	if (!PAGE_PRESENT(pte))
++		return -1;
++
++	new_pte = ukarch_pte_create(PTE_REMOVE_FLAGS(pte), new_prot, 1);
++	rc = pte_write(pt, L1_OFFSET(vaddr), new_pte, 1);
++	if (rc)
++		return -1;
++	ukarch_flush_tlb_entry(vaddr);
++
++	return 0;
++}
++
++int uk_page_set_prot(unsigned long vaddr, unsigned long new_prot)
++{
++	return _page_set_prot(ukarch_read_pt_base(), vaddr, new_prot,
++		ukarch_pte_write);
++}
++
++int _initmem_page_set_prot(unsigned long pt, unsigned long vaddr,
++	unsigned long new_prot)
++{
++	return _page_set_prot(pt, vaddr, new_prot, _ukarch_pte_write_raw);
++}
++
++unsigned long _virt_to_pte(unsigned long pt, unsigned long vaddr)
++{
++	unsigned long pt_entry;
++
++	if (!PAGE_ALIGNED(vaddr)) {
++		uk_pr_err("Address must be aligned to page size\n");
++		return PAGE_NOT_MAPPED;
++	}
++
++	pt_entry = ukarch_pte_read(pt, L4_OFFSET(vaddr), 4);
++	if (!PAGE_PRESENT(pt_entry))
++		return PAGE_NOT_MAPPED;
++
++	pt = (unsigned long) pt_pte_to_virt(pt_entry);
++	pt_entry = ukarch_pte_read(pt, L3_OFFSET(vaddr), 3);
++	if (!PAGE_PRESENT(pt_entry))
++		return PAGE_NOT_MAPPED;
++	if (PAGE_HUGE(pt_entry))
++		return pt_entry;
++
++	pt = (unsigned long) pt_pte_to_virt(pt_entry);
++	pt_entry = ukarch_pte_read(pt, L2_OFFSET(vaddr), 2);
++	if (!PAGE_PRESENT(pt_entry))
++		return PAGE_NOT_MAPPED;
++	if (PAGE_LARGE(pt_entry))
++		return pt_entry;
++
++	pt = (unsigned long) pt_pte_to_virt(pt_entry);
++	pt_entry = ukarch_pte_read(pt, L1_OFFSET(vaddr), 1);
++
++	return pt_entry;
++}
++
++unsigned long uk_virt_to_pte(unsigned long vaddr)
++{
++	return _virt_to_pte(ukarch_read_pt_base(), vaddr);
++}
++
++static unsigned long _initmem_pt_get(unsigned long paddr_start)
++{
++	unsigned long frame = paddr_start + (_used_pts_count++) * PAGE_SIZE
++		+ PAGETABLES_AREA_START - BOOKKEEP_AREA_START;
++
++	// TODO
++	// dupa ce booteaza Xen se termina memoria la adresa X
++	// dupa X am garantati doar 512K
++	// initial sunt mapati align_up(X, 4MB)
++	// eu fac X + 2MB aici cand dau aceste frame-uri si e f posibil sa nu fie loc
++	// uk_pr_err("frame is 0x%08lx\n", frame);
++
++	memset((void *) frame, 0, PAGE_SIZE);
++
++	return frame;
++}
++
++/**
++ * Create page tables that have mappings for themselves. Any other mappings
++ * can be then created using the API, after the value returned by this function
++ * is set as the PT base.
++ * @return PT base, the physical address of the 4th level page table.
++ */
++static unsigned long _pt_create(unsigned long paddr_start)
++{
++	unsigned long pt_l4, pt_l3, pt_l2, pt_l1;
++	unsigned long prev_l4_offset, prev_l3_offset, prev_l2_offset;
++	unsigned long page, frame;
++
++	pt_l4 = _initmem_pt_get(paddr_start);
++	pt_l3 = _initmem_pt_get(paddr_start);
++	pt_l2 = _initmem_pt_get(paddr_start);
++	pt_l1 = _initmem_pt_get(paddr_start);
++
++	prev_l4_offset = L4_OFFSET(BOOKKEEP_AREA_START);
++	prev_l3_offset = L3_OFFSET(BOOKKEEP_AREA_START);
++	prev_l2_offset = L2_OFFSET(BOOKKEEP_AREA_START);
++
++	_ukarch_pte_write_raw(pt_l4, prev_l4_offset,
++			(pfn_to_mfn(pt_l3 >> PAGE_SHIFT) << PAGE_SHIFT)
++			| L4_PROT, 4);
++	_ukarch_pte_write_raw(pt_l3, prev_l3_offset,
++			(pfn_to_mfn(pt_l2 >> PAGE_SHIFT) << PAGE_SHIFT)
++			| L3_PROT, 3);
++	_ukarch_pte_write_raw(pt_l2, prev_l2_offset,
++			(pfn_to_mfn(pt_l1 >> PAGE_SHIFT) << PAGE_SHIFT)
++			| L2_PROT, 2);
++
++	for (page = BOOKKEEP_AREA_START;
++		page < BOOKKEEP_AREA_START + BOOKKEEP_AREA_SIZE;
++		page += PAGE_SIZE) {
++		if (L4_OFFSET(page) != prev_l4_offset) {
++			pt_l3 = _initmem_pt_get(paddr_start);
++			_ukarch_pte_write_raw(pt_l4, L4_OFFSET(page),
++				(pfn_to_mfn(pt_l3 >> PAGE_SHIFT) << PAGE_SHIFT)
++				| L4_PROT, 4);
++			prev_l4_offset = L4_OFFSET(page);
++		}
++
++		if (L3_OFFSET(page) != prev_l3_offset) {
++			pt_l2 = _initmem_pt_get(paddr_start);
++			_ukarch_pte_write_raw(pt_l3, L3_OFFSET(page),
++				(pfn_to_mfn(pt_l2 >> PAGE_SHIFT) << PAGE_SHIFT)
++				| L3_PROT, 3);
++			prev_l3_offset = L3_OFFSET(page);
++		}
++
++		if (L2_OFFSET(page) != prev_l2_offset) {
++			pt_l1 = _initmem_pt_get(paddr_start);
++			_ukarch_pte_write_raw(pt_l2, L2_OFFSET(page),
++				(pfn_to_mfn(pt_l1 >> PAGE_SHIFT) << PAGE_SHIFT)
++				| L2_PROT, 2);
++			prev_l2_offset = L2_OFFSET(page);
++		}
++
++		frame = pfn_to_mfn((page - BOOKKEEP_AREA_START + paddr_start) >> PAGE_SHIFT) << PAGE_SHIFT;
++		_ukarch_pte_write_raw(pt_l1, L1_OFFSET(page),
++			frame | L1_PROT, 1);
++	}
++
++	return pt_l4;
++}
++
++void uk_pt_init(unsigned long pt_start_paddr, unsigned long paddr_start,
++		size_t len)
++{
++	unsigned long offset;
++
++	unsigned long phys_bitmap_start_addr;
++	size_t phys_bitmap_length;
++
++	unsigned long phys_mem_start_addr;
++	size_t phys_mem_length;
++
++	if (!PAGE_ALIGNED(pt_start_paddr) ||
++			(paddr_start != PAGE_PADDR_ANY
++			 && !PAGE_ALIGNED(paddr_start))) {
++		uk_pr_err("Addreses must be aligned to page size\n");
++		return;
++	}
++
++	/*
++	 * The needed bookkeeping internal structures are:
++	 * - a physical address bitmap, to keep track of all available physical
++	 *	 addresses (which will have a bit for every frame, so the size
++	 *	 phys_mem_length / PAGE_SIZE)
++	 * - a memory area where page tables are stored
++	 * - a bitmap for pages used as page tables
++	 */
++	phys_mem_length = len;
++	if (paddr_start == PAGE_PADDR_ANY)
++		phys_mem_length -= BOOKKEEP_AREA_SIZE;
++
++	/*
++	 * If no specific area is given to be managed, the remaining memory is
++	 * considered the actual usable memory.
++	 */
++	if (paddr_start == PAGE_PADDR_ANY) {
++		phys_mem_start_addr =
++			PAGE_ALIGN_UP(pt_start_paddr + PAGETABLES_AREA_START
++					- BOOKKEEP_AREA_START
++					+ PAGETABLES_AREA_SIZE);
++	} else {
++		phys_mem_start_addr = paddr_start;
++	}
++
++	offset = phys_mem_start_addr
++		- PAGE_LARGE_ALIGN_DOWN(phys_mem_start_addr);
++	phys_mem_start_addr -= offset;
++
++	/*
++	 * Need to bookkeep |phys_mem_length| bytes of physical
++	 * memory, starting from |phys_mem_start_addr|. This is the
++	 * physical memory given by the hypervisor.
++	 *
++	 * In Xen's case, the bitmap keeps the pseudo-physical addresses, the
++	 * translation to machine frames being done later.
++	 */
++
++	pt_mem_start_addr = pt_start_paddr + PAGETABLES_AREA_START
++		- BOOKKEEP_AREA_START;
++	pt_mem_length = PAGETABLES_AREA_SIZE;
++
++
++	/* Bookkeeping free pages used for PT allocations */
++	pt_bitmap_start_addr = pt_start_paddr;
++	pt_bitmap_length = pt_mem_length >> PAGE_SHIFT;
++	uk_bitmap_zero((unsigned long *) pt_bitmap_start_addr,
++			pt_bitmap_length);
++	uk_bitmap_set((unsigned long *) pt_bitmap_start_addr, 0,
++			_used_pts_count);
++
++	phys_bitmap_start_addr = PAGE_ALIGN_UP(pt_bitmap_start_addr + pt_bitmap_length);
++	phys_bitmap_length = (phys_mem_length + offset) >> PAGE_SHIFT;
++
++	_phys_mem_region_list[_phys_mem_region_list_size].start_addr =
++		phys_mem_start_addr;
++	_phys_mem_region_list[_phys_mem_region_list_size].length = phys_mem_length;
++	_phys_mem_region_list[_phys_mem_region_list_size].bitmap_start_addr =
++		phys_bitmap_start_addr;
++	_phys_mem_region_list[_phys_mem_region_list_size].bitmap_length =
++		phys_bitmap_length;
++
++	_phys_mem_region_list_size++;
++}
++
++int uk_pt_add_mem(unsigned long paddr_start, unsigned long len)
++{
++	unsigned long bitmap_start_paddr;
++	unsigned long bitmap_start_vaddr;
++	size_t bitmap_length;
++
++	unsigned long mem_start_addr;
++	size_t mem_length;
++
++	if (!_phys_mem_region_list_size) {
++		uk_pr_err("When initializing the first chunk of physical memory, use uk_pt_init\n");
++		return -1;
++	}
++
++	paddr_start = PAGE_ALIGN_UP(paddr_start);
++	len = PAGE_ALIGN_DOWN(len);
++
++	/*
++	 * mem_length + bitmap_length = len
++	 */
++	mem_length = len * PAGE_SIZE / (PAGE_SIZE + 1);
++	bitmap_start_paddr = paddr_start;
++	bitmap_length = PAGE_ALIGN_UP(mem_length) >> PAGE_SHIFT;
++	mem_start_addr = PAGE_ALIGN_UP(bitmap_start_paddr + bitmap_length);
++
++	bitmap_start_vaddr = PAGE_ALIGN_UP(_phys_mem_region_list[_phys_mem_region_list_size - 1].bitmap_start_addr
++		+ _phys_mem_region_list[_phys_mem_region_list_size - 1].bitmap_length);
++	if (bitmap_start_vaddr + bitmap_length > PAGETABLES_AREA_START) {
++		uk_pr_err("Not enough bookkeeping space\n");
++		return -1;
++	}
++
++	uk_pr_err("bitmap start vaddr is 0x%08lx\n", bitmap_start_vaddr);
++	uk_map_region(bitmap_start_vaddr, bitmap_start_paddr, bitmap_length >> PAGE_SHIFT, PAGE_PROT_READ | PAGE_PROT_WRITE, 0);
++
++	uk_bitmap_zero((unsigned long *) bitmap_start_vaddr, bitmap_length);
++
++	_phys_mem_region_list[_phys_mem_region_list_size].start_addr =
++		mem_start_addr;
++	_phys_mem_region_list[_phys_mem_region_list_size].length = PAGE_ALIGN_DOWN(mem_length);
++	_phys_mem_region_list[_phys_mem_region_list_size].bitmap_start_addr =
++		bitmap_start_vaddr;
++	_phys_mem_region_list[_phys_mem_region_list_size].bitmap_length =
++		bitmap_length;
++
++	_phys_mem_region_list_size++;
++
++	return 0;
++}
++
++#ifdef CONFIG_PLAT_KVM
++static int _mmap_kvm_areas(unsigned long pt_base)
++{
++	unsigned long mbinfo_pages, vgabuffer_pages;
++
++	mbinfo_pages = DIV_ROUND_UP(MBINFO_AREA_SIZE, PAGE_SIZE);
++	vgabuffer_pages = DIV_ROUND_UP(VGABUFFER_AREA_SIZE, PAGE_SIZE);
++	if (_initmem_map_region(pt_base, MBINFO_AREA_START, MBINFO_AREA_START,
++			mbinfo_pages, PAGE_PROT_READ, 0))
++		return -1;
++
++	if (_initmem_map_region(pt_base, VGABUFFER_AREA_START,
++			VGABUFFER_AREA_START, vgabuffer_pages,
++			PAGE_PROT_READ | PAGE_PROT_WRITE, 0))
++		return -1;
++
++	return 0;
++}
++#endif /* CONFIG_PLAT_KVM */
++
++static int _mmap_kernel(unsigned long pt_base,
++		unsigned long kernel_start_vaddr,
++		unsigned long kernel_start_paddr,
++		unsigned long kernel_area_size)
++{
++	unsigned long kernel_pages;
++
++	UK_ASSERT(PAGE_ALIGNED(kernel_start_vaddr));
++	UK_ASSERT(PAGE_ALIGNED(kernel_start_paddr));
++
++#ifdef CONFIG_PLAT_KVM
++	if (_mmap_kvm_areas(pt_base))
++		return -1;
++#endif /* CONFIG_PLAT_KVM */
++
++	/* TODO: break down into RW regions and RX regions */
++	kernel_pages = DIV_ROUND_UP(kernel_area_size, PAGE_SIZE);
++	if (_initmem_map_region(pt_base, kernel_start_vaddr,
++			kernel_start_paddr, kernel_pages,
++			PAGE_PROT_READ | PAGE_PROT_WRITE | PAGE_PROT_EXEC, 0))
++		return -1;
++
++	/*
++	 * It is safe to return from this function, since we are still on the
++	 * bootstrap stack, which is in the bss section, in the binary.
++	 * The switch to another stack is done later.
++	 */
++	return 0;
++}
++
++static int _initmem_set_prot_region(unsigned long pt_base, unsigned long vaddr,
++	unsigned long len, unsigned long new_prot)
++{
++	unsigned long page;
++	int rc;
++
++	for (page = vaddr; page < vaddr + len; page += PAGE_SIZE) {
++		rc = _initmem_page_set_prot(pt_base, page, new_prot);
++		if (rc)
++			return -1;
++	}
++
++	return 0;
++}
++
++static int uk_set_prot_region(unsigned long vaddr, unsigned long len,
++	unsigned long new_prot)
++{
++	unsigned long page;
++	int rc;
++
++	for (page = vaddr; page < vaddr + len; page += PAGE_SIZE) {
++		rc = uk_page_set_prot(page, new_prot);
++		if (rc)
++			return -1;
++	}
++
++	return 0;
++}
++
++void uk_pt_build(unsigned long paddr_start, unsigned long len,
++	unsigned long kernel_start_vaddr,
++	unsigned long kernel_start_paddr,
++	unsigned long kernel_area_size)
++{
++	unsigned long pt_base;
++
++	UK_ASSERT(PAGE_ALIGNED(paddr_start));
++	UK_ASSERT(PAGE_ALIGNED(len));
++
++	uk_pr_err("paddr_start is 0x%08lx\n", paddr_start);
++	pt_base = _pt_create(paddr_start);
++	uk_pt_init(paddr_start, PAGE_PADDR_ANY, len);
++	if (_mmap_kernel(pt_base, kernel_start_vaddr, kernel_start_paddr,
++				kernel_area_size))
++		UK_CRASH("Could not map kernel\n");
++
++#ifdef CONFIG_PARAVIRT
++	_initmem_page_map(pt_base, SHAREDINFO_PAGE,
++			PTE_REMOVE_FLAGS(uk_virt_to_pte(SHAREDINFO_PAGE)),
++			PAGE_PROT_READ | PAGE_PROT_WRITE, 0);
++	/* All pagetables must be set to read only before writing new pt_base */
++	_initmem_set_prot_region(pt_base, PAGETABLES_AREA_START,
++			PAGETABLES_AREA_SIZE, PAGE_PROT_READ);
++	uk_set_prot_region(pt_base, PAGETABLES_AREA_SIZE, PAGE_PROT_READ);
++#endif /* CONFIG_PARAVIRT */
++
++	ukarch_write_pt_base(pt_base);
++	_virt_offset = PAGETABLES_AREA_START - pt_base;
++	_phys_mem_region_list[0].bitmap_start_addr += _virt_offset;
++	pt_bitmap_start_addr += _virt_offset;
++
++	uk_bitmap_zero((unsigned long *) _phys_mem_region_list[0].bitmap_start_addr,
++			_phys_mem_region_list[0].bitmap_length);
++	uk_bitmap_set((unsigned long *) _phys_mem_region_list[0].bitmap_start_addr, 0,
++			(_phys_mem_region_list[0].start_addr - PAGE_LARGE_ALIGN_DOWN(_phys_mem_region_list[0].start_addr))>> PAGE_SHIFT);
++	uk_bitmap_zero((unsigned long *) stack_bitmap_start_addr,
++			stack_bitmap_length);
++}
++
++void *uk_stack_alloc()
++{
++	unsigned long stack_start_vaddr;
++	unsigned long offset;
++
++	offset = uk_bitmap_find_next_zero_area(
++			(unsigned long *) stack_bitmap_start_addr,
++			stack_bitmap_length,
++			0 /* start */, 1 /* nr */, 0 /* align_mask */);
++
++	if (offset > STACK_COUNT) {
++		uk_pr_err("No more stacks available\n");
++		return NULL;
++	}
++
++	uk_bitmap_set((unsigned long *) stack_bitmap_start_addr, offset, 1);
++
++	/* Map stack in regular pages */
++	stack_start_vaddr = STACK_AREA_START + offset * __STACK_SIZE;
++	if (uk_map_region(stack_start_vaddr, PAGE_PADDR_ANY,
++				__STACK_SIZE >> PAGE_SHIFT,
++				PAGE_PROT_READ | PAGE_PROT_WRITE, 0))
++		return NULL;
++
++	return (void *) stack_start_vaddr;
++}
++
++int uk_stack_free(void *vaddr)
++{
++	unsigned long pages;
++	size_t i;
++
++	if ((unsigned long) vaddr < STACK_AREA_START
++		|| (unsigned long) vaddr > (STACK_AREA_END - __STACK_SIZE)
++		|| (((unsigned long) vaddr) & (__STACK_SIZE - 1)))
++		return -1;
++
++	pages = __STACK_SIZE >> PAGE_SHIFT;
++	for (i = 0; i < pages; i++) {
++		if (uk_page_unmap(((unsigned long) vaddr) + i * PAGE_SIZE)) {
++			uk_pr_err("Page 0x%08lx not previously mapped\n",
++				((unsigned long) vaddr) + i * PAGE_SIZE);
++
++			return -1;
++		}
++	}
++
++	return 0;
++}
++
++int uk_heap_map(unsigned long vaddr, unsigned long len)
++{
++	unsigned long heap_pages, heap_large_pages;
++
++	if (vaddr < HEAP_AREA_START || vaddr + len > HEAP_AREA_END)
++		return -1;
++
++#ifdef CONFIG_PARAVIRT
++	if (uk_map_region(vaddr, PAGE_PADDR_ANY,
++			len >> PAGE_SHIFT, PAGE_PROT_READ | PAGE_PROT_WRITE, 0))
++		return -1;
++#else /* CONFIG_PARAVIRT */
++	/* Map heap in large and regular pages */
++	heap_large_pages = len >> PAGE_LARGE_SHIFT;
++
++	if (uk_map_region(vaddr, PAGE_PADDR_ANY,
++			heap_large_pages,
++			PAGE_PROT_READ | PAGE_PROT_WRITE,
++			PAGE_FLAG_LARGE))
++		return -1;
++
++	/*
++	 * If the heap is not properly aligned to PAGE_LARGE_SIZE,
++	 * map the rest in regular pages
++	 */
++	if ((heap_large_pages << PAGE_LARGE_SHIFT) < len) {
++		heap_pages = (len - (heap_large_pages << PAGE_LARGE_SHIFT))
++			>> PAGE_SHIFT;
++	} else {
++		heap_pages = 0;
++	}
++
++	if (uk_map_region(vaddr + (heap_large_pages << PAGE_LARGE_SHIFT),
++				PAGE_PADDR_ANY, heap_pages,
++				PAGE_PROT_READ | PAGE_PROT_WRITE, 0))
++		return -1;
++#endif /* CONFIG_PARAVIRT */
++
++	return 0;
++}
++
++void dump_pt(unsigned long pt, unsigned long vaddr)
++{
++	unsigned long pt_entry;
++	size_t i;
++
++	if (!PAGE_ALIGNED(vaddr)) {
++		uk_pr_err("Address must be aligned to page size\n");
++		return;
++	}
++
++	printf("L4 table for address 0x%08lx is 0x%08lx\n", vaddr, pt);
++	for (i = 0; i < L4_OFFSET(vaddr) || i < 2; i += 2)
++		printf("0x%08lx: 0x%08lx 0x%08lx\n", pt + 8 * i,
++				*((unsigned long *) pt + i),
++				*((unsigned long *) pt + i + 1));
++
++	pt_entry = ukarch_pte_read(pt, L4_OFFSET(vaddr), 4);
++	if (!PAGE_PRESENT(pt_entry))
++		return;
++
++	pt = (unsigned long) pt_pte_to_virt(pt_entry);
++
++	printf("L3 table for address 0x%08lx is 0x%08lx\n", vaddr, pt);
++	for (i = 0; i < L3_OFFSET(vaddr) || i < 2; i += 2)
++		printf("0x%08lx: 0x%08lx 0x%08lx\n", pt + 8 * i,
++				*((unsigned long *) pt + i),
++				*((unsigned long *) pt + i + 1));
++
++	pt_entry = ukarch_pte_read(pt, L3_OFFSET(vaddr), 3);
++	if (!PAGE_PRESENT(pt_entry))
++		return;
++	if (PAGE_HUGE(pt_entry)) {
++		printf("PTE for vaddr 0x%08lx is 0x%08lx\n", vaddr, pt_entry);
++		return;
++	}
++
++	pt = (unsigned long) pt_pte_to_virt(pt_entry);
++
++	printf("L2 table for address 0x%08lx is 0x%08lx\n", vaddr, pt);
++	for (i = 0; i < L2_OFFSET(vaddr) || i < 2; i += 2)
++		printf("0x%08lx: 0x%08lx 0x%08lx\n", pt + 8 * i,
++				*((unsigned long *) pt + i),
++				*((unsigned long *) pt + i + 1));
++
++	pt_entry = ukarch_pte_read(pt, L2_OFFSET(vaddr), 2);
++	if (!PAGE_PRESENT(pt_entry))
++		return;
++	if (PAGE_LARGE(pt_entry)) {
++		printf("Large page PTE for vaddr 0x%08lx is 0x%08lx\n",
++				vaddr, pt_entry);
++		return;
++	}
++
++	pt = (unsigned long) pt_pte_to_virt(pt_entry);
++
++	printf("L1 table for address 0x%08lx is 0x%08lx\n", vaddr, pt);
++	for (i = 0; i < L1_OFFSET(vaddr) || i < 2; i += 2)
++		printf("0x%08lx: 0x%08lx 0x%08lx\n", pt + 8 * i,
++				*((unsigned long *) pt + i),
++				*((unsigned long *) pt + i + 1));
++
++	pt_entry = ukarch_pte_read(pt, L1_OFFSET(vaddr), 1);
++
++	printf("PTE for vaddr 0x%08lx is 0x%08lx\n", vaddr, pt_entry);
++}
++
++
+diff --git a/plat/kvm/Makefile.uk b/plat/kvm/Makefile.uk
+index 94321e0c..9efb0626 100644
+--- a/plat/kvm/Makefile.uk
++++ b/plat/kvm/Makefile.uk
+@@ -42,6 +42,9 @@ endif
+ ##
+ ## Architecture library definitions for x86_64
+ ##
++ifeq ($(CONFIG_PT_API),y)
++LIBKVMPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/mm.c|common
++endif
+ LIBKVMPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/x86/trace.c|common
+ LIBKVMPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/x86/traps.c|isr
+ LIBKVMPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/x86/cpu_features.c|common
+diff --git a/plat/kvm/arm/entry64.S b/plat/kvm/arm/entry64.S
+index c4de334c..8be3d59f 100644
+--- a/plat/kvm/arm/entry64.S
++++ b/plat/kvm/arm/entry64.S
+@@ -35,7 +35,7 @@
+ #include <uk/asm.h>
+ #include <kvm-arm/mm.h>
+ #include <arm/cpu_defs.h>
+-#include <uk/plat/common/sections.h>
++#include <uk/sections.h>
+ #include <uk/config.h>
+ 
+ .global page_table_size
+diff --git a/plat/kvm/arm/setup.c b/plat/kvm/arm/setup.c
+index 41e63755..8513b48c 100644
+--- a/plat/kvm/arm/setup.c
++++ b/plat/kvm/arm/setup.c
+@@ -20,7 +20,7 @@
+  */
+ #include <uk/config.h>
+ #include <libfdt.h>
+-#include <uk/plat/common/sections.h>
++#include <uk/sections.h>
+ #include <kvm/console.h>
+ #include <kvm/config.h>
+ #include <uk/assert.h>
+diff --git a/plat/kvm/io.c b/plat/kvm/io.c
+index 14a8c01a..8854d29e 100644
+--- a/plat/kvm/io.c
++++ b/plat/kvm/io.c
+@@ -1,8 +1,10 @@
+ /* SPDX-License-Identifier: BSD-3-Clause */
+ /*
+  * Authors: Sharan Santhanam <sharan.santhanam@neclab.eu>
++ *          Stefan Teodorescu <stefanl.teodorescu@gmail.com>
+  *
+  * Copyright (c) 2018, NEC Europe Ltd., NEC Corporation. All rights reserved.
++ * Copyright (c) 2020, University Politehnica of Bucharest., NEC Corporation. All rights reserved.
+  *
+  * Redistribution and use in source and binary forms, with or without
+  * modification, are permitted provided that the following conditions
+@@ -31,13 +33,29 @@
+  */
+ 
+ #include <uk/plat/io.h>
++#include <uk/config.h>
++
++#ifdef CONFIG_PT_API
++#include <uk/plat/mm.h>
++#endif
+ 
+-/**
+- * TODO:
+- * For our kvm platform, the guest virtual address == guest physical address.
+- * We may have to reconsider this implementation when condition changes.
+- */
+ __phys_addr ukplat_virt_to_phys(const volatile void *address)
+ {
++#ifdef CONFIG_PT_API
++	unsigned long vaddr = address;
++	unsigned long pte = uk_virt_to_pte(PAGE_ALIGN_DOWN(vaddr));
++	unsigned long offset;
++
++	/* TODO: add support for huge pages */
++	if (PAGE_LARGE(pte)) {
++		offset = vaddr - PAGE_LARGE_ALIGN_DOWN(vaddr);
++	} else {
++		offset = vaddr - PAGE_ALIGN_DOWN(vaddr);
++	}
++
++
++	return PTE_REMOVE_FLAGS(pte) + offset;
++#else
+ 	return (__phys_addr)address;
++#endif
+ }
+diff --git a/plat/kvm/memory.c b/plat/kvm/memory.c
+index 1d9269ec..61d3e6ca 100644
+--- a/plat/kvm/memory.c
++++ b/plat/kvm/memory.c
+@@ -19,7 +19,7 @@
+  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  */
+ 
+-#include <uk/plat/common/sections.h>
++#include <uk/sections.h>
+ #include <sys/types.h>
+ #include <uk/plat/memory.h>
+ #include <uk/assert.h>
+diff --git a/plat/kvm/x86/setup.c b/plat/kvm/x86/setup.c
+index fbc5c0d2..7d1a2f2b 100644
+--- a/plat/kvm/x86/setup.c
++++ b/plat/kvm/x86/setup.c
+@@ -27,7 +27,7 @@
+  */
+ 
+ #include <string.h>
+-#include <uk/plat/common/sections.h>
++#include <uk/sections.h>
+ #include <x86/cpu.h>
+ #include <x86/traps.h>
+ #include <kvm/config.h>
+@@ -36,11 +36,24 @@
+ #include <kvm-x86/multiboot.h>
+ #include <kvm-x86/multiboot_defs.h>
+ #include <uk/arch/limits.h>
++#include <uk/mem_layout.h>
+ #include <uk/arch/types.h>
+ #include <uk/plat/console.h>
+ #include <uk/assert.h>
+ #include <uk/essentials.h>
+ 
++#if CONFIG_PT_API
++#include <uk/plat/mm.h>
++#endif /* CONFIG_PT_API */
++
++#ifndef UK_DEBUG_TRACE
++#define UK_DEBUG_TRACE
++#endif
++#include <uk/trace.h>
++
++UK_TRACEPOINT(trace_boot_time_init, "");
++UK_TRACEPOINT(trace_boot_plat_init, "");
++
+ #define PLATFORM_MEM_START 0x100000
+ #define PLATFORM_MAX_MEM_ADDR 0x40000000
+ 
+@@ -73,6 +86,37 @@ static inline void _mb_get_cmdline(struct multiboot_info *mi)
+ 	cmdline[(sizeof(cmdline) - 1)] = '\0';
+ }
+ 
++static inline void _mb_init_initrd2(struct multiboot_info *mi)
++{
++	multiboot_module_t *mod1;
++
++	/*
++	 * Search for initrd (called boot module according multiboot)
++	 */
++	if (mi->mods_count == 0) {
++		uk_pr_debug("No initrd present\n");
++		return;
++	}
++
++	/*
++	 * NOTE: We are only taking the first boot module as initrd.
++	 *       Initrd arguments and further modules are ignored.
++	 */
++	UK_ASSERT(mi->mods_addr);
++
++	mod1 = (multiboot_module_t *)((uintptr_t) mi->mods_addr);
++	UK_ASSERT(mod1->mod_end >= mod1->mod_start);
++
++	if (mod1->mod_end == mod1->mod_start) {
++		uk_pr_debug("Ignoring empty initrd\n");
++		return;
++	}
++
++	_libkvmplat_cfg.initrd.start = (uintptr_t) mod1->mod_start;
++	_libkvmplat_cfg.initrd.end = (uintptr_t) mod1->mod_end;
++	_libkvmplat_cfg.initrd.len = (size_t) (mod1->mod_end - mod1->mod_start);
++}
++
+ static inline void _mb_init_mem(struct multiboot_info *mi)
+ {
+ 	multiboot_memory_map_t *m;
+@@ -96,8 +140,10 @@ static inline void _mb_init_mem(struct multiboot_info *mi)
+ 	 * page tables for.
+ 	 */
+ 	max_addr = m->addr + m->len;
++#ifndef CONFIG_DYNAMIC_PT
+ 	if (max_addr > PLATFORM_MAX_MEM_ADDR)
+ 		max_addr = PLATFORM_MAX_MEM_ADDR;
++#endif /* CONFIG_DYNAMIC_PT */
+ 	UK_ASSERT((size_t) __END <= max_addr);
+ 
+ 	/*
+@@ -106,13 +152,64 @@ static inline void _mb_init_mem(struct multiboot_info *mi)
+ 	if ((max_addr - m->addr) < __STACK_SIZE)
+ 		UK_CRASH("Not enough memory to allocate boot stack\n");
+ 
++	_mb_init_initrd2(mi);
++
++#if CONFIG_DYNAMIC_PT
++	_libkvmplat_cfg.heap.start = HEAP_AREA_START;
++	_libkvmplat_cfg.heap.end   = HEAP_AREA_START
++				     + PAGE_LARGE_ALIGN_DOWN(
++						     m->len
++						     - STACK_AREA_SIZE
++						     - KERNEL_AREA_SIZE
++						     - BOOKKEEP_AREA_SIZE
++						     - _libkvmplat_cfg.initrd.len);
++	_libkvmplat_cfg.heap.len   = _libkvmplat_cfg.heap.end
++				     - _libkvmplat_cfg.heap.start;
++#if CONFIG_LIBPOSIX_MMAP
++	/* TODO: implement a way to dynamically resize the heap (e.g. brk()) */
++	_libkvmplat_cfg.heap.len /= 2;
++	_libkvmplat_cfg.heap.end = _libkvmplat_cfg.heap.start
++				   + _libkvmplat_cfg.heap.len;
++#endif /* CONFIG_LIBPOSIX_MMAP */
++	uk_pt_build(PAGE_ALIGN_UP(m->addr + KERNEL_AREA_SIZE + _libkvmplat_cfg.initrd.len),
++			m->len, KERNEL_AREA_START, KERNEL_AREA_START, KERNEL_AREA_SIZE);
++
++	_libkvmplat_cfg.bstack.start = (uintptr_t) uk_stack_alloc();
++	_libkvmplat_cfg.bstack.end   = _libkvmplat_cfg.bstack.start
++					+ __STACK_SIZE;
++	_libkvmplat_cfg.bstack.len   = __STACK_SIZE;
++
++#else
+ 	_libkvmplat_cfg.heap.start = ALIGN_UP((uintptr_t) __END, __PAGE_SIZE);
++#if CONFIG_PT_API
++	uk_pt_init(_libkvmplat_cfg.heap.start + _libkvmplat_cfg.initrd.len, PLATFORM_MAX_MEM_ADDR,
++		   m->addr + m->len - max_addr);
++
++	_libkvmplat_cfg.heap.start += BOOKKEEP_AREA_SIZE;
++#endif /* CONFIG_PT_API */
+ 	_libkvmplat_cfg.heap.end   = (uintptr_t) max_addr - __STACK_SIZE;
+ 	_libkvmplat_cfg.heap.len   = _libkvmplat_cfg.heap.end
+ 				     - _libkvmplat_cfg.heap.start;
+ 	_libkvmplat_cfg.bstack.start = _libkvmplat_cfg.heap.end;
+ 	_libkvmplat_cfg.bstack.end   = max_addr;
+ 	_libkvmplat_cfg.bstack.len   = __STACK_SIZE;
++#endif /* CONFIG_DYNAMIC_PT */
++
++	/* TODO rewrite initrd code here nicely */
++	if (uk_map_region(_libkvmplat_cfg.initrd.start, _libkvmplat_cfg.initrd.start,
++			_libkvmplat_cfg.initrd.len >> PAGE_SHIFT,
++			PAGE_PROT_READ | PAGE_PROT_WRITE, 0))
++		uk_pr_err("Couldn't map initrd\n");
++
++	for (offset = 0; offset < mi->mmap_length;
++	     offset += m->size + sizeof(m->size)) {
++		m = (void *)(__uptr)(mi->mmap_addr + offset);
++		if (m->addr > PLATFORM_MEM_START
++		    && m->type == MULTIBOOT_MEMORY_AVAILABLE) {
++			uk_pt_add_mem(m->addr, m->len);
++		}
++	}
++
+ }
+ 
+ static inline void _mb_init_initrd(struct multiboot_info *mi)
+@@ -253,6 +350,7 @@ no_initrd:
+ 
+ static void _libkvmplat_entry2(void *arg __attribute__((unused)))
+ {
++	trace_boot_plat_init();
+ 	ukplat_entry_argp(NULL, cmdline, sizeof(cmdline));
+ }
+ 
+@@ -260,8 +358,12 @@ void _libkvmplat_entry(void *arg)
+ {
+ 	struct multiboot_info *mi = (struct multiboot_info *)arg;
+ 
++	ukplat_time_init();
++	trace_boot_time_init();
++
+ 	_init_cpufeatures();
+ 	_libkvmplat_init_console();
++
+ 	traps_init();
+ 	intctrl_init();
+ 
+diff --git a/plat/xen/Config.uk b/plat/xen/Config.uk
+index 2421e182..573026ba 100644
+--- a/plat/xen/Config.uk
++++ b/plat/xen/Config.uk
+@@ -9,6 +9,7 @@ menuconfig PLAT_XEN
+        select LIBUKTIME if !HAVE_LIBC && ARCH_X86_64
+        select LIBFDT if ARCH_ARM_32
+        select XEN_DBGEMERGENCY if ARCH_ARM_32
++       select DYNAMIC_PT
+        help
+                 Create a Unikraft image that runs as a Xen guest
+ 
+diff --git a/plat/xen/Makefile.uk b/plat/xen/Makefile.uk
+index 2a8cdbf6..1a7c4de3 100644
+--- a/plat/xen/Makefile.uk
++++ b/plat/xen/Makefile.uk
+@@ -46,6 +46,10 @@ LIBXENPLAT_SRCS-y              += $(UK_PLAT_COMMON_BASE)/lcpu.c|common
+ LIBXENPLAT_SRCS-y              += $(UK_PLAT_COMMON_BASE)/memory.c|common
+ 
+ 
++ifeq ($(CONFIG_PT_API),y)
++LIBXENPLAT_MM_FLAGS-y += -I$(LIBXENPLAT_BASE)/include
++LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/mm.c|common
++endif
+ LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/x86/trace.c|common
+ LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/x86/traps.c|common
+ LIBXENPLAT_SRCS-$(CONFIG_ARCH_X86_64) += $(UK_PLAT_COMMON_BASE)/x86/cpu_features.c|common
+diff --git a/plat/xen/arm/setup.c b/plat/xen/arm/setup.c
+index 2df3b46c..bcbc939e 100644
+--- a/plat/xen/arm/setup.c
++++ b/plat/xen/arm/setup.c
+@@ -25,7 +25,7 @@
+ /* Ported from Mini-OS */
+ 
+ #include <string.h>
+-#include <uk/plat/common/sections.h>
++#include <uk/sections.h>
+ #include <xen-arm/os.h>
+ #include <xen-arm/mm.h>
+ #include <xen/xen.h>
+diff --git a/plat/xen/events.c b/plat/xen/events.c
+index 3a1d1557..ff6d4ba1 100644
+--- a/plat/xen/events.c
++++ b/plat/xen/events.c
+@@ -335,3 +335,12 @@ int ukplat_irq_init(struct uk_alloc *a __unused)
+ 	/* Nothing for now */
+ 	return 0;
+ }
++
++/* For some reason, the inline version in the header file doesn't work */
++int notify_remote_via_evtchn2(evtchn_port_t port)
++{
++	evtchn_send_t op;
++
++	op.port = port;
++	return HYPERVISOR_event_channel_op(EVTCHNOP_send, &op);
++}
+diff --git a/plat/xen/include/xen-arm/mm.h b/plat/xen/include/xen-arm/mm.h
+index 659de843..bbd31ddd 100644
+--- a/plat/xen/include/xen-arm/mm.h
++++ b/plat/xen/include/xen-arm/mm.h
+@@ -28,7 +28,7 @@
+ #define _ARCH_MM_H_
+ 
+ #include <stdint.h>
+-#include <uk/plat/common/sections.h>
++#include <uk/sections.h>
+ #include <uk/arch/limits.h>
+ 
+ typedef uint64_t paddr_t;
+diff --git a/plat/xen/include/xen-x86/hypercall64.h b/plat/xen/include/xen-x86/hypercall64.h
+index 467d8fae..f7d993dd 100644
+--- a/plat/xen/include/xen-x86/hypercall64.h
++++ b/plat/xen/include/xen-x86/hypercall64.h
+@@ -40,9 +40,7 @@
+ #include <xen/xen.h>
+ #include <xen/sched.h>
+ 
+-#define PAGE_SHIFT       __PAGE_SHIFT
+-#define PAGE_MASK        __PAGE_MASK
+-#define PAGE_SIZE        __PAGE_SIZE
++#include <uk/asm/mm.h>
+ 
+ #define STACK_SIZE_PAGE_ORDER  __STACK_SIZE_PAGE_ORDER
+ #define STACK_SIZE             __STACK_SIZE
+diff --git a/plat/xen/include/xen-x86/mm.h b/plat/xen/include/xen-x86/mm.h
+index ffbedb09..2fa6731e 100644
+--- a/plat/xen/include/xen-x86/mm.h
++++ b/plat/xen/include/xen-x86/mm.h
+@@ -25,7 +25,7 @@
+ #ifndef _ARCH_MM_H_
+ #define _ARCH_MM_H_
+ 
+-#include <uk/plat/common/sections.h>
++#include <uk/sections.h>
+ #ifndef __ASSEMBLY__
+ #include <xen/xen.h>
+ #if defined(__i386__)
+@@ -46,6 +46,8 @@
+ #include <xen-x86/mm_pv.h>
+ #endif
+ 
++#include <uk/plat/mm.h>
++
+ /*
+  * Physical address space usage:
+  *
+@@ -108,22 +110,8 @@ typedef uint64_t pgentry_t;
+ 
+ #elif defined(__x86_64__)
+ 
+-#define L2_PAGETABLE_SHIFT      21
+-#define L3_PAGETABLE_SHIFT      30
+-#define L4_PAGETABLE_SHIFT      39
+-
+-#define L1_PAGETABLE_ENTRIES    512
+-#define L2_PAGETABLE_ENTRIES    512
+-#define L3_PAGETABLE_ENTRIES    512
+-#define L4_PAGETABLE_ENTRIES    512
+-
+-#define PAGETABLE_LEVELS        4
+-
+ /* These are page-table limitations. Current CPUs support only 40-bit phys. */
+-#define PADDR_BITS              52
+ #define VADDR_BITS              48
+-#define PADDR_MASK              ((1UL << PADDR_BITS)-1)
+-#define VADDR_MASK              ((1UL << VADDR_BITS)-1)
+ 
+ #define L2_MASK  ((1UL << L3_PAGETABLE_SHIFT) - 1)
+ #define L3_MASK  ((1UL << L4_PAGETABLE_SHIFT) - 1)
+@@ -165,38 +153,18 @@ typedef unsigned long pgentry_t;
+   (((_a) >> L4_PAGETABLE_SHIFT) & (L4_PAGETABLE_ENTRIES - 1))
+ #endif
+ 
+-#define _PAGE_PRESENT  CONST(0x001)
+-#define _PAGE_RW       CONST(0x002)
+-#define _PAGE_USER     CONST(0x004)
+-#define _PAGE_PWT      CONST(0x008)
+-#define _PAGE_PCD      CONST(0x010)
+-#define _PAGE_ACCESSED CONST(0x020)
+-#define _PAGE_DIRTY    CONST(0x040)
+-#define _PAGE_PAT      CONST(0x080)
+-#define _PAGE_PSE      CONST(0x080)
+-#define _PAGE_GLOBAL   CONST(0x100)
+-
+ #if defined(__i386__)
+ #define L1_PROT (_PAGE_PRESENT|_PAGE_RW|_PAGE_ACCESSED)
+ #define L1_PROT_RO (_PAGE_PRESENT|_PAGE_ACCESSED)
+ #define L2_PROT (_PAGE_PRESENT|_PAGE_RW|_PAGE_ACCESSED|_PAGE_DIRTY |_PAGE_USER)
+ #define L3_PROT (_PAGE_PRESENT)
+-#elif defined(__x86_64__)
+-#define L1_PROT (_PAGE_PRESENT|_PAGE_RW|_PAGE_ACCESSED|_PAGE_USER)
+-#define L1_PROT_RO (_PAGE_PRESENT|_PAGE_ACCESSED|_PAGE_USER)
+-#define L2_PROT (_PAGE_PRESENT|_PAGE_RW|_PAGE_ACCESSED|_PAGE_DIRTY|_PAGE_USER)
+-#define L3_PROT (_PAGE_PRESENT|_PAGE_RW|_PAGE_ACCESSED|_PAGE_DIRTY|_PAGE_USER)
+-#define L4_PROT (_PAGE_PRESENT|_PAGE_RW|_PAGE_ACCESSED|_PAGE_DIRTY|_PAGE_USER)
+-#endif /* __i386__ || __x86_64__ */
++#endif
+ 
+ /* flags for ioremap */
+ #define IO_PROT (L1_PROT)
+ #define IO_PROT_NOCACHE (L1_PROT | _PAGE_PCD)
+ 
+ #include <uk/arch/limits.h>
+-#define PAGE_SIZE       __PAGE_SIZE
+-#define PAGE_SHIFT      __PAGE_SHIFT
+-#define PAGE_MASK       __PAGE_MASK
+ 
+ #define PFN_UP(x)	(((x) + PAGE_SIZE-1) >> L1_PAGETABLE_SHIFT)
+ #define PFN_DOWN(x)	((x) >> L1_PAGETABLE_SHIFT)
+@@ -244,7 +212,8 @@ static __inline__ paddr_t machine_to_phys(maddr_t machine)
+ #define to_virt(x)                 ((void *)((unsigned long)(x)+VIRT_START))
+ 
+ #define virt_to_pfn(_virt)         (PFN_DOWN(to_phys(_virt)))
+-#define virt_to_mfn(_virt)         (pfn_to_mfn(virt_to_pfn(_virt)))
++// TODO(fane)
++#define virt_to_mfn(virt) 	   (PTE_REMOVE_FLAGS(uk_virt_to_pte(PAGE_ALIGN_DOWN((unsigned long) virt))) >> L1_PAGETABLE_SHIFT)
+ #define mach_to_virt(_mach)        (to_virt(machine_to_phys(_mach)))
+ #define virt_to_mach(_virt)        (phys_to_machine(to_phys(_virt)))
+ #define mfn_to_virt(_mfn)          (to_virt(mfn_to_pfn(_mfn) << PAGE_SHIFT))
+diff --git a/plat/xen/memory.c b/plat/xen/memory.c
+index b390aab6..271f44fb 100644
+--- a/plat/xen/memory.c
++++ b/plat/xen/memory.c
+@@ -32,7 +32,7 @@
+  */
+ 
+ #include <string.h>
+-#include <uk/plat/common/sections.h>
++#include <uk/sections.h>
+ 
+ #include <common/gnttab.h>
+ #if (defined __X86_32__) || (defined __X86_64__)
+diff --git a/plat/xen/x86/mm.c b/plat/xen/x86/mm.c
+index e006ab7f..9fb6ee88 100644
+--- a/plat/xen/x86/mm.c
++++ b/plat/xen/x86/mm.c
+@@ -36,7 +36,7 @@
+  */
+ 
+ #include <string.h>
+-#include <uk/plat/common/sections.h>
++#include <uk/sections.h>
+ #include <errno.h>
+ #include <uk/alloc.h>
+ #include <uk/plat/config.h>
+@@ -226,45 +226,6 @@ void _init_mem_build_pagetable(unsigned long *start_pfn, unsigned long *max_pfn)
+     *start_pfn = pt_pfn;
+ }
+ 
+-/*
+- * Get the PTE for virtual address va if it exists. Otherwise NULL.
+- */
+-static pgentry_t *get_pte(unsigned long va)
+-{
+-	unsigned long mfn;
+-	pgentry_t *tab;
+-	unsigned int offset;
+-
+-	tab = pt_base;
+-
+-#if defined(__x86_64__)
+-	offset = l4_table_offset(va);
+-	if (!(tab[offset] & _PAGE_PRESENT))
+-		return NULL;
+-
+-	mfn = pte_to_mfn(tab[offset]);
+-	tab = mfn_to_virt(mfn);
+-#endif
+-	offset = l3_table_offset(va);
+-	if (!(tab[offset] & _PAGE_PRESENT))
+-		return NULL;
+-
+-	mfn = pte_to_mfn(tab[offset]);
+-	tab = mfn_to_virt(mfn);
+-	offset = l2_table_offset(va);
+-	if (!(tab[offset] & _PAGE_PRESENT))
+-		return NULL;
+-
+-	if (tab[offset] & _PAGE_PSE)
+-		return &tab[offset];
+-
+-	mfn = pte_to_mfn(tab[offset]);
+-	tab = mfn_to_virt(mfn);
+-	offset = l1_table_offset(va);
+-
+-	return &tab[offset];
+-}
+-
+ /*
+  * Return a valid PTE for a given virtual address.
+  * If PTE does not exist, allocate page-table pages.
+@@ -433,18 +394,12 @@ unsigned long allocate_ondemand(unsigned long n, unsigned long align)
+ 
+ 		unsigned long addr =
+ 			demand_map_area_start + page_idx * PAGE_SIZE;
+-		pgentry_t *pte = get_pte(addr);
+ 
+ 		for (contig = 0; contig < n; contig++, addr += PAGE_SIZE) {
+-			if (!(addr & L1_MASK))
+-				pte = get_pte(addr);
+-
+-			if (pte) {
+-				if (*pte & _PAGE_PRESENT)
+-					break;
++			unsigned long pte = uk_virt_to_pte(addr);
+ 
+-				pte++;
+-			}
++            if (pte & _PAGE_PRESENT)
++                break;
+ 		}
+ 
+ 		if (contig == n)
+@@ -483,16 +438,29 @@ unsigned long allocate_ondemand(unsigned long n, unsigned long align)
+ void *map_frames_ex(const unsigned long *mfns, unsigned long n,
+ 		unsigned long stride, unsigned long incr,
+ 		unsigned long alignment,
+-		domid_t id, int *err, unsigned long prot,
+-		struct uk_alloc *a)
++		domid_t id __unused, int *err, unsigned long prot,
++		struct uk_alloc *a __unused)
+ {
+ 	unsigned long va = allocate_ondemand(n, alignment);
++	size_t i;
++	int rc;
+ 
+ 	if (!va)
+ 		return NULL;
+ 
++	for (i = 0; i < n; i++) {
++		rc = uk_page_map(va + i * PAGE_SIZE, (mfns[i * stride] + i * incr) << PAGE_SHIFT, prot, 0);
++		if (rc) {
++            *err = rc;
++			return NULL;
++        }
++	}
++
++	/* TODO(fane) */
++	/*
+ 	if (do_map_frames(va, mfns, n, stride, incr, id, err, prot, a))
+ 		return NULL;
++	*/
+ 
+ 	return (void *) va;
+ }
+@@ -604,7 +572,7 @@ void _init_mem_set_readonly(void *text, void *etext)
+         page = tab[offset];
+         mfn = pte_to_mfn(page);
+         tab = to_virt(mfn_to_pfn(mfn) << PAGE_SHIFT);
+-        offset = l2_table_offset(start_address);        
++        offset = l2_table_offset(start_address);
+         if ( !(tab[offset] & _PAGE_PSE) )
+         {
+             page = tab[offset];
+@@ -617,7 +585,7 @@ void _init_mem_set_readonly(void *text, void *etext)
+         if ( start_address != (unsigned long)&_libxenplat_shared_info )
+         {
+ #ifdef CONFIG_PARAVIRT
+-            mmu_updates[count].ptr = 
++            mmu_updates[count].ptr =
+                 ((pgentry_t)mfn << PAGE_SHIFT) + sizeof(pgentry_t) * offset;
+             mmu_updates[count].val = tab[offset] & ~_PAGE_RW;
+             count++;
+@@ -631,7 +599,7 @@ void _init_mem_set_readonly(void *text, void *etext)
+         start_address += page_size;
+ 
+ #ifdef CONFIG_PARAVIRT
+-        if ( count == L1_PAGETABLE_ENTRIES || 
++        if ( count == L1_PAGETABLE_ENTRIES ||
+              start_address + page_size > end_address )
+         {
+             rc = HYPERVISOR_mmu_update(mmu_updates, count, NULL, DOMID_SELF);
+@@ -704,7 +672,7 @@ void _arch_init_p2m(struct uk_alloc *a)
+ 	for (pfn = 0; pfn < max_pfn; pfn += P2M_ENTRIES) {
+ 		if (!(pfn % (P2M_ENTRIES * P2M_ENTRIES))) {
+ 			l2_list = uk_palloc(a, 1);
+-			l3_list[L3_P2M_IDX(pfn)] = virt_to_mfn(l2_list);
++			l3_list[L3_P2M_IDX(pfn)] = pte_to_mfn(uk_virt_to_pte((unsigned long) l2_list));
+ 			l2_list_pages[L3_P2M_IDX(pfn)] = l2_list;
+ 		}
+ 
+@@ -712,7 +680,7 @@ void _arch_init_p2m(struct uk_alloc *a)
+ 			virt_to_mfn(phys_to_machine_mapping + pfn);
+ 	}
+ 	HYPERVISOR_shared_info->arch.pfn_to_mfn_frame_list_list =
+-		virt_to_mfn(l3_list);
++		pte_to_mfn(uk_virt_to_pte((unsigned long) l3_list));
+ 	HYPERVISOR_shared_info->arch.max_pfn = max_pfn;
+ }
+ 
+diff --git a/plat/xen/x86/setup.c b/plat/xen/x86/setup.c
+index 486b4670..af55812f 100644
+--- a/plat/xen/x86/setup.c
++++ b/plat/xen/x86/setup.c
+@@ -74,6 +74,8 @@
+ #include <uk/plat/config.h>
+ #include <uk/plat/console.h>
+ #include <uk/plat/bootstrap.h>
++#include <uk/plat/mm.h>
++#include <uk/mem_layout.h>
+ #include <x86/cpu.h>
+ 
+ #include <xen/xen.h>
+@@ -138,29 +140,37 @@ static inline void _init_mem(void)
+ 	uk_pr_info("     start_pfn: %lx\n", start_pfn);
+ 	uk_pr_info("       max_pfn: %lx\n", max_pfn);
+ 
+-	_init_mem_build_pagetable(&start_pfn, &max_pfn);
+-	_init_mem_clear_bootstrap();
+-	_init_mem_set_readonly((void *)__TEXT, (void *)__ERODATA);
++	//_init_mem_build_pagetable(&start_pfn, &max_pfn);
++	//_init_mem_clear_bootstrap();
++	//_init_mem_set_readonly((void *)__TEXT, (void *)__ERODATA);
++	/* TODO(fane) */
++	/* TODO: what to do with initrd on Xen? */
++	uk_pt_build(start_pfn << PAGE_SHIFT, (max_pfn - start_pfn) << PAGE_SHIFT, 0x2000, 0x2000, ukarch_read_pt_base() - 0x2000);
+ 
+ 	/* Fill out mrd array */
+ 	/* heap */
+-	_libxenplat_mrd[0].base  = to_virt(start_pfn << __PAGE_SHIFT);
++	_libxenplat_mrd[0].base  = HEAP_AREA_START;
+ 	_libxenplat_mrd[0].len   = (size_t) to_virt(max_pfn << __PAGE_SHIFT)
+-		- (size_t) to_virt(start_pfn << __PAGE_SHIFT);
++		- (size_t) to_virt(start_pfn << __PAGE_SHIFT) - BOOKKEEP_AREA_SIZE;
+ 	_libxenplat_mrd[0].flags = (UKPLAT_MEMRF_ALLOCATABLE);
++#if CONFIG_LIBPOSIX_MMAP
++	/* TODO(fane) */
++	_libxenplat_mrd[0].len /= 2;
++#endif /* CONFIG_LIBPOSIX_MMAP */
++
+ #if CONFIG_UKPLAT_MEMRNAME
+ 	_libxenplat_mrd[0].name  = "heap";
+ #endif
+ 
+ 	/* demand area */
+-	_libxenplat_mrd[1].base  = (void *) VIRT_DEMAND_AREA;
+-	_libxenplat_mrd[1].len   = DEMAND_MAP_PAGES * PAGE_SIZE;
++	_libxenplat_mrd[1].base  = (void *) MAPPINGS_AREA_START;
++	_libxenplat_mrd[1].len   = MAPPINGS_AREA_SIZE;
+ 	_libxenplat_mrd[1].flags = UKPLAT_MEMRF_RESERVED;
+ #if CONFIG_UKPLAT_MEMRNAME
+ 	_libxenplat_mrd[1].name  = "demand";
+ #endif
+ 	_init_mem_demand_area((unsigned long) _libxenplat_mrd[1].base,
+-			DEMAND_MAP_PAGES);
++			MAPPINGS_AREA_SIZE >> PAGE_SHIFT);
+ 
+ 	_libxenplat_mrd_num = 2;
+ }

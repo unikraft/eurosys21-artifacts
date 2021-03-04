@@ -1,0 +1,1227 @@
+diff --git a/lib/ukboot/boot.c b/lib/ukboot/boot.c
+index e8a2ac79..06ee80b1 100644
+--- a/lib/ukboot/boot.c
++++ b/lib/ukboot/boot.c
+@@ -249,7 +249,7 @@ void ukplat_entry(int argc, char *argv[])
+ 
+ 	/* On most platforms the timer depend on an initialized IRQ subsystem */
+ 	uk_pr_info("Initialize platform time...\n");
+-	ukplat_time_init();
++	//ukplat_time_init();
+ 
+ #if CONFIG_LIBUKSCHED
+ 	/* Init scheduler. */
+diff --git a/plat/kvm/Config.uk b/plat/kvm/Config.uk
+index 3372b6c5..01cd2f90 100644
+--- a/plat/kvm/Config.uk
++++ b/plat/kvm/Config.uk
+@@ -12,6 +12,21 @@ menuconfig PLAT_KVM
+ 
+ if (PLAT_KVM)
+ 
++config KVM_VMM_QEMU
++        bool "use QEMU to run kvm VM"
++        default y
++        help
++          Build an image that can be run with QEMU/kvm.
++
++config KVM_VMM_FIRECRACKER
++        bool "use Firecracker to run kvm VM [WIP]"
++        default n
++        depends on ARCH_X86_64
++        help
++          Build an image that can be run with Firecracker.
++          This is work in progress; the image will boot,
++          but there is currently no device support.
++
+ menu "Console Options"
+ 
+ config KVM_KERNEL_SERIAL_CONSOLE
+diff --git a/plat/kvm/Linker.uk b/plat/kvm/Linker.uk
+index 5e421933..d429876a 100644
+--- a/plat/kvm/Linker.uk
++++ b/plat/kvm/Linker.uk
+@@ -1,43 +1,116 @@
++ifeq ($(CONFIG_KVM_VMM_FIRECRACKER),y)
++
+ ifeq (x86_64,$(CONFIG_UK_ARCH))
+-KVM_LDFLAGS-y += -Wl,-m,elf_x86_64
++KVMFC_LDFLAGS-y += -Wl,-m,elf_x86_64
+ else ifeq (arm64,$(CONFIG_UK_ARCH))
+-KVM_LDFLAGS-y	 += -Wl,-m,aarch64elf
++KVMFC_LDFLAGS-y	 += -Wl,-m,aarch64elf
+ endif
++##
++## Link image
++##
++KVMFC_IMAGE := $(BUILD_DIR)/$(CONFIG_UK_NAME)_kvmfc-$(CONFIG_UK_ARCH)
++KVMFC_DEBUG_IMAGE := $(KVMFC_IMAGE).dbg
++
++KVMFC_LD_SCRIPT_FLAGS := $(addprefix -Wl$(comma)-dT$(comma),\
++			 $(UK_PLAT_KVM_DEF_LDS))
++KVMFC_LD_SCRIPT_FLAGS += $(addprefix -Wl$(comma)-T$(comma),\
++			$(KVMFC_LD_SCRIPT-y) $(EXTRA_LD_SCRIPT-y))
+ 
++$(KVMFC_DEBUG_IMAGE): $(KVM_ALIBS) $(KVM_ALIBS-y) $(KVM_OLIBS) $(KVM_OLIBS-y) \
++                     $(KVMFC_ALIBS) $(KVMFC_ALIBS-y) $(KVMFC_OLIBS) $(KVMFC_OLIBS-y) \
++                     $(UK_ALIBS) $(UK_ALIBS-y) $(UK_OLIBS) $(UK_OLIBS-y)
++	$(call build_cmd,LD,,$(KVMFC_IMAGE).ld.o,\
++	       $(LD) -r $(LIBLDFLAGS) $(LIBLDFLAGS-y) \
++			$(KVMFC_LDFLAGS) $(KVMFC_LDFLAGS-y) \
++			$(KVM_OLIBS) $(KVM_OLIBS-y) \
++			$(KVMFC_OLIBS) $(KVMFC_OLIBS-y) \
++			$(UK_OLIBS) $(UK_OLIBS-y) \
++			-Wl$(comma)--start-group \
++			$(KVM_ALIBS) $(KVM_ALIBS-y) \
++			$(KVMFC_ALIBS) $(KVMFC_ALIBS-y) \
++			$(UK_ALIBS) $(UK_ALIBS-y) \
++			-Wl$(comma)--end-group \
++			-o $(KVMFC_IMAGE).ld.o)
++	$(call build_cmd,OBJCOPY,,$(KVMFC_IMAGE).o,\
++		$(OBJCOPY) -w -G kvmos_* -G _libkvmplat_entry \
++			-G _libkvmplat_start64 $(KVMFC_IMAGE).ld.o $(KVMFC_IMAGE).o)
++	$(call build_cmd,LD,,$@,\
++	       $(LD) $(LDFLAGS) $(LDFLAGS-y) \
++		     $(KVMFC_LDFLAGS) $(KVMFC_LDFLAGS-y) \
++		     $(KVMFC_LD_SCRIPT_FLAGS) \
++		     $(KVMFC_IMAGE).o -o $@)
++
++$(KVMFC_IMAGE): $(KVMFC_IMAGE).dbg
++	$(call build_cmd,SCSTRIP,,$@,\
++		$(SCRIPTS_DIR)/sect-strip.py \
++			$(SECT_STRIP_FLAGS) $(SECT_STRIP_FLAGS-y) \
++			--with-objcopy=$(OBJCOPY) \
++			$< -o $@ && \
++		$(STRIP) -s $@)
++
++$(KVMFC_IMAGE).sym: $(KVMFC_DEBUG_IMAGE)
++	$(call build_cmd,NM,,$@, $(NM) -n $< > $@)
++
++$(KVMFC_IMAGE).gz: $(KVMFC_IMAGE)
++	$(call build_cmd,GZ,,$@, $(GZIP) -f -9 -c $< >$@)
++
++# register images to the build
++ifeq ($(CONFIG_KVM_VMM_FIRECRACKER),y)
++UK_DEBUG_IMAGES-y                     += $(KVMFC_DEBUG_IMAGE)
++UK_IMAGES-y                           += $(KVMFC_IMAGE)
++UK_IMAGES-$(CONFIG_OPTIMIZE_SYMFILE)  += $(KVMFC_IMAGE).sym
++UK_IMAGES-$(CONFIG_OPTIMIZE_COMPRESS) += $(KVMFC_IMAGE).gz
++endif
++
++# ...for cleaning:
++LIBKVMQPLAT_CLEAN += $(call build_clean,$(KVMFC_IMAGE).o)
++LIBKVMQPLAT_CLEAN += $(call build_clean,$(KVMFC_IMAGE).ld.o)
++endif
++
++ifeq ($(CONFIG_KVM_VMM_QEMU),y)
++
++ifeq (x86_64,$(CONFIG_UK_ARCH))
++KVMQ_LDFLAGS-y += -Wl,-m,elf_x86_64
++else ifeq (arm64,$(CONFIG_UK_ARCH))
++KVMQ_LDFLAGS-y	 += -Wl,-m,aarch64elf
++endif
+ 
+ ##
+ ## Link image
+ ##
+-KVM_IMAGE := $(BUILD_DIR)/$(CONFIG_UK_NAME)_kvm-$(CONFIG_UK_ARCH)
+-KVM_DEBUG_IMAGE := $(KVM_IMAGE).dbg
++KVMQ_IMAGE := $(BUILD_DIR)/$(CONFIG_UK_NAME)_kvmq-$(CONFIG_UK_ARCH)
++KVMQ_DEBUG_IMAGE := $(KVMQ_IMAGE).dbg
+ 
+-KVM_LD_SCRIPT_FLAGS := $(addprefix -Wl$(comma)-dT$(comma),\
++KVMQ_LD_SCRIPT_FLAGS := $(addprefix -Wl$(comma)-dT$(comma),\
+ 			 $(UK_PLAT_KVM_DEF_LDS))
+-KVM_LD_SCRIPT_FLAGS += $(addprefix -Wl$(comma)-T$(comma),\
+-			$(KVM_LD_SCRIPT-y) $(EXTRA_LD_SCRIPT-y))
++KVMQ_LD_SCRIPT_FLAGS += $(addprefix -Wl$(comma)-T$(comma),\
++			$(KVMQ_LD_SCRIPT-y) $(EXTRA_LD_SCRIPT-y))
+ 
+-$(KVM_DEBUG_IMAGE): $(KVM_ALIBS) $(KVM_ALIBS-y) $(KVM_OLIBS) $(KVM_OLIBS-y) \
+-		    $(UK_ALIBS) $(UK_ALIBS-y) $(UK_OLIBS) $(UK_OLIBS-y)
+-	$(call build_cmd,LD,,$(KVM_IMAGE).ld.o,\
++$(KVMQ_DEBUG_IMAGE): $(KVM_ALIBS) $(KVM_ALIBS-y) $(KVM_OLIBS) $(KVM_OLIBS-y) \
++                     $(KVMQ_ALIBS) $(KVMQ_ALIBS-y) $(KVMQ_OLIBS) $(KVMQ_OLIBS-y) \
++                     $(UK_ALIBS) $(UK_ALIBS-y) $(UK_OLIBS) $(UK_OLIBS-y)
++	$(call build_cmd,LD,,$(KVMQ_IMAGE).ld.o,\
+ 	       $(LD) -r $(LIBLDFLAGS) $(LIBLDFLAGS-y) \
+-			$(KVM_LDFLAGS) $(KVM_LDFLAGS-y) \
++			$(KVMQ_LDFLAGS) $(KVMQ_LDFLAGS-y) \
+ 			$(KVM_OLIBS) $(KVM_OLIBS-y) \
++			$(KVMQ_OLIBS) $(KVMQ_OLIBS-y) \
+ 			$(UK_OLIBS) $(UK_OLIBS-y) \
+ 			-Wl$(comma)--start-group \
+ 			$(KVM_ALIBS) $(KVM_ALIBS-y) \
++			$(KVMQ_ALIBS) $(KVMQ_ALIBS-y) \
+ 			$(UK_ALIBS) $(UK_ALIBS-y) \
+ 			-Wl$(comma)--end-group \
+-			-o $(KVM_IMAGE).ld.o)
+-	$(call build_cmd,OBJCOPY,,$(KVM_IMAGE).o,\
++			-o $(KVMQ_IMAGE).ld.o)
++	$(call build_cmd,OBJCOPY,,$(KVMQ_IMAGE).o,\
+ 		$(OBJCOPY) -w -G kvmos_* -G _libkvmplat_entry \
+-			$(KVM_IMAGE).ld.o $(KVM_IMAGE).o)
++			-G _libkvmplat_start64 $(KVMQ_IMAGE).ld.o $(KVMQ_IMAGE).o)
+ 	$(call build_cmd,LD,,$@,\
+ 	       $(LD) $(LDFLAGS) $(LDFLAGS-y) \
+-		     $(KVM_LDFLAGS) $(KVM_LDFLAGS-y) \
+-		     $(KVM_LD_SCRIPT_FLAGS) \
+-		     $(KVM_IMAGE).o -o $@)
++		     $(KVMQ_LDFLAGS) $(KVMQ_LDFLAGS-y) \
++		     $(KVMQ_LD_SCRIPT_FLAGS) \
++		     $(KVMQ_IMAGE).o -o $@)
+ 
+-$(KVM_IMAGE): $(KVM_IMAGE).dbg
++$(KVMQ_IMAGE): $(KVMQ_IMAGE).dbg
+ 	$(call build_cmd,SCSTRIP,,$@,\
+ 		$(SCRIPTS_DIR)/sect-strip.py \
+ 			$(SECT_STRIP_FLAGS) $(SECT_STRIP_FLAGS-y) \
+@@ -45,20 +118,21 @@ $(KVM_IMAGE): $(KVM_IMAGE).dbg
+ 			$< -o $@ && \
+ 		$(STRIP) -s $@)
+ 
+-$(KVM_IMAGE).sym: $(KVM_DEBUG_IMAGE)
++$(KVMQ_IMAGE).sym: $(KVMQ_DEBUG_IMAGE)
+ 	$(call build_cmd,NM,,$@, $(NM) -n $< > $@)
+ 
+-$(KVM_IMAGE).gz: $(KVM_IMAGE)
++$(KVMQ_IMAGE).gz: $(KVMQ_IMAGE)
+ 	$(call build_cmd,GZ,,$@, $(GZIP) -f -9 -c $< >$@)
+ 
+ # register images to the build
+-ifeq ($(CONFIG_PLAT_KVM),y)
+-UK_DEBUG_IMAGES-y                     += $(KVM_DEBUG_IMAGE)
+-UK_IMAGES-y                           += $(KVM_IMAGE)
+-UK_IMAGES-$(CONFIG_OPTIMIZE_SYMFILE)  += $(KVM_IMAGE).sym
+-UK_IMAGES-$(CONFIG_OPTIMIZE_COMPRESS) += $(KVM_IMAGE).gz
++ifeq ($(CONFIG_KVM_VMM_QEMU),y)
++UK_DEBUG_IMAGES-y                     += $(KVMQ_DEBUG_IMAGE)
++UK_IMAGES-y                           += $(KVMQ_IMAGE)
++UK_IMAGES-$(CONFIG_OPTIMIZE_SYMFILE)  += $(KVMQ_IMAGE).sym
++UK_IMAGES-$(CONFIG_OPTIMIZE_COMPRESS) += $(KVMQ_IMAGE).gz
+ endif
+ 
+ # ...for cleaning:
+-LIBKVMPLAT_CLEAN += $(call build_clean,$(KVM_IMAGE).o)
+-LIBKVMPLAT_CLEAN += $(call build_clean,$(KVM_IMAGE).ld.o)
++LIBKVMQPLAT_CLEAN += $(call build_clean,$(KVMQ_IMAGE).o)
++LIBKVMQPLAT_CLEAN += $(call build_clean,$(KVMQ_IMAGE).ld.o)
++endif
+diff --git a/plat/kvm/Makefile.uk b/plat/kvm/Makefile.uk
+index a6d6f5e7..9aaa3e14 100644
+--- a/plat/kvm/Makefile.uk
++++ b/plat/kvm/Makefile.uk
+@@ -2,18 +2,34 @@
+ ## KVM platform registration
+ ##
+ $(eval $(call addplat_s,kvm,$(CONFIG_PLAT_KVM)))
++$(eval $(call addplat_s,kvmq,$(CONFIG_KVM_VMM_QEMU)))
++UK_PLAT_KVMQ_LINKER := $(UK_PLAT_KVMQ_BASE)/Linker.uk
++$(eval $(call addplat_s,kvmfc,$(CONFIG_KVM_VMM_FIRECRACKER)))
++UK_PLAT_KVMFC_LINKER := $(UK_PLAT_KVMFC_BASE)/Linker.uk
++
++##
++## Populate LIBKVMPLAT_BASE for common files
++##
++ifeq ($(CONFIG_KVM_VMM_QEMU),y)
++LIBKVMPLAT_BASE := $(UK_PLAT_KVMQ_BASE)
++else ifeq ($(CONFIG_KVM_VMM_FIRECRACKER),y)
++LIBKVMPLAT_BASE := $(UK_PLAT_KVMFC_BASE)
++endif
+ 
+ ##
+ ## KVM platform library registration
+ ##
+-$(eval $(call addplatlib,kvm,libkvmplat))
+-$(eval $(call addplatlib_s,kvm,libkvmpci,$(CONFIG_KVM_PCI)))
+-$(eval $(call addplatlib_s,kvm,libkvmvirtio,$(CONFIG_VIRTIO_BUS)))
+-$(eval $(call addplatlib_s,kvm,libkvmvirtionet,$(CONFIG_VIRTIO_NET)))
+-$(eval $(call addplatlib_s,kvm,libkvmvirtioblk,$(CONFIG_VIRTIO_BLK)))
+-$(eval $(call addplatlib_s,kvm,libkvmvirtio9p,$(CONFIG_VIRTIO_9P)))
+-$(eval $(call addplatlib_s,kvm,libkvmofw,$(CONFIG_LIBOFW)))
+-$(eval $(call addplatlib_s,kvm,libkvmgicv2,$(CONFIG_LIBGICV2)))
++$(eval $(call addplatlib,kvmq,libkvmqplat,$(CONFIG_KVM_VMM_QEMU)))
++$(eval $(call addplatlib,kvmfc,libkvmfcplat,$(CONFIG_KVM_VMM_FIRECRACKER)))
++$(eval $(call addplatlib_s,kvmq,libkvmpci,$(CONFIG_KVM_PCI)))
++$(eval $(call addplatlib_s,kvmq,libkvmvirtio,$(CONFIG_VIRTIO_BUS)))
++$(eval $(call addplatlib_s,kvmq,libkvmvirtionet,$(CONFIG_VIRTIO_NET)))
++$(eval $(call addplatlib_s,kvmq,libkvmvirtioblk,$(CONFIG_VIRTIO_BLK)))
++$(eval $(call addplatlib_s,kvmq,libkvmvirtio9p,$(CONFIG_VIRTIO_9P)))
++$(eval $(call addplatlib_s,kvmq,libkvmofw,$(CONFIG_LIBOFW)))
++$(eval $(call addplatlib_s,kvmq,libkvmgicv2,$(CONFIG_LIBGICV2)))
++$(eval $(call addplatlib_s,kvmfc,libkvmvirtio,$(CONFIG_VIRTIO_BUS)))
++$(eval $(call addplatlib_s,kvmfc,libkvmvirtionet,$(CONFIG_VIRTIO_NET)))
+ 
+ ##
+ ## Platform library definitions
+@@ -104,6 +120,23 @@ LIBKVMPLAT_SRCS-y              += $(UK_PLAT_COMMON_BASE)/lcpu.c|common
+ LIBKVMPLAT_SRCS-y              += $(UK_PLAT_COMMON_BASE)/memory.c|common
+ LIBKVMPLAT_SRCS-y              += $(UK_PLAT_KVM_DEF_LDS)
+ 
++ifeq ($(CONFIG_KVM_VMM_QEMU),y)
++LIBKVMQPLAT_SRCS-y        := $(LIBKVMPLAT_SRCS-y)
++LIBKVMQPLAT_ASINCLUDES-y  := $(LIBKVMPLAT_ASINCLUDES-y)
++LIBKVMQPLAT_CINCLUDES-y   := $(LIBKVMPLAT_CINCLUDES-y)
++LIBKVMQPLAT_ASFLAGS       := $(LIBKVMPLAT_ASFLAGS) -DKVMQPLAT
++LIBKVMQPLAT_CFLAGS        := $(LIBKVMPLAT_CFLAGS) -DKVMQPLAT
++LIBKVMQPLAT_CXXFLAGS      := $(LIBKVMPLAT_CXXFLAGS) -DKVMQPLAT
++endif
++ifeq ($(CONFIG_KVM_VMM_FIRECRACKER),y)
++LIBKVMFCPLAT_SRCS-y        := $(LIBKVMPLAT_SRCS-y)
++LIBKVMFCPLAT_ASINCLUDES-y  := $(LIBKVMPLAT_ASINCLUDES-y)
++LIBKVMFCPLAT_CINCLUDES-y   := $(LIBKVMPLAT_CINCLUDES-y)
++LIBKVMFCPLAT_ASFLAGS       := $(LIBKVMPLAT_ASFLAGS) -DKVMFCPLAT
++LIBKVMFCPLAT_CFLAGS        := $(LIBKVMPLAT_CFLAGS) -DKVMFCPLAT
++LIBKVMFCPLAT_CXXFLAGS      := $(LIBKVMPLAT_CXXFLAGS) -DKVMFCPLAT
++endif
++
+ ##
+ ## PCI library definitions
+ ##
+diff --git a/plat/kvm/include/kvm-x86/_bootparams.h b/plat/kvm/include/kvm-x86/_bootparams.h
+new file mode 100644
+index 00000000..a3b1b5f5
+--- /dev/null
++++ b/plat/kvm/include/kvm-x86/_bootparams.h
+@@ -0,0 +1,129 @@
++/* SPDX-License-Identifier: BSD-3-Clause */
++/*
++ * Copyright (c) 2019, NEC Europe Ltd., NEC Corporation. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holder nor the names of its
++ *    contributors may be used to endorse or promote products derived from
++ *    this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * THIS HEADER MAY NOT BE EXTRACTED OR MODIFIED IN ANY WAY.
++ */
++
++#ifndef KVM_VMMINFO_H
++#error Do not include _bootparams.h directly!
++#endif
++
++#include <string.h>
++#include <uk/print.h>
++#include <uk/plat/config.h>
++#include <kvm/config.h>
++
++#define BOOT_PARAM_BASE (0x7000)
++
++static inline void _bp_get_cmdline(struct boot_params *bp)
++{
++	__u64 cmdline_addr;
++	char *bp_cmdline;
++	size_t bp_cmdline_len = bp->hdr.cmdline_size;
++
++	cmdline_addr = bp->hdr.cmd_line_ptr;
++	cmdline_addr |= (__u64)bp->ext_ramdisk_size << 32;
++	bp_cmdline = (char *)cmdline_addr;
++	uk_pr_info("command line at 0x%lx\n", cmdline_addr);
++	uk_pr_info("command line size 0x%lx\n", bp_cmdline_len);
++
++	if (!bp_cmdline) {
++		uk_pr_info("No command line provided\n");
++		strncpy(cmdline, CONFIG_UK_NAME, sizeof(cmdline));
++		return;
++	}
++
++	if (bp_cmdline_len >= sizeof(cmdline)) {
++		bp_cmdline_len = sizeof(cmdline) - 1;
++		uk_pr_info("Command line too long, truncated\n");
++	}
++	memcpy(cmdline, bp_cmdline, bp_cmdline_len);
++	/* ensure null termination */
++	cmdline[bp_cmdline_len] = '\0';
++
++	uk_pr_info("Command line: %s\n", cmdline);
++}
++
++static inline void _bp_init_mem(struct boot_params *bp)
++{
++	int i;
++	size_t max_addr;
++	struct boot_e820_entry *e820_entry = NULL;
++
++	uk_pr_info("boot_params: %d entries in e820\n", bp->e820_entries);
++	for (i=0; i < bp->e820_entries; i++) {
++		uk_pr_info("  e820 entry %d:\n", i);
++		uk_pr_info("    addr: 0x%lx\n", bp->e820_table[i].addr);
++		uk_pr_info("    size: 0x%lx\n", bp->e820_table[i].size);
++		uk_pr_info("    type: 0x%x\n", bp->e820_table[i].type);
++	}
++
++	for (i = 0; i < bp->e820_entries; i++) {
++		uk_pr_info("Checking e820 entry %d\n", i);
++		if (bp->e820_table[i].addr == PLATFORM_MEM_START
++		    && bp->e820_table[i].type == 0x1) {
++			e820_entry = &bp->e820_table[i];
++			break;
++		}
++	}
++	if (!e820_entry)
++		UK_CRASH("Could not find suitable memory region!\n");
++
++	uk_pr_info("Using e820 memory region %d\n", i);
++	max_addr = e820_entry->addr + e820_entry->size;
++	if (max_addr > PLATFORM_MAX_MEM_ADDR)
++		max_addr = PLATFORM_MAX_MEM_ADDR;
++	UK_ASSERT((size_t)__END <= max_addr);
++
++	_libkvmplat_cfg.heap.start = ALIGN_UP((uintptr_t)__END, __PAGE_SIZE);
++	_libkvmplat_cfg.heap.end   = (uintptr_t) max_addr - __STACK_SIZE;
++	_libkvmplat_cfg.heap.len   = _libkvmplat_cfg.heap.end
++				     - _libkvmplat_cfg.heap.start;
++	_libkvmplat_cfg.bstack.start = _libkvmplat_cfg.heap.end;
++	_libkvmplat_cfg.bstack.end   = max_addr;
++	_libkvmplat_cfg.bstack.len   = __STACK_SIZE;
++}
++
++static inline void _bp_init_initrd(struct boot_params *bp __unused)
++{
++	/* Firecracker does not have initrd support yet. */
++}
++
++static inline void process_vmminfo(void *arg __unused)
++{
++	/* Location of boot parameters is currently hardcoded to 0x7000
++	 * in Firecracker, but this might change at later point.
++	 */
++	struct boot_params *bp = (struct boot_params *)BOOT_PARAM_BASE;
++
++	uk_pr_info("     boot params: %p\n", bp);
++	_bp_init_mem(bp);
++	_bp_get_cmdline(bp);
++	_bp_init_initrd(bp);
++}
+diff --git a/plat/kvm/include/kvm-x86/_multiboot.h b/plat/kvm/include/kvm-x86/_multiboot.h
+new file mode 100644
+index 00000000..b1ccd798
+--- /dev/null
++++ b/plat/kvm/include/kvm-x86/_multiboot.h
+@@ -0,0 +1,243 @@
++/* SPDX-License-Identifier: ISC */
++/*
++ * Copyright (c) 2015-2017 IBM
++ * Copyright (c) 2016-2017 Docker, Inc.
++ * Copyright (c) 2017 NEC Europe Ltd., NEC Corporation
++ *
++ * Permission to use, copy, modify, and/or distribute this software
++ * for any purpose with or without fee is hereby granted, provided
++ * that the above copyright notice and this permission notice appear
++ * in all copies.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL
++ * WARRANTIES WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED
++ * WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE
++ * AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT, INDIRECT, OR
++ * CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
++ * OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
++ * NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN
++ * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++ */
++
++
++#ifndef KVM_VMMINFO_H
++#error Do not include _multiboot.h directly!
++#endif
++
++#include <string.h>
++#include <uk/print.h>
++#include <uk/plat/config.h>
++#include <kvm/config.h>
++
++static inline void _mb_get_cmdline(struct multiboot_info *mi)
++{
++	char *mi_cmdline;
++
++	if (mi->flags & MULTIBOOT_INFO_CMDLINE) {
++		mi_cmdline = (char *)(__u64)mi->cmdline;
++
++		if (strlen(mi_cmdline) > sizeof(cmdline) - 1)
++			uk_pr_err("Command line too long, truncated\n");
++		strncpy(cmdline, mi_cmdline,
++			sizeof(cmdline));
++	} else {
++		/* Use image name as cmdline to provide argv[0] */
++		uk_pr_debug("No command line present\n");
++		strncpy(cmdline, CONFIG_UK_NAME, sizeof(cmdline));
++	}
++
++	/* ensure null termination */
++	cmdline[(sizeof(cmdline) - 1)] = '\0';
++}
++
++static inline void _mb_init_mem(struct multiboot_info *mi)
++{
++	multiboot_memory_map_t *m;
++	size_t offset, max_addr;
++
++	/*
++	 * Look for the first chunk of memory at PLATFORM_MEM_START.
++	 */
++	for (offset = 0; offset < mi->mmap_length;
++	     offset += m->size + sizeof(m->size)) {
++		m = (void *)(__uptr)(mi->mmap_addr + offset);
++		if (m->addr == PLATFORM_MEM_START
++		    && m->type == MULTIBOOT_MEMORY_AVAILABLE) {
++			break;
++		}
++	}
++	UK_ASSERT(offset < mi->mmap_length);
++
++	/*
++	 * Cap our memory size to PLATFORM_MAX_MEM_SIZE which boot.S defines
++	 * page tables for.
++	 */
++	max_addr = m->addr + m->len;
++	if (max_addr > PLATFORM_MAX_MEM_ADDR)
++		max_addr = PLATFORM_MAX_MEM_ADDR;
++	UK_ASSERT((size_t) __END <= max_addr);
++
++	/*
++	 * Reserve space for boot stack at the end of found memory
++	 */
++	if ((max_addr - m->addr) < __STACK_SIZE)
++		UK_CRASH("Not enough memory to allocate boot stack\n");
++
++	_libkvmplat_cfg.heap.start = ALIGN_UP((uintptr_t) __END, __PAGE_SIZE);
++	_libkvmplat_cfg.heap.end   = (uintptr_t) max_addr - __STACK_SIZE;
++	_libkvmplat_cfg.heap.len   = _libkvmplat_cfg.heap.end
++				     - _libkvmplat_cfg.heap.start;
++	_libkvmplat_cfg.bstack.start = _libkvmplat_cfg.heap.end;
++	_libkvmplat_cfg.bstack.end   = max_addr;
++	_libkvmplat_cfg.bstack.len   = __STACK_SIZE;
++}
++
++static inline void _mb_init_initrd(struct multiboot_info *mi)
++{
++	multiboot_module_t *mod1;
++	uintptr_t heap0_start, heap0_end;
++	uintptr_t heap1_start, heap1_end;
++	size_t    heap0_len,   heap1_len;
++
++	/*
++	 * Search for initrd (called boot module according multiboot)
++	 */
++	if (mi->mods_count == 0) {
++		uk_pr_debug("No initrd present\n");
++		goto no_initrd;
++	}
++
++	/*
++	 * NOTE: We are only taking the first boot module as initrd.
++	 *       Initrd arguments and further modules are ignored.
++	 */
++	UK_ASSERT(mi->mods_addr);
++
++	mod1 = (multiboot_module_t *)((uintptr_t) mi->mods_addr);
++	UK_ASSERT(mod1->mod_end >= mod1->mod_start);
++
++	if (mod1->mod_end == mod1->mod_start) {
++		uk_pr_debug("Ignoring empty initrd\n");
++		goto no_initrd;
++	}
++
++	_libkvmplat_cfg.initrd.start = (uintptr_t) mod1->mod_start;
++	_libkvmplat_cfg.initrd.end = (uintptr_t) mod1->mod_end;
++	_libkvmplat_cfg.initrd.len = (size_t) (mod1->mod_end - mod1->mod_start);
++
++	/*
++	 * Check if initrd is part of heap
++	 * In such a case, we figure out the remaining pieces as heap
++	 */
++	if (_libkvmplat_cfg.heap.len == 0) {
++		/* We do not have a heap */
++		goto out;
++	}
++	heap0_start = 0;
++	heap0_end   = 0;
++	heap1_start = 0;
++	heap1_end   = 0;
++	if (RANGE_OVERLAP(_libkvmplat_cfg.heap.start,
++			  _libkvmplat_cfg.heap.len,
++			  _libkvmplat_cfg.initrd.start,
++			  _libkvmplat_cfg.initrd.len)) {
++		if (IN_RANGE(_libkvmplat_cfg.initrd.start,
++			     _libkvmplat_cfg.heap.start,
++			     _libkvmplat_cfg.heap.len)) {
++			/* Start of initrd within heap range;
++			 * Use the prepending left piece as heap */
++			heap0_start = _libkvmplat_cfg.heap.start;
++			heap0_end   = ALIGN_DOWN(_libkvmplat_cfg.initrd.start,
++						 __PAGE_SIZE);
++		}
++		if (IN_RANGE(_libkvmplat_cfg.initrd.start,
++
++			     _libkvmplat_cfg.heap.start,
++			     _libkvmplat_cfg.heap.len)) {
++			/* End of initrd within heap range;
++			 * Use the remaining left piece as heap */
++			heap1_start = ALIGN_UP(_libkvmplat_cfg.initrd.end,
++					       __PAGE_SIZE);
++			heap1_end   = _libkvmplat_cfg.heap.end;
++		}
++	} else {
++		/* Initrd is not overlapping with heap */
++		heap0_start = _libkvmplat_cfg.heap.start;
++		heap0_end   = _libkvmplat_cfg.heap.end;
++	}
++	heap0_len = heap0_end - heap0_start;
++	heap1_len = heap1_end - heap1_start;
++
++	/*
++	 * Update heap regions
++	 * We make sure that in we start filling left heap pieces at
++	 * `_libkvmplat_cfg.heap`. Any additional piece will then be
++	 * placed to `_libkvmplat_cfg.heap2`.
++	 */
++	if (heap0_len == 0) {
++		/* Heap piece 0 is empty, use piece 1 as only */
++		if (heap1_len != 0) {
++			_libkvmplat_cfg.heap.start = heap1_start;
++			_libkvmplat_cfg.heap.end   = heap1_end;
++			_libkvmplat_cfg.heap.len   = heap1_len;
++		} else {
++			_libkvmplat_cfg.heap.start = 0;
++			_libkvmplat_cfg.heap.end   = 0;
++			_libkvmplat_cfg.heap.len   = 0;
++		}
++		 _libkvmplat_cfg.heap2.start = 0;
++		 _libkvmplat_cfg.heap2.end   = 0;
++		 _libkvmplat_cfg.heap2.len   = 0;
++	} else {
++		/* Heap piece 0 has memory */
++		_libkvmplat_cfg.heap.start = heap0_start;
++		_libkvmplat_cfg.heap.end   = heap0_end;
++		_libkvmplat_cfg.heap.len   = heap0_len;
++		if (heap1_len != 0) {
++			_libkvmplat_cfg.heap2.start = heap1_start;
++			_libkvmplat_cfg.heap2.end   = heap1_end;
++			_libkvmplat_cfg.heap2.len   = heap1_len;
++		} else {
++			_libkvmplat_cfg.heap2.start = 0;
++			_libkvmplat_cfg.heap2.end   = 0;
++			_libkvmplat_cfg.heap2.len   = 0;
++		}
++	}
++
++	/*
++	 * Double-check that initrd is not overlapping with previously allocated
++	 * boot stack. We crash in such a case because we assume that multiboot
++	 * places the initrd close to the beginning of the heap region. One need
++	 * to assign just more memory in order to avoid this crash.
++	 */
++	if (RANGE_OVERLAP(_libkvmplat_cfg.heap.start,
++			  _libkvmplat_cfg.heap.len,
++			  _libkvmplat_cfg.initrd.start,
++			  _libkvmplat_cfg.initrd.len))
++		UK_CRASH("Not enough space at end of memory for boot stack\n");
++out:
++	return;
++
++no_initrd:
++	_libkvmplat_cfg.initrd.start = 0;
++	_libkvmplat_cfg.initrd.end   = 0;
++	_libkvmplat_cfg.initrd.len   = 0;
++	_libkvmplat_cfg.heap2.start  = 0;
++	_libkvmplat_cfg.heap2.end    = 0;
++	_libkvmplat_cfg.heap2.len    = 0;
++	return;
++}
++
++static inline void process_vmminfo(void *arg)
++{
++	struct multiboot_info *mi = (struct multiboot_info *)arg;
++
++	/*
++	 * The multiboot structures may be anywhere in memory, so take a copy of
++	 * everything necessary before we initialise memory allocation.
++	 */
++	uk_pr_info("     multiboot: %p\n", mi);
++	_mb_get_cmdline(mi);
++	_mb_init_mem(mi);
++	_mb_init_initrd(mi);
++}
+diff --git a/plat/kvm/include/kvm-x86/bootparams.h b/plat/kvm/include/kvm-x86/bootparams.h
+new file mode 100644
+index 00000000..1307e98f
+--- /dev/null
++++ b/plat/kvm/include/kvm-x86/bootparams.h
+@@ -0,0 +1,42 @@
++#ifndef BOOTPARAMS_HEADER
++#define BOOTPARAMS_HEADER
++
++#include <uk/essentials.h>
++
++struct setup_header {
++	__u8 _pad1[39];
++	__u32 ramdisk_image;
++	__u32 ramdisk_size;
++	__u8 _pad2[4];
++	__u16 heap_end_ptr;
++	__u8 _pad3[2];
++	__u32 cmd_line_ptr;
++	__u8 _pad4[12];
++	__u32 cmdline_size;
++	__u8 _pad5[44];
++} __attribute__((packed));
++
++struct boot_e820_entry {
++	__u64 addr;
++	__u64 size;
++	__u32 type;
++} __attribute__((packed));
++
++#define E820_MAX_ENTRIES 128
++
++struct boot_params {
++	__u8 _pad1[192];
++	__u32 ext_ramdisk_image;
++	__u32 ext_ramdisk_size;
++	__u32 ext_cmd_line_ptr;
++	__u8 _pad2[284];
++	__u8 e820_entries;
++	__u8 _pad3[8];
++	struct setup_header hdr;
++	__u8 _pad4[104];
++	struct boot_e820_entry e820_table[E820_MAX_ENTRIES];
++	__u8 _pad5[2560-(sizeof(struct boot_e820_entry) * E820_MAX_ENTRIES)];
++	__u8 _pad6[816];
++} __attribute__((packed));
++
++#endif /* ! BOOTPARAMS_HEADER */
+diff --git a/plat/kvm/include/kvm-x86/vmminfo.h b/plat/kvm/include/kvm-x86/vmminfo.h
+new file mode 100644
+index 00000000..3f0c6539
+--- /dev/null
++++ b/plat/kvm/include/kvm-x86/vmminfo.h
+@@ -0,0 +1,56 @@
++/* SPDX-License-Identifier: BSD-3-Clause */
++/*
++ * Copyright (c) 2019, NEC Laboratories Europe GmbH, NEC Corporation.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in the
++ *    documentation and/or other materials provided with the distribution.
++ * 3. Neither the name of the copyright holder nor the names of its
++ *    contributors may be used to endorse or promote products derived from
++ *    this software without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
++ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
++ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
++ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
++ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
++ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
++ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
++ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ * THIS HEADER MAY NOT BE EXTRACTED OR MODIFIED IN ANY WAY.
++ */
++
++#ifndef KVM_VMMINFO_H
++#define KVM_VMMINFO_H
++
++#include <uk/config.h>
++
++#define PLATFORM_MEM_START 0x100000
++#define PLATFORM_MAX_MEM_ADDR 0x40000000
++
++#define MAX_CMDLINE_SIZE 8192
++static char cmdline[MAX_CMDLINE_SIZE];
++
++/* include the respective info storage method depending on VM monitor */
++#if KVMQPLAT
++#include <kvm-x86/multiboot.h>
++#include <kvm-x86/multiboot_defs.h>
++#include <kvm-x86/_multiboot.h>
++#elif KVMFCPLAT
++#include <kvm-x86/bootparams.h>
++#include <kvm-x86/_bootparams.h>
++#else
++#error No VMM chosen for KVM environment!
++#endif /* CONFIG_KVM_VMM_* */
++
++#endif /* KVM_VMMINFO_H */
+diff --git a/plat/kvm/x86/entry64.S b/plat/kvm/x86/entry64.S
+index 274ab0b3..186f6ce4 100644
+--- a/plat/kvm/x86/entry64.S
++++ b/plat/kvm/x86/entry64.S
+@@ -27,6 +27,7 @@
+  * SUCH DAMAGE.
+  */
+ 
++#include <uk/config.h>
+ #include <x86/cpu_defs.h>
+ #include <kvm-x86/traps.h>
+ #include <kvm-x86/multiboot_defs.h>
+@@ -37,6 +38,7 @@
+ #define MYMULTIBOOT_FLAGS \
+     (MULTIBOOT_PAGE_ALIGN | MULTIBOOT_MEMORY_INFO | MULTIBOOT_AOUT_KLUDGE)
+ 
++#if KVMQPLAT
+ .section .data.boot
+ 
+ .align 4
+@@ -50,11 +52,13 @@ _multiboot_header:
+ .long _end                                        /* bss end addr */
+ .long _libkvmplat_start32                         /* entry addr */
+ 
++#endif
+ .section .bss
+ 
+ .space 4096
+ bootstack:
+ 
++#if KVMQPLAT
+ /*
+  * Bootloader entry point.
+  *
+@@ -90,15 +94,6 @@ ENTRY(_libkvmplat_start32)
+ 	orl $X86_EFER_LME, %eax
+ 	wrmsr
+ 
+-	/* 3: load pml4 pointer */
+-	movl $cpu_pml4, %eax
+-	movl %eax, %cr3
+-
+-	/* 4: enable paging */
+-	movl %cr0, %eax
+-	orl $X86_CR0_PG, %eax
+-	movl %eax, %cr0
+-
+ 	jmp _libkvmplat_start64
+ 
+ 	/* NOTREACHED */
+@@ -111,6 +106,7 @@ haltme:
+ 	hlt
+ 	jmp haltme
+ END(_libkvmplat_start32)
++#endif
+ 
+ /*
+  * amd64 programmer's manual:
+@@ -149,6 +145,15 @@ mxcsr_ptr:
+ .section .text.boot
+ 
+ ENTRY(_libkvmplat_start64)
++	/* load pml4 pointer */
++	movq $cpu_pml4, %rax
++	movq %rax, %cr3
++
++	/* enable paging */
++	movq %cr0, %rax
++	orl $X86_CR0_PG, %eax
++	movq %rax, %cr0
++
+ 	/* set up the boot stack */
+ 	movq $bootstack, %rsp
+ 	xorq %rbp, %rbp
+diff --git a/plat/kvm/x86/link64.lds.S b/plat/kvm/x86/link64.lds.S
+index eb4a19d2..4faa0381 100644
+--- a/plat/kvm/x86/link64.lds.S
++++ b/plat/kvm/x86/link64.lds.S
+@@ -26,7 +26,7 @@
+ #include <uk/arch/limits.h> /* for __PAGE_SIZE */
+ #include <uk/plat/common/common.lds.h>
+ 
+-ENTRY(_libkvmplat_entry)
++ENTRY(_libkvmplat_start64)
+ SECTIONS
+ {
+ 	. = 0x100000;
+diff --git a/plat/kvm/x86/pagetable.S b/plat/kvm/x86/pagetable.S
+index d200a13a..4693690d 100644
+--- a/plat/kvm/x86/pagetable.S
++++ b/plat/kvm/x86/pagetable.S
+@@ -38,12 +38,24 @@
+ .align 0x1000
+ cpu_zeropt:
+ 	/* the first 1M is inaccessible, except for:
+-	   0x09000 - 0x09fff -> multiboot info @ 0x09500 (read-only)
++	   0x07000 - 0x07fff -> bootparams info (RO, Firecracker)
++	   0x09000 - 0x09fff -> multiboot info @ 0x09500 (RO, QEMU)
++	   0x20000 - 0x20fff -> bootparams cmdline (RO, Firecracker)
+ 	   0xb8000 - 0xbffff -> VGA buffer (read+write)
+ 	 */
++#if KVMQPLAT
+ 	.fill 0x9, 0x8, 0x0
+ 	.quad 0x0000000000009000 + PAGETABLE_RO
+ 	.fill 0xae, 0x8, 0x0
++#elif KVMFCPLAT
++	.fill 0x7, 0x8, 0x0
++	.quad 0x0000000000007000 + PAGETABLE_RO
++	.fill 0x18, 0x8, 0x0
++	.quad 0x0000000000020000 + PAGETABLE_RO
++	.fill 0x97, 0x8, 0x0
++#else
++	.fill 0xb8, 0x8, 0x0
++#endif /* first area until 0xb7fff */
+ 	.quad 0x00000000000b8000 + PAGETABLE_RW
+ 	.quad 0x00000000000b9000 + PAGETABLE_RW
+ 	.quad 0x00000000000ba000 + PAGETABLE_RW
+diff --git a/plat/kvm/x86/setup.c b/plat/kvm/x86/setup.c
+index 9c7a93a8..3e969dde 100644
+--- a/plat/kvm/x86/setup.c
++++ b/plat/kvm/x86/setup.c
+@@ -26,231 +26,20 @@
+  * CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  */
+ 
+-#include <string.h>
+ #include <uk/plat/common/sections.h>
+ #include <x86/cpu.h>
+ #include <x86/traps.h>
+-#include <kvm/config.h>
+ #include <kvm/console.h>
+ #include <kvm/intctrl.h>
+-#include <kvm-x86/multiboot.h>
+-#include <kvm-x86/multiboot_defs.h>
+-#include <uk/arch/limits.h>
+-#include <uk/arch/types.h>
+-#include <uk/plat/console.h>
+-#include <uk/assert.h>
+-#include <uk/essentials.h>
+ 
+-#define PLATFORM_MEM_START 0x100000
+-#define PLATFORM_MAX_MEM_ADDR 0x40000000
+-
+-#define MAX_CMDLINE_SIZE 8192
+-static char cmdline[MAX_CMDLINE_SIZE];
++#include <kvm-x86/vmminfo.h>
++#include <uk/print.h>
+ 
+ struct kvmplat_config _libkvmplat_cfg = { 0 };
+ 
+ extern void _libkvmplat_newstack(uintptr_t stack_start, void (*tramp)(void *),
+ 				 void *arg);
+ 
+-static inline void _mb_get_cmdline(struct multiboot_info *mi)
+-{
+-	char *mi_cmdline;
+-
+-	if (mi->flags & MULTIBOOT_INFO_CMDLINE) {
+-		mi_cmdline = (char *)(__u64)mi->cmdline;
+-
+-		if (strlen(mi_cmdline) > sizeof(cmdline) - 1)
+-			uk_pr_err("Command line too long, truncated\n");
+-		strncpy(cmdline, mi_cmdline,
+-			sizeof(cmdline));
+-	} else {
+-		/* Use image name as cmdline to provide argv[0] */
+-		uk_pr_debug("No command line present\n");
+-		strncpy(cmdline, CONFIG_UK_NAME, sizeof(cmdline));
+-	}
+-
+-	/* ensure null termination */
+-	cmdline[(sizeof(cmdline) - 1)] = '\0';
+-}
+-
+-static inline void _mb_init_mem(struct multiboot_info *mi)
+-{
+-	multiboot_memory_map_t *m;
+-	size_t offset, max_addr;
+-
+-	/*
+-	 * Look for the first chunk of memory at PLATFORM_MEM_START.
+-	 */
+-	for (offset = 0; offset < mi->mmap_length;
+-	     offset += m->size + sizeof(m->size)) {
+-		m = (void *)(__uptr)(mi->mmap_addr + offset);
+-		if (m->addr == PLATFORM_MEM_START
+-		    && m->type == MULTIBOOT_MEMORY_AVAILABLE) {
+-			break;
+-		}
+-	}
+-	UK_ASSERT(offset < mi->mmap_length);
+-
+-	/*
+-	 * Cap our memory size to PLATFORM_MAX_MEM_SIZE which boot.S defines
+-	 * page tables for.
+-	 */
+-	max_addr = m->addr + m->len;
+-	if (max_addr > PLATFORM_MAX_MEM_ADDR)
+-		max_addr = PLATFORM_MAX_MEM_ADDR;
+-	UK_ASSERT((size_t) __END <= max_addr);
+-
+-	/*
+-	 * Reserve space for boot stack at the end of found memory
+-	 */
+-	if ((max_addr - m->addr) < __STACK_SIZE)
+-		UK_CRASH("Not enough memory to allocate boot stack\n");
+-
+-	_libkvmplat_cfg.heap.start = ALIGN_UP((uintptr_t) __END, __PAGE_SIZE);
+-	_libkvmplat_cfg.heap.end   = (uintptr_t) max_addr - __STACK_SIZE;
+-	_libkvmplat_cfg.heap.len   = _libkvmplat_cfg.heap.end
+-				     - _libkvmplat_cfg.heap.start;
+-	_libkvmplat_cfg.bstack.start = _libkvmplat_cfg.heap.end;
+-	_libkvmplat_cfg.bstack.end   = max_addr;
+-	_libkvmplat_cfg.bstack.len   = __STACK_SIZE;
+-}
+-
+-static inline void _mb_init_initrd(struct multiboot_info *mi)
+-{
+-	multiboot_module_t *mod1;
+-	uintptr_t heap0_start, heap0_end;
+-	uintptr_t heap1_start, heap1_end;
+-	size_t    heap0_len,   heap1_len;
+-
+-	/*
+-	 * Search for initrd (called boot module according multiboot)
+-	 */
+-	if (mi->mods_count == 0) {
+-		uk_pr_debug("No initrd present\n");
+-		goto no_initrd;
+-	}
+-
+-	/*
+-	 * NOTE: We are only taking the first boot module as initrd.
+-	 *       Initrd arguments and further modules are ignored.
+-	 */
+-	UK_ASSERT(mi->mods_addr);
+-
+-	mod1 = (multiboot_module_t *)((uintptr_t) mi->mods_addr);
+-	UK_ASSERT(mod1->mod_end >= mod1->mod_start);
+-
+-	if (mod1->mod_end == mod1->mod_start) {
+-		uk_pr_debug("Ignoring empty initrd\n");
+-		goto no_initrd;
+-	}
+-
+-	_libkvmplat_cfg.initrd.start = (uintptr_t) mod1->mod_start;
+-	_libkvmplat_cfg.initrd.end = (uintptr_t) mod1->mod_end;
+-	_libkvmplat_cfg.initrd.len = (size_t) (mod1->mod_end - mod1->mod_start);
+-
+-	/*
+-	 * Check if initrd is part of heap
+-	 * In such a case, we figure out the remaining pieces as heap
+-	 */
+-	if (_libkvmplat_cfg.heap.len == 0) {
+-		/* We do not have a heap */
+-		goto out;
+-	}
+-	heap0_start = 0;
+-	heap0_end   = 0;
+-	heap1_start = 0;
+-	heap1_end   = 0;
+-	if (RANGE_OVERLAP(_libkvmplat_cfg.heap.start,
+-			  _libkvmplat_cfg.heap.len,
+-			  _libkvmplat_cfg.initrd.start,
+-			  _libkvmplat_cfg.initrd.len)) {
+-		if (IN_RANGE(_libkvmplat_cfg.initrd.start,
+-			     _libkvmplat_cfg.heap.start,
+-			     _libkvmplat_cfg.heap.len)) {
+-			/* Start of initrd within heap range;
+-			 * Use the prepending left piece as heap */
+-			heap0_start = _libkvmplat_cfg.heap.start;
+-			heap0_end   = ALIGN_DOWN(_libkvmplat_cfg.initrd.start,
+-						 __PAGE_SIZE);
+-		}
+-		if (IN_RANGE(_libkvmplat_cfg.initrd.start,
+-
+-			     _libkvmplat_cfg.heap.start,
+-			     _libkvmplat_cfg.heap.len)) {
+-			/* End of initrd within heap range;
+-			 * Use the remaining left piece as heap */
+-			heap1_start = ALIGN_UP(_libkvmplat_cfg.initrd.end,
+-					       __PAGE_SIZE);
+-			heap1_end   = _libkvmplat_cfg.heap.end;
+-		}
+-	} else {
+-		/* Initrd is not overlapping with heap */
+-		heap0_start = _libkvmplat_cfg.heap.start;
+-		heap0_end   = _libkvmplat_cfg.heap.end;
+-	}
+-	heap0_len = heap0_end - heap0_start;
+-	heap1_len = heap1_end - heap1_start;
+-
+-	/*
+-	 * Update heap regions
+-	 * We make sure that in we start filling left heap pieces at
+-	 * `_libkvmplat_cfg.heap`. Any additional piece will then be
+-	 * placed to `_libkvmplat_cfg.heap2`.
+-	 */
+-	if (heap0_len == 0) {
+-		/* Heap piece 0 is empty, use piece 1 as only */
+-		if (heap1_len != 0) {
+-			_libkvmplat_cfg.heap.start = heap1_start;
+-			_libkvmplat_cfg.heap.end   = heap1_end;
+-			_libkvmplat_cfg.heap.len   = heap1_len;
+-		} else {
+-			_libkvmplat_cfg.heap.start = 0;
+-			_libkvmplat_cfg.heap.end   = 0;
+-			_libkvmplat_cfg.heap.len   = 0;
+-		}
+-		 _libkvmplat_cfg.heap2.start = 0;
+-		 _libkvmplat_cfg.heap2.end   = 0;
+-		 _libkvmplat_cfg.heap2.len   = 0;
+-	} else {
+-		/* Heap piece 0 has memory */
+-		_libkvmplat_cfg.heap.start = heap0_start;
+-		_libkvmplat_cfg.heap.end   = heap0_end;
+-		_libkvmplat_cfg.heap.len   = heap0_len;
+-		if (heap1_len != 0) {
+-			_libkvmplat_cfg.heap2.start = heap1_start;
+-			_libkvmplat_cfg.heap2.end   = heap1_end;
+-			_libkvmplat_cfg.heap2.len   = heap1_len;
+-		} else {
+-			_libkvmplat_cfg.heap2.start = 0;
+-			_libkvmplat_cfg.heap2.end   = 0;
+-			_libkvmplat_cfg.heap2.len   = 0;
+-		}
+-	}
+-
+-	/*
+-	 * Double-check that initrd is not overlapping with previously allocated
+-	 * boot stack. We crash in such a case because we assume that multiboot
+-	 * places the initrd close to the beginning of the heap region. One need
+-	 * to assign just more memory in order to avoid this crash.
+-	 */
+-	if (RANGE_OVERLAP(_libkvmplat_cfg.heap.start,
+-			  _libkvmplat_cfg.heap.len,
+-			  _libkvmplat_cfg.initrd.start,
+-			  _libkvmplat_cfg.initrd.len))
+-		UK_CRASH("Not enough space at end of memory for boot stack\n");
+-out:
+-	return;
+-
+-no_initrd:
+-	_libkvmplat_cfg.initrd.start = 0;
+-	_libkvmplat_cfg.initrd.end   = 0;
+-	_libkvmplat_cfg.initrd.len   = 0;
+-	_libkvmplat_cfg.heap2.start  = 0;
+-	_libkvmplat_cfg.heap2.end    = 0;
+-	_libkvmplat_cfg.heap2.len    = 0;
+-	return;
+-}
+-
+ static void _libkvmplat_entry2(void *arg __attribute__((unused)))
+ {
+ 	ukplat_entry_argp(NULL, cmdline, sizeof(cmdline));
+@@ -258,23 +47,13 @@ static void _libkvmplat_entry2(void *arg __attribute__((unused)))
+ 
+ void _libkvmplat_entry(void *arg)
+ {
+-	struct multiboot_info *mi = (struct multiboot_info *)arg;
+-
+ 	_init_cpufeatures();
+ 	_libkvmplat_init_console();
+ 	traps_init();
+ 	intctrl_init();
++	process_vmminfo(arg);
+ 
+ 	uk_pr_info("Entering from KVM (x86)...\n");
+-	uk_pr_info("     multiboot: %p\n", mi);
+-
+-	/*
+-	 * The multiboot structures may be anywhere in memory, so take a copy of
+-	 * everything necessary before we initialise memory allocation.
+-	 */
+-	_mb_get_cmdline(mi);
+-	_mb_init_mem(mi);
+-	_mb_init_initrd(mi);
+ 
+ 	if (_libkvmplat_cfg.initrd.len)
+ 		uk_pr_info("        initrd: %p\n",
+diff --git a/support/build/Makefile.build b/support/build/Makefile.build
+index 5679741d..6a0091c2 100644
+--- a/support/build/Makefile.build
++++ b/support/build/Makefile.build
+@@ -26,16 +26,12 @@
+ ifneq ($(call qstrip,$(UK_LIBS) $(UK_LIBS-y)),)
+ $(foreach L,$(UK_LIBS) $(UK_LIBS-y), \
+ $(if $(call qstrip,$($(call uc,$(L))_SRCS) $($(call uc,$(L))_SRCS-y)), \
+-$(foreach S,$($(call uc,$(L))_SRCS) $($(call uc,$(L))_SRCS-y), \
+-$(eval $(call buildrule_libobj_multitarget,$(L),$(S))) \
+-); \
+-$(eval $(call buildrule_olib,$(L))); \
+ $(eval UK_OLIBS-y += $(call libname2olib,$(L))); \
++$(eval UKBUILD_LIBS += $(L)); \
+ ) \
+ )
+ endif
+ 
+-
+ #################################################
+ #
+ # Install build rules for each enabled platform
+@@ -47,13 +43,18 @@ $(foreach P,$(UK_PLATS) $(UK_PLATS-y), \
+ $(if $(call qstrip,$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y)), \
+ $(foreach L,$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y), \
+ $(if $(call qstrip,$($(call uc,$(L))_SRCS) $($(call uc,$(L))_SRCS-y)), \
++$(eval $(call uc,$(P))_OLIBS-y += $(call libname2olib,$(L))); \
++$(eval UKBUILD_LIBS += $(L)); \
++) \
++) \
++) \
++)
++
++endif
++
++$(foreach L,$(sort $(UKBUILD_LIBS)), \
+ $(foreach S,$($(call uc,$(L))_SRCS) $($(call uc,$(L))_SRCS-y), \
+ $(eval $(call buildrule_libobj_multitarget,$(L),$(S))) \
+ ); \
+ $(eval $(call buildrule_olib,$(L))); \
+-$(eval $(call uc,$(P))_OLIBS-y    += $(call libname2olib,$(L))); \
+-) \
+-) \
+-); \
+ )
+-endif
+diff --git a/support/build/Makefile.clean b/support/build/Makefile.clean
+index 0ad3d155..a131119e 100644
+--- a/support/build/Makefile.clean
++++ b/support/build/Makefile.clean
+@@ -25,7 +25,7 @@
+ 
+ ifneq ($(call qstrip,$(UK_LIBS) $(UK_LIBS-y)),)
+ $(foreach L,$(UK_LIBS) $(UK_LIBS-y), \
+-$(eval $(call cleanrule_lib,$(L))); \
++$(eval UKCLEAN_LIBS += $(L)); \
+ )
+ endif
+ 
+@@ -40,8 +40,12 @@ ifneq ($(call qstrip,$(UK_PLATS) $(UK_PLATS-y)),)
+ $(foreach P,$(UK_PLATS) $(UK_PLATS-y), \
+ $(if $(call qstrip,$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y)), \
+ $(foreach L,$($(call uc,$(P))_LIBS) $($(call uc,$(P))_LIBS-y), \
+-$(eval $(call cleanrule_lib,$(L))); \
++$(eval UKCLEAN_LIBS += $(L)); \
+ ) \
+ ) \
+ )
+ endif
++
++$(foreach L,$(sort $(UKCLEAN_LIBS)), \
++$(eval $(call cleanrule_lib,$(L))); \
++)

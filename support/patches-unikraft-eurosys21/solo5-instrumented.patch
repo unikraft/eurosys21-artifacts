@@ -1,0 +1,15 @@
+diff --git a/Makefile.uk b/Makefile.uk
+index b4edae6..364dd7f 100644
+--- a/Makefile.uk
++++ b/Makefile.uk
+@@ -11,8 +11,8 @@ $(eval $(call addplatlib,solo5,libsolo5plat))
+ ##
+ ## Solo5 Sources
+ ##
+-SOLO5_VERSION=0.4.1
+-SOLO5_URL=https://github.com/Solo5/solo5/archive/v$(SOLO5_VERSION).zip
++SOLO5_VERSION=0.4.1-instvmm
++SOLO5_URL=https://github.com/hlef/solo5/archive/v$(SOLO5_VERSION).zip
+ $(eval $(call fetch,libsolo5,$(SOLO5_URL)))
+ 
+ ##
