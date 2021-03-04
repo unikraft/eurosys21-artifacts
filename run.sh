@@ -68,7 +68,7 @@ function install_dependencies() {
         libhugetlbfs-bin \
         build-essential \
         qemu-system-x86 \
-        redis-utils \
+        redis-tools \
         socat \
         uuid-runtime \
         bridge-utils \
