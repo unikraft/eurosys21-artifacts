@@ -149,13 +149,13 @@ def plot(data=None, output=None):
         align='center',
         zorder=4,
         yerr=(operations[operation_label][AMAX_KEY] - operations[operation_label][AMIN_KEY]),
-        error_kw=dict(lw=2, capsize=10, capthick=1),
+        error_kw=dict(lw=1, capsize=10, capthick=1),
         width=bar_width,
         color=bar_colors[operation_label],
         linewidth=.5
       )
       
-      ax1.text(i + 1 + bar_offset, operations[operation_label][AMAX_KEY] + 0.1, round(operations[operation_label][MEAN_KEY], 2),
+      ax1.text(i + 1 + bar_offset, operations[operation_label][AMAX_KEY] + 0.2, round(operations[operation_label][MEAN_KEY], 2),
         ha='center',
         va='bottom',
         zorder=6,
