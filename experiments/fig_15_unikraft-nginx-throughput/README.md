@@ -1,8 +1,9 @@
 # Unikraft Nginx TX with varying allocators
 
-This experiment provides data for Fig. 15. The performance of NGINX is
-evaluated with wrk (1 minute, 14 threads, 30 conns, static 612B HTML
-page).
+This experiment provides data for Fig. 15. Similary to Fig. 13, we
+evaluate the performance of NGINX with wrk (1 minute, 14 threads, 30
+conns, static 612B HTML page). In this experiment, we evaluate
+Unikraft's ability to vary memory allocators.
 
 ## Usage
 
