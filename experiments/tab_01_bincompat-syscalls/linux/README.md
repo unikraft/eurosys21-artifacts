@@ -9,5 +9,17 @@ number 500, which returns only a constant (`0xC0FFEE`)`. This is used
 to evaluate the baseline costs of entering and exiting a system call
 handler.
 
-The build configuration file can be found in this directory, too. It is
-based on a Debian Buster 5.10 kernel configuration.
+We used the build configuration file `config-5.11.0-sysnoop+` for
+compiling. It is derived from a standard Debian Buster 5.10 kernel
+configuration.
+
+In order to compile the kernel by yourself, please run the following
+commands:
+
+``` shell
+git clone --branch skuenzer/eurosys21 https://github.com/skuenzer/linux/
+cd linux/
+cp <path-to>/config-5.11.0-sysnoop+ .config
+make oldconfig
+make -j
+```
