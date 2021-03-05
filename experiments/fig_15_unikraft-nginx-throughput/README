@@ -1,9 +1,0 @@
-This experiment provides data for Fig. 17.
-
-Run instructions:
- - cd experiments/17_unikraft-nginx-throughput
- - ./genimages.sh
- - ./benchmark.sh
- - ./plot.py
-
-./benchmark.sh takes about 20-25 minutes in average.
