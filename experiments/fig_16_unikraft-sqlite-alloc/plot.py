@@ -38,14 +38,14 @@ def plot(data=None, output=None):
     'mimalloc': '#ddcae3',
     'tinyalloc': '#ededed',
     'tlsf': '#618c84',
-    'bbuddy': '#49687c'
+    'buddy': '#49687c'
   }
 
   labels = {
     'mimalloc': 'mimalloc',
     'tinyalloc': 'tinyalloc',
     'tlsf': 'TLSF',
-    'bbuddy': 'Binary Buddy'
+    'buddy': 'Binary Buddy'
   }
 
   for f in os.listdir(RESULTSDIR):
