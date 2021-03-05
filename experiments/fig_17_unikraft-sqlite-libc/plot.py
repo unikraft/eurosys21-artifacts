@@ -15,7 +15,7 @@ labels = {
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: {} <results folder> <figure.pdf>".format(sys.argv[0]), file=sys.stderr)
+        print("Usage: {} <results folder> <figure>".format(sys.argv[0]), file=sys.stderr)
         sys.exit(1)
 
     os.chdir(sys.argv[1])
@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     fig = plt.figure(figsize=(8, 4))
     ax = fig.add_subplot(1, 1, 1)
-    ax.set_ylabel("Time (seconds)")
+    ax.set_ylabel("Time (seconds)", fontsize=LARGE_SIZE)
     ax.grid(which='major', axis='y', linestyle=':', alpha=0.5, zorder=0)
     yticks = np.arange(0, max_time, step=1)
     ax.set_yticks(yticks, minor=False)
