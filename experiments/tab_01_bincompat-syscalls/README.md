@@ -32,7 +32,7 @@ non-turbo frequency to your CPU.
 4. `./build-fses.sh` - Creates an initramdisk that only contains the
    benchmark program as init process for the Linux experiments.
 5. `./run.sh` - Run the experiments, console outputs are stored
-   under `eval/` for later evaluation.
+   under `eval/parsed/` for later evaluation.
 6. `./parse.sh` - Parses the console outputs, intermediate data within
    `eval/`
 7. `./process.sh` - Computes the average, median, q1, and q3 over the
