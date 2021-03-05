@@ -16,6 +16,8 @@ docker file per application. These ones are available in the
 machine to perform this experiment.
 
 **APPROXIMATIVE EXECUTION TIME=30/45minutes**
+**THIS EXPERIMENT REQUIRES AT LEAST DOCKERCLIENT20 AND**
+**DOCKERENGINE19 otherwise results may be less accurate**
 
 ## How to Use (automatic test)
 
