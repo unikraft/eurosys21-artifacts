@@ -1,9 +1,0 @@
-This experiment provides data for Fig. 16.
-
-Run instructions:
- - cd experiments/16_unikraft-nginx-alloc-boot
- - ./genimages.sh
- - ./benchmark.sh
- - ./plot.py
-
-./benchmark.sh takes about 1.5 minutes in average.
