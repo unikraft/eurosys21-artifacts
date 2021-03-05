@@ -2,10 +2,14 @@
 import sys
 import numpy
 
-tsc_hz=2600*1000000
+tsc_hz=0
+if len(sys.argv) >= 3 and int(sys.argv[2]) > 0:
+	tsc_hz=int(sys.argv[2])*1000000
+else:
+	tsc_hz=2600*1000000
+	sys.stderr.write("WARNING: Do not have TSC frequency from experiment, assuming " + str(float(tsc_hz) / 1000000000.) + " GHz TSC clock for time conversion.\n" )
 
 def tsc2nsec(val, hz=2600000000):
-	sys.stderr.write("NOTE: Assuming " + str(float(tsc_hz) / 1000000000.) + " GHz TSC clock for conversion.\n" )
 	return float(val) / (float(hz)/ 1000000000.)
 
 data = []

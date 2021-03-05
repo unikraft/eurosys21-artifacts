@@ -1,4 +1,5 @@
 #!/bin/bash
+EVAL="${1:-.}/eval"
 PARSED="${1:-.}/eval/parsed"
 DATA="${1:-.}/results"
 PROCESS_DS="${1:-.}/do_process_dataset.py"
@@ -11,6 +12,8 @@ process()
 	local OS=$(  printf '%s' "$FNAME" | cut -d'.' -f1 )
 	local FS=$(   printf '%s' "$FNAME" | cut -d'.' -f2 | cut -d'-' -f1 )
 	local TYPE=
+
+	local TSC_MHZ=$( cat "${EVAL}/tsc_mhz.txt" )
 
 	printf '%s' "$FNAME" | cut -d'.' -f2 | grep -q '\(-\)nofile'
 	if [ $? -eq 0 ]; then
@@ -32,7 +35,7 @@ process()
 
 	echo "${TARGET}:${TYPE}"
 	echo -n -e "${TYPE}\t" >> "${TARGET}"
-	"${PROCESS_DS}" "${1}" >> "${TARGET}"
+	"${PROCESS_DS}" "${1}" "${TSC_MHZ}" >> "${TARGET}"
 }
 
 cd "${1:-.}"
