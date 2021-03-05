@@ -33,6 +33,8 @@ docker rm -f $CONTAINER
 unikraft_eurosys21_build helloworld stat $IMAGES
 mv $IMAGES/unikraft+stat.kernel $IMAGES/unikraft+qemu.kernel
 
+unikraft_eurosys21_build helloworld qemu1nic $IMAGES
+
 # ========================================================================
 # Generate Solo5 images
 # ========================================================================
