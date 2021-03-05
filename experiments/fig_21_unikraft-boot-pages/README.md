@@ -1,14 +1,17 @@
-# Unikraft boot times with static/dynamic initialization of page tables
+# Unikraft page table initialization boot times
 
-This experiment provides data for Fig. 23.
+This experiment provides data for Fig. 21.
 
 ## Usage
 
 Run instructions:
- - cd experiments/23_unikraft-boot-pages
- - ./genimages.sh
- - ./benchmark.sh
- - ./plot.py
 
-`./genimages.sh` takes two minutes in average.
-`./benchmark.sh` takes less than a minute in average.
+```
+cd experiments/21_unikraft-boot-pages
+./genimages.sh
+./benchmark.sh
+./plot.py
+```
+
+- `./genimages.sh` takes two minutes in average.
+- `./benchmark.sh` takes less than a minute in average.
