@@ -160,7 +160,7 @@ for i in "$@"; do
       VERBOSE=y; shift;;
     -l|--list)
       LIST_ALL=y; shift;;
-    ---no-docker-plot)
+    --no-docker-plot)
       DOCKER_PLOT=n; shift;;
     --no-deps)
       NO_DEPS=y; shift;;
