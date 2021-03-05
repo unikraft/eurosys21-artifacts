@@ -1,0 +1,14 @@
+#!/bin/bash
+TSCHZ=$( dmesg | grep 'tsc: Detected .* MHz processor' | tail -n1 )
+if [ -z "$TSCHZ" -a -e "/var/log/syslog" ]; then
+	TSCHZ=$( grep 'tsc: Detected .* MHz processor' "/var/log/syslog" | tail -n1 )
+fi
+
+TSCMHZ=$( printf '%s' "$TSCHZ" | sed 's/^.*Detected \(.*\) MHz processor.*$/\1\n/' )
+if [ -z "$TSCHZ" -o -z "$TSCMHZ" ]; then
+	echo "Failed to detect TSC frequency" 1>&2
+	exit 1
+fi
+
+printf "%s\n" "$TSCMHZ"
+exit 0
