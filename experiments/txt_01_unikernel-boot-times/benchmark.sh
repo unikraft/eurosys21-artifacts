@@ -134,6 +134,7 @@ function benchit  {
 
   for i in $( seq 1 ${num} ); do
     runvm $vm >> rawdata/${vm}.txt
+    sleep 2
   done
 }
 
