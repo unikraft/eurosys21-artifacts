@@ -3,15 +3,30 @@
 This repository contains the artifacts, including experiments and graphs, for
 the paper: "Unikraft: Fast, Specialized Unikernels the Easy Way"
 
+## Contents
 
-## Experiments
+  1. [Experiments](#1-experiments): List of all experiments in the paper.
+  2. [Repository structure](#2-repository-structure): Details the organization
+     of this repository.
+  3. [Prerequisites](#3-prerequisites): Explains how host machines were set up
+     for the experiments.  
+      3.1. [Hardware](#31-hardware): Details of hardware setup in the paper and
+           general recommendations.  
+      3.2. [Kernel](#32-kernel): Details on kernel requirements for the
+           experiments which must be addressed manually.
+  4. [Getting Started](#4-getting-started): Introduction on how to use this
+     repository and recreate the experiments.  
+     4.1. [`run.sh` Usage](#41-runsh-usage): Provides the help page for the
+          `run.sh` wrapper program.
+  5. [Notes](#7-notes): Additional notes.
+
+## 1. Experiments
 
 The paper lists 22 figures and 3 tables worth of experiments, which both
 demonstrate [Unikraft](http://unikraft.org)'s capabilities against other
 existing, similar frameworks as well as demonstrating the
 exstensibility of Unikraft itself.  Each experiment and the relevant scripts to
-generate the data and subsequent plot are included in this repository.
-
+generate the data and subsequent plot are included in this reposit
 Each figure, table and corresponding experiment are listed below:
 
 | Figure                                                              |                                                                       | Description                                                                                                                                                                                                                   | Est. runtime |
@@ -45,12 +60,12 @@ Each figure, table and corresponding experiment are listed below:
 
 The paper also mentions several results in-line, which can be found at:
 
-| Text                                                           | Experiment | Est. runtime |
-|----------------------------------------------------------------|------------|--------------|
-| [`txt_01`](/experiments/txt_01_unikernel-boot-times/README.md) | Unikernel boot time baseline.  | 0h 21m   |
-| [`txt_02`](/experiments/txt_02_9pfs-boot-times/README.md)      |                               |          |
+| Text                                                           | Experiment                    | Est. runtime |
+|----------------------------------------------------------------|-------------------------------|--------------|
+| [`txt_01`](/experiments/txt_01_unikernel-boot-times/README.md) | Unikernel boot time baseline. | 0h 21m       |
+| [`txt_02`](/experiments/txt_02_9pfs-boot-times/README.md)      |                               |              |
 
-## Repository structure
+## 2. Repository structure
 
 We have organised this repository as follows:
 
@@ -73,9 +88,9 @@ We have organised this repository as follows:
  * `run.sh` This tool wraps all experiments and can be used to run them all or
    individually.  More details on this utility script are detailed below.
 
-## Prerequisites
+## 3. Prerequisites
 
-### Hardware
+### 3.1. Hardware
 
 Before you can run these experiments, you will need to prepare 3 physical host
 environments.  **Physical hosts as opposted to virtual machines are recommended
@@ -102,7 +117,7 @@ boxes with an Intel i7 9700K 3.6 GHz (4.9 Ghz with Turbo Boost, 8 cores) and
 cards with the 82599EB chipset.
 
 
-### Software
+### 3.2. Kernel
 
 All experiments were run on a physical host with Debian Buster with Linux 4.19
 installed.  All install and preparation scripts in this repository target this
@@ -137,10 +152,10 @@ this repo (as opposed to the kernel boot parameters, which you will need to take
 care of manually).
 
 
-## Getting Started
+## 4. Getting Started
 
 1. Before running any of these experiments, prepare your host with the
-   recommendations detailed above in [prerequisites](#prerequisites);
+   recommendations detailed above in [prerequisites](#3-prerequisites);
 
 2. Many of the experiments use Docker as an intermediate tool for creating build
    and test environments (along with testing Docker itself).  Please
@@ -154,20 +169,20 @@ care of manually).
 
 4. All experiments should be `prepare`d first, which installs necessary tools
    and downloads additional resources, before they can run.  This can be done by
-   calling `run.sh fig_XX prepare` ([more details below](#usage)) for a single
-   experiment or `run.sh prepare` for all experiments.  (Note: The preparation
-   step for all experiments usually exceeds several hours.)
+   calling `run.sh fig_XX prepare` ([more details below](#41-runsh-usage)) for a
+   single experiment or `run.sh prepare` for all experiments.  (Note: The
+   preparation step for all experiments usually exceeds several hours.)
 
 5. Once prepared, simply call the relevant experiment you wish to re-create
    using the `run.sh` script.
 
 
-## Usage
+### 4.1. `run.sh` Usage
 
 We have wrapped all the individual experiments with the `run.sh` tool.  This
 script will install the necessary dependencies for all experiments (excluding
-Docker) only for Debian Buster.  Please see [prerequisites](#prerequisites) and 
-[getting started](#getting-started) guide above.
+Docker) only for Debian Buster.  Please see [prerequisites](#3-prerequisites)
+and [getting started](#4-getting-started) guide above.
 
 ```
 ./run.sh - Run all or a specific experiment.
@@ -211,9 +226,11 @@ Influential Environmental Variables
 Each experiment, and therefore directory listed in `experiments/`, is populated
 with a `README.md` which includes more detail about the individual experiment.
 
-## Notes on disk storage
+## 6. Notes
 
-We use intermediate Docker containers for building images and accessing
-pre-built binaries for many of the experiments.  In addition to this, this 
-repository clones the Linux kernel to make changes for testing.  As a result,
-expected disk storage utilized to conduct all experiments is ~50GB.
+* We use intermediate Docker containers for building images and accessing
+  pre-built binaries for many of the experiments.  In addition to this, this 
+  repository clones the Linux kernel to make changes for testing.  As a result,
+  expected disk storage utilized to conduct all experiments is ~50GB.
+
+* The preparation step for all experiments usually exceeds several hours.
