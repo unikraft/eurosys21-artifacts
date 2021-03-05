@@ -13,6 +13,7 @@ If the server is down you can download it from the [backup] server.
 
 
 **APPROXIMATIVE EXECUTION TIME=2h**
+
 **NOTE THAT THIS EXPERIMENT REQUIRES SOME DISK SPACE (+/-1.5GB in the /tmp folder)**
 
 ## How to Use (automatic test)
@@ -108,3 +109,30 @@ Output will be displayed on stdout and saved into a CSV file
 Once all the results are generated, run the `./plot.sh` script to
 generate the table 2 as a CSV file. This one will be generated in the
 current folder with the following name: `merged.csv`.
+
+
+### Further information about the archive
+
+The archive contains different folders:
+- `apps_loc`: this folder contains the Unikraft application sources as
+well as the experiments to count the number of lines of glue code 
+which is necessary to port an application (from its sources) to
+Unikraft. We use the *cloc* tool to count the number of lines.
+- `apps_musl_compat`: this folder contains applications which use
+*musl* as libc as well as the compat. layer which is called
+`lib-compat`.
+- `apps_musl_std`: this folder contains applications which use
+*musl* as libc. The compat. layer is not used in that case.
+- `apps_newlib_compat`: this folder contains application which uses
+*newlib* as libc as well as the compat. layer which is called 
+`lib-compat`.
+- `apps_newlib_std`: this folder contains applications which use
+*newlib* as libc. The compat. layer is not used in that case.
+- `libs`: this folder contains Unikraft microlibs and more especially
+all the microlibs which contains the objects built from their native
+build system. These ones are prefixed with the `lib-objects-` keyword.
+Within each `lib-object` folder, there is a `objs` folder which
+contains the object files of the application (built with their native 
+build system using gcc and glic). In addition, source files are also
+provided.
+- `unikraft`: this folder contains the main unikraft code.
