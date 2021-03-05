@@ -31,6 +31,7 @@ parse_data()
 	done
 }
 
+cd "{1:-.}"
 mkdir -pv "${PARSED}"
 parse_data "${RESULTS}/linux"
 parse_data "${RESULTS}/linux-nomitig"

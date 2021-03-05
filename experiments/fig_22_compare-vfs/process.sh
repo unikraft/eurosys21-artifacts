@@ -35,6 +35,7 @@ process()
 	"${PROCESS_DS}" "${1}" >> "${TARGET}"
 }
 
+cd "{1:-.}"
 mkdir -pv "${DATA}"
 rm -v "${DATA}/"*.csv
 process "${PARSED}/linux.vfs"
