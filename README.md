@@ -135,23 +135,36 @@ this repo (as opposed to the kernel boot parameters, which you will need to take
 care of manually).
 
 
-## Getting Start
+## Getting Started
 
-1. To start running these experiments, begin by cloning this repository:
+1. Before running any of these experiments, prepare your host with the
+   recommendations detailed above in [prerequisites](#prerequisites);
+
+2. Many of the experiments use [Docker](https://docs.docker.com/get-docker/) as
+   an intermediate tool for creating build and test environments (along with
+   testing Docker itself).  Please install Docker on your system to continue;
+
+3. Once Docker is installed, clone this repository:
    ```bash
    git clone https://github.com/unikraft/eurosys21-artifacts.git
    ```
 
-2. Many of the experiments use [Docker](https://docs.docker.com/get-docker/) as
-   an intermediate tool for creating build and test environments (along with
-   testing Docker itself).  Please install Docker on your system to continue.
+4. All experiments should be `prepare`d first, which installs necessary tools
+   and downloads additional resources, before they can run.  This can be done by
+   calling the [`run.sh fig_XX prepare`](/run.sh) for a single experiment or
+   `run.sh prepare` for all experiments.  (Note: The preparation step for all
+   experiments usually exceeds several hours.)
+
+5. Once prepared, simply call the relevant experiment you wish to re-create
+   using the `run.sh` script.
 
 
-## Running experiments
+## Usage
 
 We have wrapped all the individual experiments with the `run.sh` tool.  This
 script will install the necessary dependencies for all experiments (excluding
-Docker) only for Debian Buster.
+Docker) only for Debian Buster.  Please see [prerequisites](#prerequisites) and 
+[getting started](#getting-started) guide above.
 
 ```
 ./run.sh - Run all or a specific experiment.
