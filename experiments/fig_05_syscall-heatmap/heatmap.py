@@ -90,9 +90,9 @@ def processToAggregate(file, data, json_data):
     for symbol in local_set:
         if symbol in data:
             data[symbol] += 1
-        else:
-            # May require local change to the json file to adapt the name.
-            print(f'[{colors.WARNING}WARNING{colors.ENDC}] Symbol {colors.UNDERLINE}{symbol}{colors.ENDC} (in file {colors.BOLD}{file}{colors.ENDC}) is not present in the EXCEL file')
+        #else:
+        #    # May require local change to the json file to adapt the name.
+        #    print(f'[{colors.WARNING}WARNING{colors.ENDC}] Symbol {colors.UNDERLINE}{symbol}{colors.ENDC} (in file {colors.BOLD}{file}{colors.ENDC}) is not present in the EXCEL file')
 
 # readAggregateFile reads an aggregated json file which contains the 
 # mapping <syscall, usage>. It is used with the argument 
