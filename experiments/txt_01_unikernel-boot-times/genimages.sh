@@ -60,3 +60,7 @@ fi
 if [ ! -f "${IMAGES}/hello-vmlinux.bin" ]; then
 	curl -fsSL -o ${IMAGES}/hello-vmlinux.bin https://s3.amazonaws.com/spec.ccfc.min/img/hello/kernel/hello-vmlinux.bin
 fi
+
+if [ ! -f "${IMAGES}/mirage-noop.hvt" ]; then
+	./mirage-image.sh
+fi

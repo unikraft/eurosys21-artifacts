@@ -77,3 +77,6 @@ The VM has been created from a linux kernel 4.15.0-96-generic. We
 didn't patch or modify the kernel code. We just added a 9pfs mount
 point (`test`) which allows to share data between the host and the
 guest.
+
+If the autologin failed, the login/password is `root` and the
+experiment script is `./script.sh`.

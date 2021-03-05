@@ -1,3 +1,0 @@
-config LIBPOSIX_MMAP
-	bool "POSIX mmap syscall"
-	default n

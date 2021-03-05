@@ -1,0 +1,100 @@
+From 9b2438991c3c2c18914571c13c1462ea38689c5b Mon Sep 17 00:00:00 2001
+From: Alexander Jung <a.jung@lancs.ac.uk>
+Date: Fri, 5 Mar 2021 21:30:31 +0100
+Subject: [PATCH] NOOP Unikernel KVM Exit timer patch
+
+Signed-off-by: Alexander Jung <a.jung@lancs.ac.uk>
+---
+ tenders/hvt/hvt_kvm_x86_64.c | 30 ++++++++++++++++++++++++++++++
+ tenders/hvt/hvt_main.c       |  4 ++++
+ 2 files changed, 34 insertions(+)
+
+diff --git a/tenders/hvt/hvt_kvm_x86_64.c b/tenders/hvt/hvt_kvm_x86_64.c
+index 1f94c90..abdac5a 100644
+--- a/tenders/hvt/hvt_kvm_x86_64.c
++++ b/tenders/hvt/hvt_kvm_x86_64.c
+@@ -28,15 +28,18 @@
+ #include <err.h>
+ #include <errno.h>
+ #include <fcntl.h>
++#include <stdio.h>
+ #include <sys/ioctl.h>
+ #include <sys/mman.h>
+ #include <string.h>
+ #include <stdlib.h>
+ #include <linux/kvm.h>
+ 
++#include "solo5.h"
+ #include "hvt.h"
+ #include "hvt_kvm.h"
+ #include "hvt_cpu_x86_64.h"
++#include <time.h>
+ 
+ void hvt_mem_size(size_t *mem_size) {
+     hvt_x86_mem_size(mem_size);
+@@ -148,11 +151,26 @@ void hvt_vcpu_init(struct hvt *hvt, hvt_gpa_t gpa_ep)
+     hvt->cpu_boot_info_base = X86_BOOT_INFO_BASE;
+ }
+ 
++struct timespec diff(struct timespec start, struct timespec end)
++{
++       struct timespec temp;
++       if ((end.tv_nsec-start.tv_nsec)<0) {
++               temp.tv_sec = end.tv_sec-start.tv_sec-1;
++               temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
++       } else {
++               temp.tv_sec = end.tv_sec-start.tv_sec;
++               temp.tv_nsec = end.tv_nsec-start.tv_nsec;
++       }
++       return temp;
++}
++
++struct timespec time1, time2, main_entry_time;
+ int hvt_vcpu_loop(struct hvt *hvt)
+ {
+     struct hvt_b *hvb = hvt->b;
+     int ret;
+ 
++    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time1);
+     while (1) {
+         ret = ioctl(hvb->vcpufd, KVM_RUN, NULL);
+         if (ret == -1 && errno == EINTR)
+@@ -189,6 +207,18 @@ int hvt_vcpu_loop(struct hvt *hvt)
+ 
+             int nr = run->io.port - HVT_HYPERCALL_PIO_BASE;
+ 
++            if (nr == KVM_EXIT_SHUTDOWN) {
++                clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time2);
++                errx(1, "solo5 startup: %lus, %luus (%lu ms)\n"
++                        "guest startup: %lus, %luus (%lu ms)\n",
++                        diff(main_entry_time, time1).tv_sec,
++                        diff(main_entry_time, time1).tv_nsec / 1000,
++                        diff(main_entry_time, time1).tv_nsec / 1000000,
++                        diff(time1, time2).tv_sec,
++                        diff(time1, time2).tv_nsec / 1000,
++                        diff(time1, time2).tv_nsec / 1000000);
++            }
++
+             /* Guest has halted the CPU. */
+             if (nr == HVT_HYPERCALL_HALT) {
+                 hvt_gpa_t gpa =
+diff --git a/tenders/hvt/hvt_main.c b/tenders/hvt/hvt_main.c
+index a815c3c..5c7f333 100644
+--- a/tenders/hvt/hvt_main.c
++++ b/tenders/hvt/hvt_main.c
+@@ -135,8 +135,12 @@ static void version(const char *prog)
+     exit(0);
+ }
+ 
++#include <time.h>
++struct timespec main_entry_time;
++
+ int main(int argc, char **argv)
+ {
++    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &main_entry_time);
+     size_t mem_size = 0x20000000;
+     hvt_gpa_t gpa_ep, gpa_kend;
+     const char *prog;
+-- 
+2.20.1
+

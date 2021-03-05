@@ -27,6 +27,8 @@
 #ifndef _ENDIAN_H
 #define _ENDIAN_H
 
+#include <machine/endian.h>
+
 #define __LITTLE_ENDIAN 1234
 #define __BIG_ENDIAN 4321
 #define __PDP_ENDIAN 3412
@@ -40,21 +42,6 @@
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 
 #include <stdint.h>
-
-static inline uint16_t __bswap16(uint16_t __x)
-{
-	return __x<<8 | __x>>8;
-}
-
-static inline uint32_t __bswap32(uint32_t __x)
-{
-	return __x>>24 | (__x>>8&0xff00) | (__x<<8&0xff0000) | __x<<24;
-}
-
-static inline uint64_t __bswap64(uint64_t __x)
-{
-	return (__bswap32(__x)+0ULL)<<32 | __bswap32(__x>>32);
-}
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 #define htobe16(x) __bswap16(x)

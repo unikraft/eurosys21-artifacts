@@ -1,0 +1,242 @@
+menuconfig LIBLWIP
+	bool "lwip - Lightweight TCP/IP stack"
+	default n
+	select LIBNOLIBC if !HAVE_LIBC
+	select LIBUKDEBUG
+	select LIBUKSWRAND
+	select HAVE_NW_STACK
+
+if LIBLWIP
+menu "Netif drivers"
+config LWIP_UKNETDEV
+	bool "Unikraft Netdev Ethernet (libuknetdev)"
+	default y
+	select LIBUKNETDEV
+	select LIBUKNETDEV_DISPATCHERTHREADS if LWIP_THREADS
+	help
+		A generic driver that operates network drivers through
+		libuknetdev API.
+		Note: When lwIP is configured with mainloop mode, receive
+		interrupts are not enabled by this driver (there is also no
+		receive interrupt handler registered).
+		In case threaded mode is selected and the underlying device
+		driver does not support receive interrupts the network
+		interfaces have to be polled manually (uknetdev_poll()).
+endmenu
+
+config LWIP_AUTOIFACE
+	bool "Automatically attach netifs"
+	default y
+	help
+		Automatically attach found network devices to the stack
+		during initialization.
+
+choice
+	prompt "Operation mode"
+	default LWIP_THREADS
+
+config LWIP_NOTHREADS
+	bool "Mainloop (non-threaded)"
+	help
+		No thread is created to operate the stack. The stack has to be
+		called from the same context as all stack interactions. This
+		includes polling network devices. The Socket API is unavailable.
+
+config LWIP_THREADS
+	bool "Threaded"
+	select LIBUKSCHED
+	select LIBUKMPI
+	select LIBUKMPI_MBOX
+	select LIBUKLOCK
+	select LIBUKLOCK_SEMAPHORE
+	select LIBUKLOCK_MUTEX
+	help
+		Creates a core thread for the stack.
+endchoice
+
+choice
+	prompt "Memory allocation mode"
+	default LWIP_HEAP
+
+config LWIP_HEAP
+	bool "Heap only"
+	help
+		Use default ukalloc allocator for all memory allocation requests
+
+#config LWIP_POOLS
+#	bool "Memory pools"
+endchoice
+
+config LWIP_NETIF_EXT_STATUS_CALLBACK
+	bool "Netif extended status callback API"
+	default y
+	help
+		Support extended status callbacks to netif related events.
+
+config LWIP_NETIF_STATUS_PRINT
+	bool "Print netif status updates"
+	depends on LWIP_NETIF_EXT_STATUS_CALLBACK
+	default y
+	help
+		Print netif status changes to standard console
+
+config LWIP_HAVE_LOOPIF
+	bool "Loopback interface"
+	default n
+	help
+		Enable loopback interface.
+
+config LWIP_IPV4
+	bool "IPv4 support"
+	default y
+
+config LWIP_IPV6
+	bool "IPv6 support"
+	default n
+
+config LWIP_UDP
+	bool "UDP support"
+	default y
+
+menuconfig LWIP_TCP
+	bool "TCP support"
+	default y
+
+if LWIP_TCP
+config LWIP_TCP_MSS
+	int "Maximum segment size (bytes)"
+	default 1460
+
+config LWIP_WND_SCALE
+	bool "Window scaling"
+	default y
+
+config LWIP_TCP_KEEPALIVE
+	bool "Keepalive"
+	default n
+
+config LWIP_TCP_TIMESTAMPS
+	bool "Timestamps"
+	default n
+endif
+
+config LWIP_ICMP
+	bool "ICMP support"
+	default y
+
+config LWIP_IGMP
+	bool "IGMP support"
+	default n
+
+config LWIP_SNMP
+	bool "SNMP support"
+	default n
+
+config LWIP_DHCP
+	bool "DHCP client"
+	depends on LWIP_IPV4
+	select LWIP_UDP
+	default n
+	help
+		When LWIP_AUTOIFACE is used, the initialization routine will
+		query the IPv4 addresses for the found devices from a DHCP
+		server on network.
+
+menuconfig LWIP_DNS
+	bool "DNS Resolver"
+	default y
+
+if LWIP_DNS
+config LWIP_DNS_MAX_SERVERS
+	int "Maximum number of servers"
+	default 2
+
+config LWIP_DNS_TABLE_SIZE
+	int "DNS table size"
+	default 32
+endif
+
+config LWIP_SOCKET
+	bool "Socket API"
+	select LIBVFSCORE
+	depends on LWIP_THREADS && (LWIP_UDP || LWIP_TCP)
+	default y
+
+if LWIP_SOCKET
+	config LWIP_SOCKET_SELECT_GENERIC_FDS
+		bool "Use select() with any file descriptor type"
+		depends on HAVE_LIBC
+		default y
+		help
+			lwip's select() implementation supports only sockets. This
+			configuration option makes it possible to use other file descriptor
+			types as well, even though they are not supported by lwip.
+
+	config LWIP_SOCKET_PPOLL
+		bool "Enable ppoll()"
+		depends on HAVE_LIBC
+		default y
+		help
+			Enable ppoll() implementation.
+endif
+
+menuconfig LWIP_DEBUG
+	bool "Debug messages"
+	default n
+	help
+		Enables debug messages on the debug console for selected lwIP
+		message types.
+
+if LWIP_DEBUG
+config LWIP_MAINLOOP_DEBUG
+	bool "Mainloop"
+	default n
+	help
+		Enables TCP_IP_DEBUG, TIMERS_DEBUG
+
+config LWIP_IF_DEBUG
+	bool "Netif"
+	default n
+	help
+		Enables ETHARP_DEBUG, NETIF_DEBUG
+
+config LWIP_IP_DEBUG
+	bool "IP"
+	default n
+	help
+		Enables IP_DEBUG, IP6_DEBUG, IP_REASS_DEBUG
+
+config LWIP_UDP_DEBUG
+	bool "UDP"
+	default n
+	help
+		Enables UDP_DEBUG
+
+config LWIP_TCP_DEBUG
+	bool "TCP"
+	default n
+	help
+		Enables TCP_DEBUG, TCP_FR_DEBUG, TCP_RTO_DEBUG, TCP_CWND_DEBUG,
+		TCP_WND_DEBUG, TCP_RST_DEBUG, TCP_QLEN_DEBUG, TCP_OUTPUT_DEBUG,
+		TCP_INPUT_DEBUG
+
+config LWIP_SYS_DEBUG
+	bool "System"
+	default n
+	help
+		Enables SYS_DEBUG, PBUF_DEBUG, MEM_DEBUG, MEMP_DEBUG
+
+config LWIP_API_DEBUG
+	bool "APIs"
+	default n
+	help
+		Enables SOCKETS_DEBUG, RAW_DEBUG, API_MSG_DEBUG, API_LIB_DEBUG
+
+config LWIP_SERVICE_DEBUG
+	bool "Services"
+	default n
+	help
+		Enables ETHARP_DEBUG, DNS_DEBUG, AUTOIP_DEBUG, DHCP_DEBUG,
+		ICMP_DEBUG, SNMP_DEBUG, SNMP_MSG_DEBUG, SNMP_MIB_DEBUG
+endif
+endif

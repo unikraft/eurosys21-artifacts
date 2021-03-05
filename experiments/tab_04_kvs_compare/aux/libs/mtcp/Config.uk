@@ -1,0 +1,114 @@
+menuconfig LIBMTCP
+  bool "mTCP: A Highly Scalable User-level TCP Stack for Multicore Systems"
+  default n
+
+if LIBMTCP
+
+choice
+	prompt "I/O driver"
+	default MTCP_USE_PSIO
+	help
+	  Select the underlying I/O driver.
+
+config MTCP_USE_PSIO
+  bool "psio"
+config MTCP_USE_NETMAP
+  bool "netmap"
+config MTCP_USE_ONVM
+  bool "onvm"
+config MTCP_USE_DPDK
+  bool "dpdk"
+
+endchoice
+
+config MTCP_MAX_CONCURRENCY
+  int
+  prompt "Maximum number of concurrent connections"
+  default 10000
+
+config MTCP_MAX_NUM_BUFFERS
+  int
+  prompt "Maximum number of socket buffers"
+  default 10000
+  help
+    Maximum number of socket buffers.  Set this to a small value if there are  many idle connections.
+
+config MTCP_RCVBUF_SIZE
+  int
+  prompt "Receive buffer size of sockets"
+  default 8192
+  help
+    Receive buffer size of sockets.
+    If not set: MTCP_RCVBUF_SIZE = MTCP_SNDBUF_SIZE
+
+config MTCP_SNDBUF_SIZE
+  int
+  prompt "Send buffer size of sockets"
+  help
+  default 8192
+    Send buffer size of sockets.
+    If not set: MTCP_SNDBUF_SIZE = MTCP_RCVBUF_SIZE
+
+config MTCP_TCP_TIMEOUT
+  int
+  prompt "TCP timeout seconds"
+  default 30
+  help
+    "TCP timeout in seconds.  -1 can disable the timeout check.
+
+config MTCP_TCP_TIMEWAIT
+  int
+  prompt "TCP timewait seconds"
+  default 0
+
+config MTCP_USE_CCP
+  bool
+  prompt "Use congestion control algorithm"
+  default n
+
+if MTCP_USE_CCP
+
+choice
+	prompt "Congestion control algorithm"
+	default MTCP_USE_CCP_RENO
+	help
+	  Select the congestion control algorithm.
+
+config MTCP_CCP_RENO
+  bool "reno"
+config MTCP_CCP_CUBIC
+  bool "cubic"
+
+endchoice
+
+endif # MTCP_USE_CCP
+
+if MTCP_USE_ONVM
+
+config MTCP_ONVM_SERV
+  int
+  prompt "Service ID (required)"
+  default 1
+
+config MTCP_ONVM_INST
+  int
+  prompt "Instance ID (optional)"
+  default 1
+
+config MTCP_ONVM_DEST
+  int
+  prompt "Destination ID (will forward to another NF)"
+  default 2
+
+endif # MTCP_ONVM_SERV
+
+if MTCP_USE_DPDK
+
+config MTCP_NUM_MEM_CH
+  int
+  prompt "The number of memory channels that are currently inserted in the CPU per socket."
+  default 0
+
+endif # MTCP_USE_DPDK
+
+endif # LIBMTCP

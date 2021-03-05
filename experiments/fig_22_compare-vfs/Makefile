@@ -18,24 +18,24 @@ all: prepare run plot
 
 .PHONY: prepare
 prepare:
-	@./clone-deps.sh "$(WORKDIR)"
-	@./build-shfstools.sh "$(WORKDIR)"
-	@./build-benchmark.sh "$(WORKDIR)"
-	@./build-fses.sh "$(WORKDIR)"
+	$(WORKDIR)/clone-deps.sh "$(WORKDIR)"
+	$(WORKDIR)/build-shfstools.sh "$(WORKDIR)"
+	$(WORKDIR)/build-benchmark.sh "$(WORKDIR)"
+	$(WORKDIR)/build-fses.sh "$(WORKDIR)"
 
 .PHONY: run
 run:
-	@./run.sh "$(WORKDIR)"
-	@./parse.sh "$(WORKDIR)"
-	@./process.sh "$(WORKDIR)"
+	$(WORKDIR)/run.sh "$(WORKDIR)"
+	$(WORKDIR)/parse.sh "$(WORKDIR)"
+	$(WORKDIR)/process.sh "$(WORKDIR)"
 
 .PHONY: plot
 plot:
-	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
+	PYTHONPATH=$(WORKDIR)/../common $(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
 
 .PHONY: clean
 clean:
-	@./clean.sh "$(WORKDIR)"
+	$(WORKDIR)/clean.sh "$(WORKDIR)"
 
 .PHONY: properclean
 properclean: clean
