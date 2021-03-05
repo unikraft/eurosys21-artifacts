@@ -10,7 +10,7 @@ process()
 	echo ""
 }
 
-cd "{1:-.}"
+cd "${1:-.}"
 mkdir -pv "${RESULTS}"
 process "${PARSED}/linux"		>  "$RESULTS/table.txt"
 process "${PARSED}/linux-nomitig"	>> "$RESULTS/table.txt"

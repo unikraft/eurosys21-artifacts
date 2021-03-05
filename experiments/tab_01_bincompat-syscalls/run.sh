@@ -25,11 +25,11 @@ run_vm_benchmark()
     done
 }
 
-TOOLS="$( readlink -f "${1:-.}/../../tools" )"
+TOOLS="${1:-.}/../../tools"
 RESULTS="${1:-.}/eval"
 TIMES=25
 
-cd "{1:-.}"
+cd "${1:-.}"
 mkdir -pv "${RESULTS}"
 "${TOOLS}/tsc_mhz" > "${RESULTS}/tsc_mhz.txt"
 run_vm_benchmark    "${RESULTS}/linux"		"linux/vmlinuz-5.11.0-sysnoop+"			\
