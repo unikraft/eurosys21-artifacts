@@ -1,0 +1,360 @@
+running batch 2048Mdyn, 1/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x109410: file /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c
+0000000000001787 trace_boot_time_init: 
+0000000000065400 trace_boot_plat_init: 
+0000000000065568 trace_boot_alloc_beg: 
+0000000000093464 trace_boot_alloc_end: 
+0000000000093625 trace_boot_end: 
+Detaching from program: /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch 2048Mdyn, 2/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x109410: file /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c
+0000000000001800 trace_boot_time_init: 
+0000000000064129 trace_boot_plat_init: 
+0000000000064302 trace_boot_alloc_beg: 
+0000000000091803 trace_boot_alloc_end: 
+0000000000091965 trace_boot_end: 
+Detaching from program: /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch 2048Mdyn, 3/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x109410: file /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c
+0000000000001797 trace_boot_time_init: 
+0000000000064672 trace_boot_plat_init: 
+0000000000064870 trace_boot_alloc_beg: 
+0000000000092405 trace_boot_alloc_end: 
+0000000000092573 trace_boot_end: 
+Detaching from program: /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch 2048Mdyn, 4/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x109410: file /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c
+0000000000001799 trace_boot_time_init: 
+0000000000064292 trace_boot_plat_init: 
+0000000000064468 trace_boot_alloc_beg: 
+0000000000092167 trace_boot_alloc_end: 
+0000000000092338 trace_boot_end: 
+Detaching from program: /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch 2048Mdyn, 5/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x109410: file /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c
+0000000000001821 trace_boot_time_init: 
+0000000000064916 trace_boot_plat_init: 
+0000000000065103 trace_boot_alloc_beg: 
+0000000000092900 trace_boot_alloc_end: 
+0000000000093063 trace_boot_end: 
+Detaching from program: /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch 2048Mdyn, 6/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x109410: file /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c
+0000000000001789 trace_boot_time_init: 
+0000000000064392 trace_boot_plat_init: 
+0000000000064573 trace_boot_alloc_beg: 
+0000000000092145 trace_boot_alloc_end: 
+0000000000092307 trace_boot_end: 
+Detaching from program: /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch 2048Mdyn, 7/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x109410: file /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c
+0000000000001811 trace_boot_time_init: 
+0000000000064627 trace_boot_plat_init: 
+0000000000064819 trace_boot_alloc_beg: 
+0000000000092360 trace_boot_alloc_end: 
+0000000000092528 trace_boot_end: 
+Detaching from program: /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch 2048Mdyn, 8/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x109410: file /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c
+0000000000001800 trace_boot_time_init: 
+0000000000064565 trace_boot_plat_init: 
+0000000000064777 trace_boot_alloc_beg: 
+0000000000092371 trace_boot_alloc_end: 
+0000000000092523 trace_boot_end: 
+Detaching from program: /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch 2048Mdyn, 9/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x109410: file /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c
+0000000000001795 trace_boot_time_init: 
+0000000000065144 trace_boot_plat_init: 
+0000000000065311 trace_boot_alloc_beg: 
+0000000000093269 trace_boot_alloc_end: 
+0000000000093439 trace_boot_end: 
+Detaching from program: /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
+running batch 2048Mdyn, 10/10
+GNU gdb (Debian 8.2.1-2+b3) 8.2.1
+Copyright (C) 2018 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+Type "show copying" and "show warranty" for details.
+This GDB was configured as "x86_64-linux-gnu".
+Type "show configuration" for configuration details.
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>.
+Find the GDB manual and other documentation resources online at:
+    <http://www.gnu.org/software/gdb/documentation/>.
+
+For help, type "help".
+Type "apropos word" to search for commands related to "word"...
+Reading symbols from /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel...done.
+Remote debugging using :1234
+0x000000000000fff0 in ?? ()
+Hardware assisted breakpoint 1 at 0x109410: file /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c, line 38.
+Continuing.
+
+Breakpoint 1, ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+Ending remote debugging.
+The target architecture is assumed to be i386:x86-64:intel
+Remote debugging using localhost:1234
+ukplat_terminate (request=UKPLAT_HALT) at /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c:38
+38	in /root/workspace/unikraft-ptsupport/plat/kvm/shutdown.c
+0000000000001857 trace_boot_time_init: 
+0000000000065873 trace_boot_plat_init: 
+0000000000066067 trace_boot_alloc_beg: 
+0000000000094251 trace_boot_alloc_end: 
+0000000000094429 trace_boot_end: 
+Detaching from program: /root/eurosys21-artifacts/experiments/fig_21_unikraft-boot-pages/images/unikraft+dyn.kernel, Remote target
+Ending remote debugging.
+[Inferior 1 (Remote target) detached]
