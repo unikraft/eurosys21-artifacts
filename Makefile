@@ -19,3 +19,5 @@ ifeq ($(DOCKER_FORCE_BUILD),y)
 		$(DOCKER_BUILD_EXTRA) \
 		.
 endif
+
+include $(WORKDIR)/tools/Makefile
