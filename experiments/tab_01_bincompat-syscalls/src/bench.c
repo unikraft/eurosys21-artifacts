@@ -16,9 +16,6 @@
 #ifndef CONFIG_WARMUP
 #define CONFIG_WARMUP 1
 #endif
-#ifndef CONFIG_BENCHTSC
-#define CONFIG_BENCHTSC 1
-#endif
 #ifndef CONFIG_NB_ROUNDS
 #define CONFIG_NB_ROUNDS 20
 #endif
@@ -62,7 +59,6 @@ uint64_t funcall_bench(uint64_t iter)
 	return t1 - t0;
 }
 
-#if CONFIG_BENCHTSC
 uint64_t tsc_bench(uint64_t iter)
 {
 	uint64_t t0, t1;
@@ -71,9 +67,6 @@ uint64_t tsc_bench(uint64_t iter)
 	t1 = bench_end();
 	return t1 - t0;
 }
-#else
-#define tsc_bench(...) (0)
-#endif
 
 int _print_cfg_bool(const char *name, int set)
 {
@@ -100,7 +93,6 @@ int main()
 
     printf("--- 8< ---\n");
     print_cfg_bool(CONFIG_WARMUP);
-    print_cfg_bool(CONFIG_BENCHTSC);
     print_cfg_int(CONFIG_NB_ROUNDS);
     print_cfg_int(CONFIG_ITER_PER_ROUND);
     printf("--- >8 ---\n\n");
