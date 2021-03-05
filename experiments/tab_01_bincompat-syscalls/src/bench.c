@@ -19,9 +19,6 @@
 #ifndef CONFIG_BENCHTSC
 #define CONFIG_BENCHTSC 1
 #endif
-#ifndef CONFIG_BENCHTSC_AND_LOOP
-#define CONFIG_BENCHTSC_AND_LOOP 0
-#endif
 #ifndef CONFIG_NB_ROUNDS
 #define CONFIG_NB_ROUNDS 20
 #endif
@@ -71,9 +68,6 @@ uint64_t tsc_bench(uint64_t iter)
 	uint64_t t0, t1;
 
 	t0 = bench_start();
-#if CONFIG_BENCHTSC_AND_LOOP
-	while (iter-- > 0) { asm volatile(""); }
-#endif
 	t1 = bench_end();
 	return t1 - t0;
 }
@@ -107,7 +101,6 @@ int main()
     printf("--- 8< ---\n");
     print_cfg_bool(CONFIG_WARMUP);
     print_cfg_bool(CONFIG_BENCHTSC);
-    print_cfg_bool(CONFIG_BENCHTSC_AND_LOOP);
     print_cfg_int(CONFIG_NB_ROUNDS);
     print_cfg_int(CONFIG_ITER_PER_ROUND);
     printf("--- >8 ---\n\n");
@@ -142,16 +135,7 @@ int main()
 	 i < CONFIG_NB_ROUNDS;
 	 i++) {
 	    if (overhead_tsc[i])
-		    printf(
-#if CONFIG_BENCHTSC_AND_LOOP
-			    "tsc+loop(%d)\t%"PRIu64"\n",
-			    CONFIG_ITER_PER_ROUND,
-			    overhead_tsc[i]
-#else
-			    "tsc\t%"PRIu64"\n",
-			    overhead_tsc[i]
-#endif
-			    );
+		    printf("tsc\t%"PRIu64"\n", overhead_tsc[i]);
 
 #if CONFIG_ITER_PER_ROUND >= 1000
 	    printf("scall\t%"PRIu64".%03"PRIu64"\n",
