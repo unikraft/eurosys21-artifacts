@@ -32,7 +32,7 @@ run_vm_benchmark()
     done
 }
 
-RESULTS=eval
+RESULTS="${1:-.}/eval"
 TIMES=25
 
 mkdir -p ${RESULTS}
