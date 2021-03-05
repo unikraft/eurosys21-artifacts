@@ -35,7 +35,8 @@ run_vm_benchmark()
 RESULTS="${1:-.}/eval"
 TIMES=25
 
-mkdir -p ${RESULTS}
-run_vm_benchmark	"${RESULTS}/linux"		"/boot/vmlinuz-5.5.0-0.bpo.2-amd64"	"src/fsbench.initrd.gz"	""			$TIMES
-run_vm_benchmark	"${RESULTS}/linux-nomitig"	"/boot/vmlinuz-5.5.0-0.bpo.2-amd64"	"src/fsbench.initrd.gz"	""			$TIMES "mitigations=off"
-run_vm_benchmark	"${RESULTS}/unikraft"		"src/build/fsbench-tlsf_kvm-x86_64"	"src/fsbench.cpio"	"src/fsbench.shfs"	$TIMES
+cd "{1:-.}"
+mkdir -pv "${RESULTS}"
+run_vm_benchmark	"${RESULTS}/linux"		"../tab_01_bincompat-syscalls/linux/vmlinuz-5.11.0-sysnoop+"	"src/fsbench.initrd.gz"	""			$TIMES
+run_vm_benchmark	"${RESULTS}/linux-nomitig"	"../tab_01_bincompat-syscalls/linux/vmlinuz-5.11.0-sysnoop+"	"src/fsbench.initrd.gz"	""			$TIMES "mitigations=off"
+run_vm_benchmark	"${RESULTS}/unikraft"		"src/build/fsbench-tlsf_kvm-x86_64"				"src/fsbench.cpio"	"src/fsbench.shfs"	$TIMES
