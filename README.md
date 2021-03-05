@@ -84,8 +84,9 @@ environments.  In the paper, we used three different set ups:
     experiments). We use a somewhat older kernel because HermiTux will
     not run with newer versions, as noted [here](https://github.com/ssrg-vt/hermitux/issues/12).
  2. A Linux host with Linux kernel 4.19 used as a DPDK packet generator
-    ([`fig_19`](/experiments/fig_19_compare-dpdk/README.md)).
- 4. A Xen host used for Xen 9pfs experiments.
+    ([`fig_19`](/experiments/fig_19_compare-dpdk/README.md)) which has an
+    ethernet cable connected to the first host.
+ 3. A Xen host used for Xen 9pfs experiments.
 
 A single server can be used for almost all experiments, though it would require
 installing different Linux kernel versions, or the Xen hypervisor and rebooting
