@@ -16,7 +16,28 @@ for C in ${CORES[@]}; do
 	echo "Available governors: $( cat "$CFREQ/scaling_available_governors" )"
 	MAXFREQ=$( cat "$CFREQ/cpuinfo_max_freq" )
 	MINFREQ=$( cat "$CFREQ/cpuinfo_min_freq" )
+
+	# Try to detect if MAXFREQ is a turbo frequency
+	MAXFREQ0=0
+	MAXFREQ1=0
+	for FREQ in $( cat "$CFREQ/scaling_available_frequencies" ); do
+		if [ $FREQ -gt $MAXFREQ0 ]; then
+			if [ $MAXFREQ0 -gt $MAXFREQ1 ]; then
+				MAXFREQ1=$MAXFREQ0
+			fi
+			MAXFREQ0=$FREQ
+		elif [ $FREQ -gt $MAXFREQ1 ]; then
+			MAXFREQ1=$FREQ
+		fi
+	done
+	if [ $MAXFREQ1 -gt 0 -a $MAXFREQ0 -gt 0 -a $(( MAXFREQ0 - MAXFREQ1 )) -le 1000 ]; then
+		echo "Skipping turbo frequency from automatic selection ($MAXFREQ0)"
+		MAXFREQ=$MAXFREQ1
+	fi
+
+	# User can overwrite detected value
 	NEWFREQ=${1:-${MAXFREQ}}
+
 	echo "CPU frequency range: $MINFREQ - $MAXFREQ"
 	echo "Current governor: $( cat "$CFREQ/scaling_governor" )"
 	echo "Governor frequency range: $( cat "$CFREQ/scaling_min_freq" ) - $( cat "$CFREQ/scaling_max_freq" )"
