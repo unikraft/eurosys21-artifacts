@@ -16,8 +16,9 @@ docker file per application. These ones are available in the
 machine to perform this experiment.
 
 **APPROXIMATIVE EXECUTION TIME=30/45minutes**
-**THIS EXPERIMENT REQUIRES AT LEAST DOCKERCLIENT20 AND**
-**DOCKERENGINE19 otherwise results may be less accurate**
+
+**This experiment requires at least docker client 20 and**
+**docker engine 19 otherwise results may be less accurate**
 
 ## How to Use (automatic test)
 
@@ -28,7 +29,7 @@ command. This command will:
 that this script takes a long time...
 2. Run the syscalls experiment by running `./run_all.sh`. 
 3. Generate the graph by running the `./plot.sh` script and then the
-figure is saved into the current repository as `syscall-support.pdf`.
+figure is saved into the current repository as `fig_07_syscall-support.svg`.
 
 ## How to Use (manual test)
 
@@ -43,7 +44,7 @@ container.
 
 Once all the results are generated, run the `./plot.sh` script to
 generate the graph. This one will be generated in the current folder
-with the following name: `syscall-support.pdf`.
+with the following name: `fig_07_syscall-support.svg`.
 
 ## Others
 
