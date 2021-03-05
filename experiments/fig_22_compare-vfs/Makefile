@@ -31,7 +31,7 @@ run:
 
 .PHONY: plot
 plot:
-	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
+	PYTHONPATH=$(WORKDIR)/../common $(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
 
 .PHONY: clean
 clean:
