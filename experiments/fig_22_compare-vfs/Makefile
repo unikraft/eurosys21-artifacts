@@ -35,7 +35,7 @@ plot:
 
 .PHONY: clean
 clean:
-	@-
+	@./clean.sh "$(WORKDIR)"
 
 .PHONY: properclean
 properclean:
