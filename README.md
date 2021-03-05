@@ -194,33 +194,33 @@ If no figure ID or test name is provided, the action is run for all
 experiments.  If no action is provided, all actions are performed.
 
 Examples:
-  ./run.sh fig_01    Runs prepare, run and plot for fig_01.
-  ./run.sh prepare   Prepares all experiments.
+  ./run.sh fig_01      Runs prepare, run and plot for fig_01.
+  ./run.sh prepare     Prepares all experiments.
 
 Actions:
-  prepare            Prepares the host and/or builds dependent tools
-                       and images before the test is run.
-  run                Runs the given experiment and saves the results.
-  plot               Uses the data from the experiment to generate
-                       the plot.
-  clean              Clean intermediate build files from an experiment.
+  prepare              Prepares the host and/or builds dependent tools
+                         and images before the test is run.
+  run                  Runs the given experiment and saves the results.
+  plot                 Uses the data from the experiment to generate
+                         the plot.
+  clean                Clean intermediate build files from an experiment.
 
 Options:
-     --no-deps       Do not try to install dependencies.
-  -D --no-docker     Do not use Docker for plotting.
-  -l --list          List all tests and exit.
-  -v --verbose       Be verbose.
-  -h --help          Show this help menu.
+     --no-deps         Do not try to install dependencies.
+     --no-docker-plot  Do not use Docker for plotting.
+  -l --list            List all tests and exit.
+  -v --verbose         Be verbose.
+  -h --help            Show this help menu.
 
 Influential Environmental Variables
-  EXPERIMENTS_DIR    Directory of all the experiments
-                       (default: ./experiments).
-  DOCKER_FORCE_BUILD Force build of Docker containers
-                       (default :y).
-  DOCKER_IMAGE_PLOT  Docker environment for generating plots
-                       (default: unikraft/eurosys21-artifacts-plot:latest).
-  PLOT_FORMAT        File format for the plot
-                       (default: svg).
+  EXPERIMENTS_DIR      Directory of all the experiments
+                         (default: ./experiments).
+  DOCKER_FORCE_BUILD   Force build of Docker containers
+                         (default: y).
+  DOCKER_IMAGE_PLOT    Docker environment for generating plots
+                         (default: unikraft/eurosys21-artifacts-plot:latest).
+  PLOT_FORMAT          File format for the plot
+                         (default: svg).
 ```
 
 Each experiment, and therefore directory listed in `experiments/`, is populated
