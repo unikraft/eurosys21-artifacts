@@ -79,6 +79,7 @@ function install_dependencies() {
         socat \
         meson \
         cscope \
+        cloc \
         uuid-runtime \
         uuid-dev \
         libuuid1 \
