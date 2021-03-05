@@ -105,10 +105,12 @@ cards with the 82599EB chipset.
 
 #### Kernel
 
-All experiments were on Debian Buster
+All experiments were on Debian Buster and all install and preparation scripts
+target this distribution.
 
-For all set ups, we disabled Hyper-Threading (`noht`) and isolated 4 CPU cores
-(e.g. `isocpus=4,5,6,7`).  This can be done by setting kernel boot parameters,
+For all set ups, we disabled Hyper-Threading (`noht`), isolate 4 CPU cores
+(e.g. `isocpus=4,5,6,7`) and allow for user-defined CPU frequency
+(`intel_pstate=disable`).  This can be done by setting kernel boot parameters,
 e.g. with pxelinux:
 
 ```
@@ -117,7 +119,7 @@ LABEL item_kernel0
   MENU LABEL Linux
   MENU DEFAULT
   KERNEL vmlinuz-4.19.0
-  APPEND isolcpus=4,5,6,7 noht
+  APPEND isolcpus=4,5,6,7 noht intel_pstate=disable
   ...
 ```
 
