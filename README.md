@@ -103,8 +103,6 @@ cards with the 82599EB chipset.
 
 ### Software
 
-#### Kernel
-
 All experiments were on Debian Buster and all install and preparation scripts
 target this distribution.
 
