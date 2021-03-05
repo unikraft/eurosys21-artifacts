@@ -9,6 +9,11 @@ else
     echo "Download the VM from remote server (this will take some times...)"
     curl -LO https://people.montefiore.uliege.be/gain/unikraft/vm.zip
 
+    if [ ! -f vm.zip ]; then
+        echo "Download the VM from remote backup server (this will take some times...)"
+        curl -LO http://www.unikraft.org/eurosys/vm.zip
+    fi
+
     echo "Unzip the VM..."
     unzip vm.zip
 fi

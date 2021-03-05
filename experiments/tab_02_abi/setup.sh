@@ -20,6 +20,11 @@ else
     echo "Download the archive from remote server (this will take some time...)"
     curl -LO https://people.montefiore.uliege.be/gain/unikraft/abi.zip
 
+    if [ ! -f abi.zip ]; then
+        echo "Download the archive from remote backup server (this will take some time...)"
+        curl -LO http://www.unikraft.org/eurosys/abi.zip
+    fi
+
     echo "Unzip the archive..."
     unzip abi.zip
 fi

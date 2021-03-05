@@ -1,6 +1,14 @@
 #!/bin/bash
 python3 -m pip install xlrd==1.2.0
+python3 -m pip install numpy==1.16.5
 python3 -m pip install seaborn
+
+if [ $(id -u) -eq 0 ]; then
+    echo "Already root for docker commands"
+else
+    sudo usermod -aG docker $USER
+    newgrp docker
+fi
 
 mkdir aggregated_dockerfile
 cd dockerfiles/base
