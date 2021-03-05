@@ -152,9 +152,9 @@ care of manually).
 
 4. All experiments should be `prepare`d first, which installs necessary tools
    and downloads additional resources, before they can run.  This can be done by
-   calling the [`run.sh fig_XX prepare`](/run.sh) for a single experiment or
-   `run.sh prepare` for all experiments.  (Note: The preparation step for all
-   experiments usually exceeds several hours.)
+   calling `run.sh fig_XX prepare` ([more details below](#usage)) for a single
+   experiment or `run.sh prepare` for all experiments.  (Note: The preparation
+   step for all experiments usually exceeds several hours.)
 
 5. Once prepared, simply call the relevant experiment you wish to re-create
    using the `run.sh` script.
