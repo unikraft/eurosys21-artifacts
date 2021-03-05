@@ -6,6 +6,7 @@ set -x
 source ../common/set-cpus.sh
 source ../common/nginx.sh
 source ../common/network.sh
+source ../common/qemu.sh
 
 IMAGES=images/
 BASEIP=172.190.0
