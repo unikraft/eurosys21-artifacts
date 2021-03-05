@@ -76,7 +76,7 @@ def plot(data=None, output=None):
   # General style
   common_style(plt)
 
-  throughput_max += 100 # margin above biggest bar
+  throughput_max += 50 # margin above biggest bar
 
   # Setup matplotlib axis
   fig = plt.figure(figsize=(8, 5))
