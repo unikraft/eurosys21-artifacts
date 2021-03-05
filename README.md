@@ -103,8 +103,8 @@ cards with the 82599EB chipset.
 
 ### Software
 
-All experiments were on Debian Buster and all install and preparation scripts
-target this distribution.
+All experiments were run on Debian Buster and all install and preparation
+scripts target this distribution.
 
 For all set ups, we disabled Hyper-Threading (`noht`), isolate 4 CPU cores
 (e.g. `isocpus=4,5,6,7`) and allow for user-defined CPU frequency
