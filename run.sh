@@ -77,6 +77,7 @@ function install_dependencies() {
         qemu-system-x86 \
         redis-tools \
         socat \
+        meson \
         cscope \
         uuid-runtime \
         uuid-dev \
