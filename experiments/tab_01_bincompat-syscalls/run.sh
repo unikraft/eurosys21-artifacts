@@ -1,4 +1,5 @@
 #!/bin/bash
+TOOLS="${1:-.}/../../tools"
 
 process_typescript()
 {
@@ -16,7 +17,7 @@ run_vm_benchmark()
 
     for (( I=0; I<${TIMES}; I++ )); do
 	taskset -c 2-3 script -c \
-		"qemu-guest -c 2 -p 4-5 \
+		"${TOOLS}/qemu-guest -c 2 -p 4-5 \
 		-k ${KERNEL} \
 		-i ${INITRD} \
 		-a 'isolcpus=1 console=ttyS0 panic=-1 ${APPEND}'" ${OUT}.${I}.typescript
@@ -25,7 +26,6 @@ run_vm_benchmark()
     done
 }
 
-TOOLS="${1:-.}/../../tools"
 RESULTS="${1:-.}/eval"
 TIMES=25
 
