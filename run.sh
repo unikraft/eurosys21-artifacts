@@ -26,7 +26,7 @@ Usage:
   $0 [OPTIONS] [FIGURE_ID|TEST_NAME] [ACTION]
 
 If no figure ID or test name is provided, the action is run for all
-experiments.
+experiments.  If no action is provided, all actions are performed.
 
 Example:
   $0 fig_01
