@@ -8,8 +8,9 @@ to host the zip archive which contains the setup on another [server].
 If the server is down you can download it from the [backup] server.
 
 [Unikraft]: https://github.com/unikraft/unikraft
-[server]: https://people.montefiore.uliege.be/gain/unikraft/abi.zip
-[backup]: http://www.unikraft.org/eurosys/abi.zip
+[server]: http://releases.unikraft.org/.eurosys21/abi.zip
+[backup]: https://people.montefiore.uliege.be/gain/unikraft/abi.zip
+
 
 **APPROXIMATIVE EXECUTION TIME=2h**
 **NOTE THAT THIS EXPERIMENT REQUIRES SOME DISK SPACE (+/-1.5GB in the /tmp folder)**

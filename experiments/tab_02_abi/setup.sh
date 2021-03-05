@@ -18,11 +18,11 @@ if [ -d "$ABI_FOLDER" ]; then
     echo "Directory already exists so skip download process to gain time"
 else
     echo "Download the archive from remote server (this will take some time...)"
-    curl -LO https://people.montefiore.uliege.be/gain/unikraft/abi.zip
+    curl -LO http://releases.unikraft.org/.eurosys21/abi.zip
 
     if [ ! -f abi.zip ]; then
         echo "Download the archive from remote backup server (this will take some time...)"
-        curl -LO http://www.unikraft.org/eurosys/abi.zip
+        curl -LO https://people.montefiore.uliege.be/gain/unikraft/abi.zip
     fi
 
     echo "Unzip the archive..."

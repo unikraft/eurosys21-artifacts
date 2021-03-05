@@ -7,11 +7,11 @@ if [ -d "$VM_FOLDER" ]; then
     echo "Directory already exists so skip download process to gain time"
 else
     echo "Download the VM from remote server (this will take some times...)"
-    curl -LO https://people.montefiore.uliege.be/gain/unikraft/vm.zip
+    curl -LO http://releases.unikraft.org/.eurosys21/vm.zip
 
     if [ ! -f vm.zip ]; then
         echo "Download the VM from remote backup server (this will take some times...)"
-        curl -LO http://www.unikraft.org/eurosys/vm.zip
+        curl -LO https://people.montefiore.uliege.be/gain/unikraft/vm.zip
     fi
 
     echo "Unzip the VM..."

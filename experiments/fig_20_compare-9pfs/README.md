@@ -9,8 +9,8 @@ contains the Linux VM on another [server]. If the server is down
 you can download it from the [backup] server.
 
 [Unikraft]: https://github.com/unikraft/unikraft
-[server]: https://people.montefiore.uliege.be/gain/unikraft/vm.zip
-[backup]: http://www.unikraft.org/eurosys/vm.zip
+[server]: http://releases.unikraft.org/.eurosys21/vm.zip
+[backup]: https://people.montefiore.uliege.be/gain/unikraft/vm.zip
 
 **APPROXIMATIVE EXECUTION TIME=2hours**
 
@@ -74,6 +74,6 @@ current folder with the following name: `fig_20_compare-9pfs.svg`.
 ### Further information about the VM
 
 The VM has been created from a linux kernel 4.15.0-96-generic. We
-didn't patch or modify the kernel code. We just added some a 9pfs
-mount point (`test`) which allows to share data between host and the
+didn't patch or modify the kernel code. We just added a 9pfs mount
+point (`test`) which allows to share data between the host and the
 guest.
