@@ -1,4 +1,4 @@
-#!/bin/bash
+]#!/bin/bash
 
 process_typescript()
 {
@@ -28,7 +28,8 @@ run_vm_benchmark()
 RESULTS="${1:-.}/eval"
 TIMES=25
 
-mkdir -p ${RESULTS}
+cd "{1:-.}"
+mkdir -pv "${RESULTS}"
 run_vm_benchmark    "${RESULTS}/linux"		"linux/vmlinuz-5.11.0-sysnoop+"			\
 			"src/syscallbench.initrd.gz"	$TIMES
 run_vm_benchmark    "${RESULTS}/linux-nomitig"	"linux/vmlinuz-5.11.0-sysnoop+"			\
