@@ -39,7 +39,7 @@ non-turbo frequency to your CPU.
    data. It creates a table within `results/`
 
 Alternatively, you can execute these steps with `make all`.
-All steps together take roughly 15-30 mins.
+All steps together take roughly 25 mins.
 
 With `./clean.sh` you can delete all compilation units, cloned
 repositories and intermediate measurement data. It keeps the final
