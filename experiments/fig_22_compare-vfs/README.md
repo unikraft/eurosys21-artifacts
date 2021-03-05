@@ -2,11 +2,15 @@
 
 The experiments in this folder will evaluate the performance
 when specializing the VFS with Unikraft.
-The same benchmark source code `src/` is compiled as (1) Unikraft
-unikernel and (2) as Linux ELF binary. It will try to open
-a non-existing file and an existing file with the standard VFS
-on Linux and Unikraft. In case of Unikraft, a second evaluation
-is done by using the SHFS API.
+The same benchmark program under `src/` is compiled as (1) Unikraft
+unikernel and (2) as Linux ELF binary. It will try to open for 1000
+times a non-existing file and for 1000 times an existing file through
+the VFS on Linux and Unikraft (`open()`). In case of Unikraft, a
+second evaluation is done by using the native SHFS API
+(`shfs_fio_open()`). SHFS uses a hash-table as content catalog and
+was originally developed for MiniCache
+(<https://github.com/cnplab/minicache>), a specialized unikernel that
+can be used as a web content cache node.
 
 Please note that these experiments do their measurement with the TSC.
 You need to make sure that your machine does dynamically scale the CPU
