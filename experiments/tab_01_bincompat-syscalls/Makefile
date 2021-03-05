@@ -19,11 +19,12 @@ prepare:
 .PHONY: run
 run:
 	$(WORKDIR)/run.sh "$(WORKDIR)"
+	$(WORKDIR)/parse.sh "$(WORKDIR)"
+	$(WORKDIR)/process.sh "$(WORKDIR)"
 
 .PHONY: plot
 plot:
-	$(WORKDIR)/parse.sh "$(WORKDIR)"
-	$(WORKDIR)/process.sh "$(WORKDIR)"
+	@-
 
 .PHONY: clean
 clean:

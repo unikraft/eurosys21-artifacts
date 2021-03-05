@@ -26,11 +26,11 @@ prepare:
 .PHONY: run
 run:
 	@./run.sh "$(WORKDIR)"
+	@./parse.sh "$(WORKDIR)"
+	@./process.sh "$(WORKDIR)"
 
 .PHONY: plot
 plot:
-	@./parse.sh "$(WORKDIR)"
-	@./process.sh "$(WORKDIR)"
 	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
 
 .PHONY: clean
