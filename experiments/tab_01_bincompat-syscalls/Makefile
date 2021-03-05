@@ -31,4 +31,4 @@ clean:
 
 .PHONY: properclean
 properclean: clean
-	@rm -rvf "${WORKDIR}/results"
+	@rm -rvf "${WORKDIR}/results/"*

@@ -1,4 +1,5 @@
 #!/bin/bash
+EVAL="${1:-.}/eval"
 PARSED="${1:-.}/eval/parsed"
 RESULTS="${1:-.}/results"
 PROCESS_DS="${1:-.}/do_process_dataset.py"
@@ -6,7 +7,9 @@ PROCESS_DS="${1:-.}/do_process_dataset.py"
 process()
 {
 	echo "$( basename ${1} )"
-	"${PROCESS_DS}" "${1}"
+	local TSC_MHZ=$( cat "${EVAL}/tsc_mhz.txt" )
+
+	"${PROCESS_DS}" "${1}" "${TSC_MHZ}"
 	echo ""
 }
 
