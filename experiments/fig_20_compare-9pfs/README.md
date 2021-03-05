@@ -5,9 +5,12 @@
 This folder is used for a performance experiment of 9pfs between
 [Unikraft][] and a Linux VM (write and read latency). Since these
 experiments require a large VM, we decided to host the zip file which
-contains the Linux VM on another server.
+contains the Linux VM on another [server]. If the server is down
+you can download it from the [backup] server.
 
 [Unikraft]: https://github.com/unikraft/unikraft
+[server]: https://people.montefiore.uliege.be/gain/unikraft/vm.zip
+[backup]: http://www.unikraft.org/eurosys/vm.zip
 
 **APPROXIMATIVE EXECUTION TIME=2hours**
 
@@ -64,6 +67,13 @@ procedure below:
 
 ### Generate the graph
 
-Once all the results are generated, run the `./plot.sh` script to
+Once all the results are generated, run the `./plot.sh` and script to
 generate the 9pfs latency plot. This one will be generated in the
-current folder with the following name: `compare_9pfs_lines.pdf`.
+current folder with the following name: `fig_20_compare-9pfs.svg`.
+
+### Further information about the VM
+
+The VM has been created from a linux kernel 4.15.0-96-generic. We
+didn't patch or modify the kernel code. We just added some a 9pfs
+mount point (`test`) which allows to share data between host and the
+guest.
