@@ -7,7 +7,6 @@ if [ $(id -u) -eq 0 ]; then
     echo "Already root for docker commands"
 else
     sudo usermod -aG docker $USER
-    newgrp docker
 fi
 
 mkdir aggregated_dockerfile
