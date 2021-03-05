@@ -1,0 +1,39 @@
+#!/bin/bash
+CORES=( $( ls /sys/devices/system/cpu/ | egrep cpu\[0-9\]\+\{1,2\} | sed "s/cpu//" | sed "s/\///" | sort -h ) )
+echo "Found cores ids: ${CORES[*]}" 1>&2
+
+for C in ${CORES[@]}; do
+	CSYS=/sys/devices/system/cpu/cpu${C}
+	CFREQ=/sys/devices/system/cpu/cpufreq/policy${C}
+
+	if [ ! -e "$CFREQ/scaling_available_governors" ]; then
+		echo "No scaling governor found for CPU ${C}" 1>&2
+		continue
+	fi
+
+	echo "CPU${C}"
+	echo "====="
+	echo "Available governors: $( cat "$CFREQ/scaling_available_governors" )"
+	MAXFREQ=$( cat "$CFREQ/cpuinfo_max_freq" )
+	MINFREQ=$( cat "$CFREQ/cpuinfo_min_freq" )
+	NEWFREQ=${1:-${MAXFREQ}}
+	echo "CPU frequency range: $MINFREQ - $MAXFREQ"
+	echo "Current governor: $( cat "$CFREQ/scaling_governor" )"
+	echo "Governor frequency range: $( cat "$CFREQ/scaling_min_freq" ) - $( cat "$CFREQ/scaling_max_freq" )"
+	echo "Current frequency: $( cat "$CFREQ/scaling_cur_freq" )"
+	echo "---"
+	echo "Set governor to 'userspace'..."
+	echo 'userspace' > "$CFREQ/scaling_governor"
+	echo "Set minimum frequency to ${NEWFREQ}..."
+	echo "${NEWFREQ}" > "$CFREQ/scaling_min_freq"
+	echo "Set maximum frequency to ${NEWFREQ}..."
+	echo "${NEWFREQ}" > "$CFREQ/scaling_max_freq"
+	echo "Set frequency to ${NEWFREQ}..."
+	echo "${NEWFREQ}" > "$CFREQ/scaling_setspeed"
+	cpupower -c ${C} frequency-set -f ${NEWFREQ}
+	echo "---"
+	echo "Current governor: $( cat "$CFREQ/scaling_governor" )"
+	echo "Governor frequency range: $( cat "$CFREQ/scaling_min_freq" ) - $( cat "$CFREQ/scaling_max_freq" )"
+	echo "Current frequency: $( cat "$CFREQ/scaling_cur_freq" )"
+	echo ""
+done
