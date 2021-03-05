@@ -102,7 +102,7 @@ int port_init(uint16_t port, struct rte_mempool *mbuf_pool)
 }
 
 int pkt_burst_transmit_data(int port_id, struct rte_mempool *mp, int itr,
-			    void *data, uint16_t size)
+			    int cnt, void *data, uint16_t size)
 {
 	struct rte_mbuf *pkts_burst[MAX_PKT_BURST];
 	struct uk_netbuf *uk_pkts_burst[MAX_PKT_BURST];
@@ -127,6 +127,7 @@ int pkt_burst_transmit_data(int port_id, struct rte_mempool *mp, int itr,
 	dev_private = vrtl_eth_dev->data->dev_private;
 	UK_ASSERT(dev_private);
 #endif
+	nb_pkt_per_burst = cnt;
 
 
 	mbp = mp;
