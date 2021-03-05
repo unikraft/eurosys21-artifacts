@@ -54,7 +54,7 @@ def plot(data=None, output=None):
         operations = {}
 
         for row in csvdata:
-          if row[0] not in operations:
+          if int(row[0]) not in operations:
             operations[int(row[0])] = []
           
           operations[int(row[0])].append(float(row[1]))
@@ -62,10 +62,10 @@ def plot(data=None, output=None):
         for operation in operations:
           all_ops = np.array(operations[int(operation)])
           operations[int(operation)] = {
-            MEAN_KEY: int(round(np.average(all_ops))),
-            MEDIAN_KEY: int(round(np.median(all_ops))),
-            AMAX_KEY: int(round(np.amax(all_ops))),
-            AMIN_KEY: int(round(np.amin(all_ops)))
+            MEAN_KEY: np.average(all_ops),
+            MEDIAN_KEY: np.median(all_ops),
+            AMAX_KEY: np.amax(all_ops),
+            AMIN_KEY: np.amin(all_ops)
           }
 
           if int(round((np.amax(all_ops)))) > throughput_max:
@@ -124,7 +124,8 @@ def plot(data=None, output=None):
         linewidth=.5
       )
     
-      ax1.text(i + 1, operations[operation][AMAX_KEY] + 10, operations[operation][MEAN_KEY],
+      ax1.text(i + 1, operations[operation][AMAX_KEY] + 10,
+        int(round(operations[operation][MEAN_KEY])),
         ha='center',
         va='bottom',
         zorder=6,
