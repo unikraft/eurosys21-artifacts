@@ -195,7 +195,7 @@ case $REQUEST in
 esac
 
 # Should we start building dependencies?
-if [[ $LIST_ALL != 'y' && $NO_DEPS == 'n' ]]; then
+if [[ $LIST_ALL != 'y' && $NO_DEPS == 'n' && $ACTION != "clean" ]]; then
   if  [[ $DOCKER_PLOT == 'y' ]]; then
     log_inf "Building docker..."
     DOCKER_FORCE_BUILD=$DOCKER_FORCE_BUILD make -C $WORKDIR docker
