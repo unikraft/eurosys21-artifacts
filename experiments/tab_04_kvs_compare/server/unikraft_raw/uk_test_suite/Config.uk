@@ -185,3 +185,11 @@ menu APPTESTSUITE_DPDK
 	endif
 	
 endmenu
+
+menu APPTESTSUITE_MTCPAPP
+
+		config APPTESTSUITE_MTCPAPP_PERF
+			bool "mtcp: perf client"
+			select UKDPDK
+			default n
+endmenu

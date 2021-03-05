@@ -56,6 +56,6 @@ $(eval $(call _import_dpdk_lib,librte_mbuf,$(LIBUKDPDKBUILD_BASE)/libs/librte_mb
 $(eval $(call _import_dpdk_lib,librte_net,$(LIBUKDPDKBUILD_BASE)/libs/librte_net))
 $(eval $(call  _import_dpdk_lib,librte_meter,$(LIBUKDPDKBUILD_BASE)/libs/librte_meter))
 $(eval $(call  _import_dpdk_lib,librte_ethdev,$(LIBUKDPDKBUILD_BASE)/libs/librte_ethdev))
-#$(eval $(call _import_dpdk_lib,librte_hash,$(LIBUKDPDKBUILD_BASE)/libs/librte_hash))
-#$(eval $(call _import_dpdk_lib,librte_ip_frag,$(LIBUKDPDKBUILD_BASE)/libs/librte_ip_frag))
+$(eval $(call _import_dpdk_lib,librte_hash,$(LIBUKDPDKBUILD_BASE)/libs/librte_hash))
+$(eval $(call _import_dpdk_lib,librte_ip_frag,$(LIBUKDPDKBUILD_BASE)/libs/librte_ip_frag))
 $(eval $(call  _import_dpdk_lib,libuk_pmd,$(LIBUKDPDKBUILD_BASE)/libs/libuk_pmd))

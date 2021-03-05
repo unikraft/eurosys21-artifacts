@@ -859,7 +859,6 @@ static int virtio_netdev_rxq_dequeue(struct uk_netdev_rx_queue *rxq,
 	ret = virtqueue_buffer_dequeue_burst(rxq->vq, (void **) netbuf, cnt,
 					     &rxq->len[0]);
 	if (*cnt == 0) {
-		uk_pr_info("No data available in the queue\n");
 		return ret;
 	}
 

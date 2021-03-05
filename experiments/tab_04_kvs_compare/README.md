@@ -14,3 +14,6 @@ On the second machine we run 4 different server implementations. We use dpdk vho
 
 # Requirements
 * meson 0.54.0
+
+# Server
+The server is running on uktut1.

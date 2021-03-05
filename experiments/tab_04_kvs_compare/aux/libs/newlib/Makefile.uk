@@ -864,6 +864,12 @@ LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/tzvars.c
 LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/time/wcsftime.c
 
 ################################################################################
+# Newlib/libc code -- unix
+################################################################################
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/unix/basename.c
+LIBNEWLIBC_SRCS-y += $(LIBNEWLIB_LIBC)/unix/dirname.c
+
+################################################################################
 # Newlib/libc code -- setjmp, longjmp
 ################################################################################
 LIBNEWLIBC_SRCS-$(CONFIG_ARCH_X86_64) += $(LIBNEWLIB_LIBC)/machine/x86_64/setjmp.S

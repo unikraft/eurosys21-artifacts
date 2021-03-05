@@ -1,0 +1,5 @@
+menuconfig LIBUUID
+	   bool "libuuid - library for unique id generation"
+	   default n
+           select HAVE_LIBC
+           select UKUNISTD
