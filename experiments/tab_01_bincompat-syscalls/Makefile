@@ -22,7 +22,8 @@ run:
 
 .PHONY: plot
 plot:
-	@echo "Not possible."
+	$(WORKDIR)/parse.sh "$(WORKDIR)"
+	$(WORKDIR)/process.sh "$(WORKDIR)"
 
 .PHONY: clean
 clean:
