@@ -6,7 +6,7 @@ for d in *; do
         echo "Enter to $d repository"
         cd $d
     
-        if [[ -f "build/app-std_kvm-x86_64" ]]; then 
+        if [[ -f "app-std_kvm-x86_64" ]]; then
             echo "$d -> Build without the compat. layer"
             echo "$d,V" >> "../$CSV_FILE"
         else

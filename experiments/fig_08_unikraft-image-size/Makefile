@@ -31,7 +31,7 @@ prepare: helloworld nginx redis sqlite
 helloworld: helloworld_default helloworld_dce helloworld_lto helloworld_dce_lto
 helloworld_%:
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v list pull -w .unikraft unikraft@0.4)
-	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
+	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT) -F)
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft build)
 	cp $(CONFIGSDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@_$(PLAT)-$(ARCH)
 
@@ -45,7 +45,7 @@ nginx_%:
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v list pull -w .unikraft lib/lwip@0.4)
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v list pull -w .unikraft lib/openssl@0.4)
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v list pull -w .unikraft lib/nginx@0.4)
-	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
+	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT) -F)
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft build)
 	cp $(CONFIGSDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@_$(PLAT)-$(ARCH)
 
@@ -58,7 +58,7 @@ redis_%:
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v list pull -w .unikraft lib/lwip@0.4)
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v list pull -w .unikraft lib/redis@0.4)
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v list pull -w .unikraft redis@0.4)
-	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
+	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT) -F)
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft build)
 	cp $(CONFIGSDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@_$(PLAT)-$(ARCH)
 
@@ -69,7 +69,7 @@ sqlite_%:
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v list pull -w .unikraft lib/pthread-embedded@0.4)
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v list pull -w .unikraft lib/newlib@0.4)
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v list pull -w .unikraft lib/sqlite@0.4)
-	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
+	$(call DRUN,$(CONFIGSDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT) -F)
 	$(call DRUN,$(CONFIGSDIR)/$@,kraft build)
 	cp $(CONFIGSDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@_$(PLAT)-$(ARCH)
 

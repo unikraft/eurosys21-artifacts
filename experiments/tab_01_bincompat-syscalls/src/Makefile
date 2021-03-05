@@ -30,6 +30,6 @@ syscallbench: bench.o
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 clean:
-	$(RM) bench *.o
+	$(RM) syscallbench *.o
 
 .PHONY: clean

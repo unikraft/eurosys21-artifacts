@@ -6,6 +6,15 @@ for d in *; do
      
         echo "Compiling $d ... This may take some times"
         make &> "make_output_$d.txt" 
+        
+        if [[ -f "build/app-compat_kvm-x86_64" ]]; then
+            mv build/app-compat_kvm-x86_64 app-compat_kvm-x86_64
+        fi
+        
+        if [[ -f "build/app-std_kvm-x86_64" ]]; then
+            mv build/app-std_kvm-x86_64 app-std_kvm-x86_64
+        fi
+        make properclean
         cd ..
         echo "---------------------------------------------"
     fi

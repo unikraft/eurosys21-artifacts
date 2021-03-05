@@ -17,9 +17,9 @@ plot:
 	$(CP) $(WORKDIR)/syscall-heatmap.svg $(PLOT)
 
 prepare:
-	$(WORKDIR)./setup.sh
+	$(WORKDIR)/setup.sh
 
 run:
-	$(WORKDIR)./run_all.sh
+	$(WORKDIR)/run_all.sh
 
 .PHONY:	all clean plot prepare run

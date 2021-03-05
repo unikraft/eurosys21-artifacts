@@ -24,7 +24,7 @@ if [ ! -d "${OUT_BASE}" ]; then
 fi
 
 cd "$2"
-find ./ -print0 \
+find ./ \( ! -iname ".gitkeep" \) -print0 \
     | cpio --null -ov --format=newc \
     | gzip -9 > "${OUT_BASE}/${OUT_FILE}"
 exit $?
