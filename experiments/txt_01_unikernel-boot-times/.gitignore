@@ -2,3 +2,15 @@
 images
 rawdata
 results
+mirage-noop/_build
+mirage-noop/.merlin
+mirage-noop/.mirage.config
+mirage-noop/dune
+mirage-noop/dune-project
+mirage-noop/dune.build
+mirage-noop/dune.config
+mirage-noop/key_gen.ml
+mirage-noop/main.ml
+mirage-noop/Makefile
+mirage-noop/*.opam
+mirage-noop/myocamlbuild.ml
