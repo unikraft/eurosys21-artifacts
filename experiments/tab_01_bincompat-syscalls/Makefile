@@ -18,7 +18,7 @@ prepare:
 
 .PHONY: run
 run:
-	@-
+	$(WORKDIR)/run.sh "$(WORKDIR)"
 
 .PHONY: plot
 plot:
