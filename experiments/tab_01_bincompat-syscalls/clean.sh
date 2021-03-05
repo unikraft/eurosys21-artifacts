@@ -21,6 +21,5 @@ make clean
 ##
 rm -rvf "${WORKDIR}/cloned"
 rm -rvf "${WORKDIR}/eval"
-rm -rvf "${WORKDIR}/results"
 
 exit $?

@@ -21,7 +21,7 @@ Each figure, table and corresponding experiment are listed below:
 | [`fig_03`](/experiments/fig_03_unikraft-helloworld-deps/README.md)  | <img src="/plots/fig_03_unikraft-helloworld-deps.svg" width="200" /> | "Hello World" Unikraft dependency graph.                                                                                                                                                                                      | 0h 1m        |
 | [`fig_05`](/experiments/fig_05_syscall-heatmap/README.md)           | <img src="/plots/fig_05_syscall-heatmap.svg" width="200" />          | Syscalls required by a set of 30 popular server applications versus syscalls currently supported by Unikraft.                                                                                                                 |              |
 | [`fig_07`](/experiments/fig_07_syscall-support/README.md)           | <img src="/plots/fig_07_syscall-support.svg" width="200" />          | Syscall support for [top 30 server apps](https://popcon.debian.org/). All apps are close to being supported, and several already work even if some syscalls are stubbed (SQLite, NGINX).                                      |              |
-| [`fig_08`](/experiments/fig_08_unikraft-image-size/README.md)       | <img src="/plots/fig_08_unikraft-image-size.svg" width="200" />      | Image sizes of Unikraft applications.  We include  permutations with and without LTO and DCE.                                                                                                                                 | 1h 10m       |
+| [`fig_08`](/experiments/fig_08_unikraft-image-size/README.md)       | <img src="/plots/fig_08_unikraft-image-size.svg" width="200" />      | Image sizes of Unikraft applications.  We include  permutations with and without LTO and DCE.                                                                                                                                 | 0h 1m        |
 | [`fig_09`](/experiments/fig_09_compare-image-size/README.md)        | <img src="/plots/fig_09_compare-image-size.svg" width="200" />       | Image sizes for representative applications with Unikraft and other OSes, stripped, without LTO and DCE.                                                                                                                      | 0h 5m        |
 | [`fig_10`](/experiments/fig_10_unikraft-boot/README.md)             | <img src="/plots/fig_10_unikraft-boot.svg" width="200" />            | Boot time for Unikraft images with different virtual machine monitors.                                                                                                                                                        | 0h 9m        |
 | [`fig_11`](/experiments/fig_11_compare-min-mem/README.md)           | <img src="/plots/fig_11_compare-min-mem.svg" width="200" />          | Minimum memory needed to run different applications using different OSes, including Unikraft.                                                                                                                                 | 0h 50m       |
@@ -167,3 +167,10 @@ Influential Environmental Variables
 
 Each experiment, and therefore directory listed in `experiments/`, is populated
 with a `README.md` which includes more detail about the individual experiment.
+
+## Notes on disk storage
+
+We use intermediate Docker containers for building images and accessing
+pre-built binaries for many of the experiments.  In addition to this, this 
+repository clones the Linux kernel to make changes for testing.  As a result,
+expected disk storage utilized to conduct all experiments is ~50GB.

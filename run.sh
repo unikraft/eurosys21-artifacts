@@ -83,6 +83,7 @@ function install_dependencies() {
         net-tools \
         libmhash-dev \
         libmhash2 \
+        linux-cpupower \
         gawk \
         musl-tools \
         qemu-utils
