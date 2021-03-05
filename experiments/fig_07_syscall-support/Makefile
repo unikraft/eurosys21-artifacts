@@ -14,7 +14,7 @@ clean:
 
 plot:
 	$(WORKDIR)/plot.sh
-	$(CP) $(WORKDIR)/syscall-support.svg $(PLOT)
+	$(CP) $(WORKDIR)/fig_07_syscall-support.svg $(PLOT)
 
 prepare:
 	$(WORKDIR)/setup.sh

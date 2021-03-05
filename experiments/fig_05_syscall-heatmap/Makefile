@@ -14,7 +14,7 @@ clean:
 
 plot:
 	$(WORKDIR)/plot.sh
-	$(CP) $(WORKDIR)/syscall-heatmap.svg $(PLOT)
+	$(CP) $(WORKDIR)/fig_05_syscall-heatmap.svg $(PLOT)
 
 prepare:
 	$(WORKDIR)/setup.sh
