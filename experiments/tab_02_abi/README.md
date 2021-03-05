@@ -110,7 +110,6 @@ Once all the results are generated, run the `./plot.sh` script to
 generate the table 2 as a CSV file. This one will be generated in the
 current folder with the following name: `merged.csv`.
 
-
 ### Further information about the archive
 
 The archive contains different folders:
@@ -133,6 +132,6 @@ all the microlibs which contains the objects built from their native
 build system. These ones are prefixed with the `lib-objects-` keyword.
 Within each `lib-object` folder, there is a `objs` folder which
 contains the object files of the application (built with their native 
-build system using gcc and glic). In addition, source files are also
-provided.
+build system using gcc and glibc). In addition, source files are also
+included.
 - `unikraft`: this folder contains the main unikraft code.
