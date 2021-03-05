@@ -26,4 +26,4 @@ docker exec $CONTAINER_NAME make depends
 docker exec $CONTAINER_NAME make
 
 mkdir -p $IMAGESDIR
-mv $(WORKDIR)/mirage-noop/noop.hvt $IMAGESDIR/mirage-noop.hvt
+mv $WORKDIR/mirage-noop/noop.hvt $IMAGESDIR/mirage-noop.hvt
