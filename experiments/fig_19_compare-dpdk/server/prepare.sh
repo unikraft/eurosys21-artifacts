@@ -1,6 +1,10 @@
 cd unikraft/uk_test_suite/ && make fetch
-#cd build/libukdpdkbuild/ln -s ~/Unikraft_dpdk/lib_src/dpdk/ dpdk-19.08
-cd ../..
+cd build/libukdpdkbuild/origin/
+rm -rf dpdk-19.08
+ln -s ~/Unikraft_dpdk/lib_src/dpdk/ dpdk-19.08
+cd ../../..
+make -j12
+cd ../../
 
 
 echo "Getting the Linux VM with DPDK"
