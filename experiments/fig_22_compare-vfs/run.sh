@@ -32,11 +32,13 @@ run_vm_benchmark()
     done
 }
 
+TOOLS="$( readlink -f "${1:-.}/../../tools" )"
 RESULTS="${1:-.}/eval"
 TIMES=25
 
 cd "{1:-.}"
 mkdir -pv "${RESULTS}"
+"${TOOLS}/tsc_mhz" > "${RESULTS}/tsc_mhz.txt"
 run_vm_benchmark	"${RESULTS}/linux"		"../tab_01_bincompat-syscalls/linux/vmlinuz-5.11.0-sysnoop+"	"src/fsbench.initrd.gz"	""			$TIMES
 run_vm_benchmark	"${RESULTS}/linux-nomitig"	"../tab_01_bincompat-syscalls/linux/vmlinuz-5.11.0-sysnoop+"	"src/fsbench.initrd.gz"	""			$TIMES "mitigations=off"
 run_vm_benchmark	"${RESULTS}/unikraft"		"src/build/fsbench-tlsf_kvm-x86_64"				"src/fsbench.cpio"	"src/fsbench.shfs"	$TIMES
