@@ -1,0 +1,31 @@
+sudo: required
+git:
+  depth: 3
+  submodules: false
+env:
+  matrix:
+  - OS_TYPE=ubuntu OS_VERSION=18.04 OS_NAME=bionic
+services:
+- docker
+addons:
+  apt:
+    update: true
+before_install:
+- sudo apt-get -qq update
+- sudo docker pull ${OS_TYPE}:${OS_VERSION}
+script:
+- docker run -ti -v ${TRAVIS_BUILD_DIR}:/work:rw ${OS_TYPE}:${OS_VERSION} /bin/bash
+  -c "cd /work; ./tests.sh ${OS_TYPE} ${OS_NAME}"
+before_deploy:
+- cd ${TRAVIS_BUILD_DIR}
+- dpkg-deb -b tmp pte-hermit_1.2.2-1_amd64.deb
+deploy:
+  provider: bintray
+  on:
+    branch: hermit
+  skip_cleanup: true
+  file: ".bintray_descriptor.json"
+  user:
+    secure: tIHWBxEIFYFFRHCTiTttvEhEJVl/QRfOKkR2qyjybb+Jty361/+RotbI/AsCHJ7ldEXKgirpZsOyKsjwy7NlvOuVpyoe4oOzmex+P8dIldwZTraLYmQkiNW473+st0FgFbZvTOlDC3F9te6k9mbKUJDd5W0QM/Nwbnz8+OcPYCd34MjCSFn0uMEaGzvvc75AL7KzB4YVor7w7luvKEDdvCOcA5R1JpI3x7tHYyUPw/KmXrKmax1XWIuiW8msJPp8jdRvwu9vIW101ZIKDuqDdzbQ2YJU7Xg3Owkdbmct15bsexbPEser1H8zMMp2cG9SZzhWYD5NlPad9SlQs/pNovZsYoEHIVazgyl1VXqQfYQO3Z9JdU84BhM5ecR9kosIDxVraqrxTE+Cb3xvdqI2Ck/mZoGTZUUtOzpkgQ7L9sDHZjDY7qIQvBZXUpYOKW806+ZJqrkozw7vMxIQpdK6Nefb1J1loe/LTVgMAM1u13x7GpJplaXDQ0Tqrk27hM21bEfqS3qSeb++idw0a2pcrHC2oDCJbZqFZF0nIID+qZUYeGH8mKKd2t1f9Tj1/jiCKjedGWzAHx5631RC7R4Ly0tKPhTO0Z9PqfvyHk7IOF7fvNwlZTpf+tOBQKl0TO9Cz3npmqW04pPyG0qbkhvkr6ea7SgS+Ov5KVPB5WzC7NA=
+  key:
+    secure: sjkDEBrnLIRjRbz1kO5VAb/QjIbY8bNcTejbuKHSAwmqKRzHCaUhzNlXvf5LGhqF1g+5pB7Xb4VhkvrAW3nvzKovvwXDvYTqF/oESBXBB28VYSY5Xt8sp4mLUoHA3yuNl1QNJmmHmALE584i4LU73IGelLbq+DG4KhM6SRqrpciY/3oSsDaaqFyqBgFbBjoA1NnUoYeziC8YdHgV92JgpRvp6Z72eVsp19itMr2NoV3HpBr/63Z7qkBmAcHc1xRYVPmkFMMnMUDLiEOHhRusdZLr7e+yQ1R7qq1r+t983qERA2i9DxqJgxhhpQ1fQVSqO4KuUIH0vnwAYZAxJzkxvzlNxkhO8W++lpqqJrCR73EwrLC5FMCYOU5I4pROKDJuUvT7JfVa40rvupow000dzQapjtfvEjPG70DPvjrWDrMY15EHIiwFpir8ecsXI8qhVPSdgwKyrEkTbBzb2bNymrlZQH7m4H13vnFnI53eEjEsjvibZeGbg0/BDr43bSSUAzUgwLe7uODj3VDw/FK/qI5fxPCrylC2zTgxF0fdWpyva5CKZNXYGxTEKTbaudcoqnfg6yEq0bhaEbAWMm98uDm7CUCISg2hLCUJGeX5rSwmhm/K3TrOYoo+BStT5u7i+8qcHvdoNgu2aYZ+wMmbT+04t5KN98NlFGxRQEtbzCE=

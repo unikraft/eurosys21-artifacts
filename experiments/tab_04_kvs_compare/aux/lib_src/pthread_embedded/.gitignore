@@ -1,0 +1,10 @@
+*.o
+*.a
+*.dep
+Makefile
+config.log
+config.status
+debian/files
+debian/pthread-embedded-hermit.debhelper.log
+debian/pthread-embedded-hermit.substvars
+debian/pthread-embedded-hermit/
