@@ -143,7 +143,7 @@ def plot(data=None, output=None):
       linewidth=.5
     )
     
-    ax1.text(i + 1, throughput[MEAN_KEY] + yerr + 2, "%3.1f" % throughput[MEAN_KEY],
+    ax1.text(i + 1, throughput[MEAN_KEY] + yerr + 15, "%3.1f" % throughput[MEAN_KEY],
       ha='center',
       va='bottom',
       zorder=6,
