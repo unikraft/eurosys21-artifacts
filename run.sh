@@ -59,6 +59,25 @@ Influential Environmental Variables
 EOF
 }
 
+# Parse flag arguments
+for i in "$@"; do
+  case $i in
+    -v|--verbose)
+      VERBOSE=y; shift;;
+    -l|--list)
+      LIST_ALL=y; shift;;
+    --no-docker-plot)
+      DOCKER_PLOT=n; shift;;
+    --no-deps)
+      NO_DEPS=y; shift;;
+    -h|--help)
+      _help; exit 0;;
+    *)
+      ;;
+  esac
+done
+
+
 # Dependency management
 function install_dependencies() {
   local DISTRO=$(lsb_release -c -s)
@@ -151,25 +170,6 @@ function perform() {
       ;;
   esac
 }
-
-
-# Parse flag arguments
-for i in "$@"; do
-  case $i in
-    -v|--verbose)
-      VERBOSE=y; shift;;
-    -l|--list)
-      LIST_ALL=y; shift;;
-    --no-docker-plot)
-      DOCKER_PLOT=n; shift;;
-    --no-deps)
-      NO_DEPS=y; shift;;
-    -h|--help)
-      _help; exit 0;;
-    *)
-      ;;
-  esac
-done
 
 # Save positional arguments
 REQUEST=$1
