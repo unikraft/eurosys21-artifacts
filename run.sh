@@ -99,10 +99,14 @@ function install_dependencies() {
       if [[ $NO_DOCKER == 'y' ]]; then
         apt-get install -y \
           python3 \
+          python3-pip \
           python3-click \
           python3-tabulate \
           python3-numpy \
+          python3-graphviz \
           python3-matplotlib \
+          musl-tools \
+          texlive-full \
           texlive-fonts-recommended \
           texlive-fonts-extra \
           dvipng
