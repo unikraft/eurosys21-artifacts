@@ -1,5 +1,6 @@
 
 cd xen/apps/app-helloworld/
+make
 
 echo "" > xen_9p.results
 echo "With 9pfs (ns)"
