@@ -161,7 +161,9 @@ function perform() {
             PLOT=/root/workspace/plots/$BASENAME.$PLOT_FORMAT \
             plot
       else
-        make -C $WORKDIR/experiments/$BASENAME plot
+        make -C $WORKDIR/experiments/$BASENAME \
+          PLOT=/root/workspace/plots/$BASENAME.$PLOT_FORMAT \
+          plot
       fi
       ;;
     prepare|run|clean)
