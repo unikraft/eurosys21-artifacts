@@ -140,11 +140,12 @@ care of manually).
 1. Before running any of these experiments, prepare your host with the
    recommendations detailed above in [prerequisites](#prerequisites);
 
-2. Many of the experiments use [Docker](https://docs.docker.com/get-docker/) as
-   an intermediate tool for creating build and test environments (along with
-   testing Docker itself).  Please install Docker on your system to continue;
+2. Many of the experiments use Docker as an intermediate tool for creating build
+   and test environments (along with testing Docker itself).  Please
+   [install Docker](https://docs.docker.com/get-docker/) on your system to
+   continue;
 
-3. Once Docker is installed, clone this repository:
+3. Once Docker is installed, clone this repository
    ```bash
    git clone https://github.com/unikraft/eurosys21-artifacts.git
    ```
