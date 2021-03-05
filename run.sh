@@ -149,6 +149,8 @@ function perform() {
 
   log_inf "Running $ACTION on $BASENAME..."
 
+  export PATH=$PATH:$WORKDIR/tools
+
   case $ACTION in
     plot)
       if [[ $DOCKER_PLOT == 'y' ]]; then
