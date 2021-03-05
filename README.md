@@ -50,6 +50,27 @@ The paper also mentions several results in-line, which can be found at:
 | [`txt_01`](/experiments/txt_01_unikernel-boot-times/README.md) | Unikernel boot time baseline.  | 0h 21m   |
 | [`txt_02`](/experiments/txt_02_9pfs-boot-times/README.md)      |                               |          |
 
+## Repository structure
+
+We have organised this repository as follows:
+
+ * `experiments/` - All experiments are listed in this directory, each
+   experiment has a corresponding `README.md` which explains in more detail how
+   the experiment works and how to run it.  Along with this, a `Makefile` is
+   provided which can be used to:
+    - `prepare` the experiment, usually involving downloading and building
+      relevant images, tools, and auxiliary services necessary for running the
+      experiment;
+    - `run` which runs the experiment; 
+    - `plot` which produces the figure or table; and,
+    - `clean` removes intermediate build files.
+       
+ * `build/` - Intermediate build artifacts necessary for experiments to run.  
+   This will be populated by the experiment's preparation (`prepare`) step;
+ * `support/` which contains definitions of container images, `Dockerfile`s,
+   which are used by multiple experiments; and,
+ * `tools/` which contain programs which are used by multiple experiments.
+
 ## Prerequisites
 
 ### Hardware
