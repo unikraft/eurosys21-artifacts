@@ -37,3 +37,5 @@ else
     echo "$FILE4 does not exist. Perform the VM experiment first"
     exit 1
 fi
+
+python3 plot.py --data $DATA_FOLDER --output fig_20_compare-9pfs.svg

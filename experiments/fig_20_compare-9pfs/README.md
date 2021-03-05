@@ -64,6 +64,6 @@ procedure below:
 
 ### Generate the graph
 
-Once all the results are generated, run the `./plot.sh` script to
+Once all the results are generated, run the `./plot.sh` and script to
 generate the 9pfs latency plot. This one will be generated in the
-current folder with the following name: `compare_9pfs_lines.pdf`.
+current folder with the following name: `fig_20_compare-9pfs.svg`.
