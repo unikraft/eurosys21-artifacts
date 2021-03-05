@@ -7,6 +7,13 @@ DOCKER_FORCE_BUILD ?= n
 IMAGES ?= $(subst Dockerfile.,,$(notdir $(wildcard $(WORKDIR)/support/Dockerfile.*)))
 IMAGE_PREFFIX ?= unikraft/eurosys21-artifacts-
 
+#
+# Targets
+#
+
+.PHONY: all
+all: docker
+
 .PHONY: docker
 docker: $(addprefix docker-,$(IMAGES))
 docker-%:
