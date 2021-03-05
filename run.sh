@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
 # Authors: Alexander Jung <a.jung@lancs.ac.uk>
-WORKDIR=$(dirname $0)
+WORKDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 . $WORKDIR/support/common.sh
 
 # Influential environmental variables
