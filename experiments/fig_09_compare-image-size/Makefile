@@ -59,7 +59,7 @@ unikraft-nginx:
 	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/lwip@0.4)
 	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/openssl@0.4)
 	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/nginx@0.4)
-	$(call DRUN,$(IMPLDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT) -F)
 	$(call DRUN,$(IMPLDIR)/$@,kraft build)
 	cp $(IMPLDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@
 
@@ -71,7 +71,7 @@ unikraft-redis:
 	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/lwip@0.4)
 	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/redis@0.4)
 	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft redis@0.4)
-	$(call DRUN,$(IMPLDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT) -F)
 	$(call DRUN,$(IMPLDIR)/$@,kraft build)
 	cp $(IMPLDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@
 
@@ -81,7 +81,7 @@ unikraft-sqlite:
 	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/pthread-embedded@0.4)
 	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/newlib@0.4)
 	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft lib/sqlite@0.4)
-	$(call DRUN,$(IMPLDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT) -F)
 	$(call DRUN,$(IMPLDIR)/$@,kraft build)
 	cp $(IMPLDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@
 
