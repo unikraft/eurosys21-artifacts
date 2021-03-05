@@ -81,6 +81,11 @@ function install_dependencies() {
         libuuid1 \
         bridge-utils \
         net-tools \
+        bison \
+        curl \
+        flex \
+        wget \
+        sudo \
         libmhash-dev \
         libmhash2 \
         linux-cpupower \
