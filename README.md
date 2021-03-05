@@ -47,8 +47,8 @@ The paper also mentions several results in-line, which can be found at:
 
 | Text                                                           | Experiment | Est. runtime |
 |----------------------------------------------------------------|------------|--------------|
-| [`txt_01`](/experiments/txt_01_unikernel-boot-times/README.md) |            |              |
-| [`txt_02`](/experiments/txt_02_9pfs-boot-times/README.md)      |            |              |
+| [`txt_01`](/experiments/txt_01_unikernel-boot-times/README.md) | Unikernel boot time baseline  | 0h 21m   |
+| [`txt_02`](/experiments/txt_02_9pfs-boot-times/README.md)      |                               |          |
 
 ## Prerequisites
 
