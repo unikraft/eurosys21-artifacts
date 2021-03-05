@@ -77,17 +77,15 @@ We have organised this repository as follows:
 
 ### Hardware
 
-Before you can run these experiments, you will need to prepare your host
-environment.  In the paper, we used three different set ups:
+Before you can run these experiments, you will need to prepare 3 physical host
+environments.  In the paper, we used three different set ups:
 
  1. A Linux host with KVM enabled and Linux kernel 4.19 (most
     experiments). We use a somewhat older kernel because HermiTux will
     not run with newer versions, as noted [here](https://github.com/ssrg-vt/hermitux/issues/12).
- 2. A Linux host with a recent Linux kernel (5.11) used as a DPDK packet
-    generator ([`fig_19`](/experiments/fig_19_compare-dpdk/README.md)).  In
-    addition, we patch the kernel with [these patches](#) to conduct syscall
-    overhead experiments ([`tab_01`](/experiments/tab_01_bincompat-syscalls/README.md)).
- 3. A Xen host used for Xen 9pfs experiments.). 
+ 2. A Linux host with Linux kernel 4.19 used as a DPDK packet generator
+    ([`fig_19`](/experiments/fig_19_compare-dpdk/README.md)).
+ 4. A Xen host used for Xen 9pfs experiments.
 
 A single server can be used for almost all experiments, though it would require
 installing different Linux kernel versions, or the Xen hypervisor and rebooting
@@ -103,8 +101,9 @@ cards with the 82599EB chipset.
 
 ### Software
 
-All experiments were run on Debian Buster and all install and preparation
-scripts target this distribution.
+All experiments were run on a physical host with Debian Buster with Linux 4.19
+installed.  All install and preparation scripts in this repository target this
+distribution and kernel version.
 
 For all set ups, we disabled Hyper-Threading (`noht`), isolate 4 CPU cores
 (e.g. `isocpus=4,5,6,7`) and allow for user-defined CPU frequency
