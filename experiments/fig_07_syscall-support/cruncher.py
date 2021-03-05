@@ -11,6 +11,7 @@ import json
 import argparse
 import xlrd
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
@@ -61,6 +62,61 @@ syscalls = {}
 #   "apps": list of application names
 #   "num_apps": number of of applications using the syscall
 undefined_syscalls = {}
+
+
+
+SMALL_SIZE = 12
+MEDIUM_SIZE = 14
+LARGE_SIZE = 18
+BIGGER_SIZE = 24
+KBYTES = 1000.0
+
+PATTERNS = ('-', '+', 'x', '\\', '.')
+
+bar_colors = [
+  '#618c84',  # dark green
+  '#333333',  # red
+  '#91c6e7',  # blue
+  '#fff3cd',  # yellow
+  '#7c4f4f',  # dark yellow
+  '#E06E36',  # orange
+  '#ededed',  # gray
+  '#91c6e7',  # light blue
+  '#49687c',  # dark blue 
+  '#a2d9d1',  # thyme
+]
+
+def apply_plot_style(plt):
+    plt.style.use('classic')
+    plt.tight_layout()
+
+    plt.rcParams['text.usetex'] = False
+    plt.rc('pdf', fonttype=42)
+
+    # plt.rcParams["font.family"] = "Arial"
+
+    # plt.rc('font', **{
+    #   'family': 'sans-serif',
+    #   'sans-serif': ['DejaVu Sans'] # ['Computer Modern']
+    # })
+
+    plt.rc('font',**{
+        'family':'sans-serif',
+        'sans-serif':['Helvetica']}
+    )
+    plt.rc('text', usetex=True)
+
+
+    # plt.rcParams['font.sans-serif'] = "Comic Sans MS"
+    plt.rcParams['font.family'] = "sans-serif"
+
+    plt.rc('font', size=MEDIUM_SIZE)         # controls default text sizes
+    plt.rc('axes', titlesize=MEDIUM_SIZE)    # fontsize of the axes title
+    plt.rc('axes', labelsize=LARGE_SIZE)     # fontsize of the x and y labels
+    plt.rc('xtick', labelsize=LARGE_SIZE)   # fontsize of the tick labels
+    plt.rc('ytick', labelsize=MEDIUM_SIZE)   # fontsize of the tick labels
+    plt.rc('legend', fontsize=MEDIUM_SIZE)   # legend fontsize
+    # plt.rc('figure', titlesize=BIGGER_SIZE, titleweight='bold')  # fontsize of the figure title
 
 
 def process_application_json(app_name, json_data):
@@ -409,26 +465,39 @@ def plot_syscall_support_per_app():
         only_10_list.append(only_10)
         only_5_to_10_list.append(only_5_to_10)
 
-    fig, ax = plt.subplots()
+    apply_plot_style(plt)
+
+    fig = plt.figure(figsize=(8, 4))
+    ax = fig.add_subplot(1,1,1)
+    # fig, ax = plt.subplots()
     #p1 = plt.bar(app_list, supported_list, color='white', edgecolor='black') #, hatch='x')
     #p2 = plt.bar(app_list, not_supported_list, bottom=supported_list, color='black', edgecolor='black') #, hatch='/')
     #p3 = plt.bar(app_list, only_10_list, bottom=supported_list, color='gray', edgecolor='black') #, hatch='+')
     #p4 = plt.bar(app_list, only_5_list, bottom=supported_list, color='lightgray', edgecolor='black') #, hatch='*')
-    p1 = plt.bar(app_list, supported_list)
-    p2 = plt.bar(app_list, not_supported_list, bottom=supported_list)
-    p3 = plt.bar(app_list, only_10_list, bottom=supported_list)
-    p4 = plt.bar(app_list, only_5_list, bottom=supported_list)
+    p1 = plt.bar(app_list, supported_list, color=bar_colors[0])
+    p2 = plt.bar(app_list, not_supported_list, bottom=supported_list, color=bar_colors[1])
+    p3 = plt.bar(app_list, only_10_list, bottom=supported_list, color=bar_colors[2])
+    p4 = plt.bar(app_list, only_5_list, bottom=supported_list, color=bar_colors[3])
 
-    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter("%3.0f%%"))
     ax.yaxis.grid(linestyle='dotted')
-    plt.xticks(np.arange(len(app_list)), app_list, rotation=45)
+    plt.xticks(np.arange(len(app_list)), app_list, rotation=90, fontsize=MEDIUM_SIZE)
     plt.yticks(np.arange(0, 101, 10))
+    # ax.yaxis.set_major_formatter(ticker.FormatStrFormatter("%3.0f%%"))
+    ax.yaxis.set_major_formatter(ticker.PercentFormatter())
     #plt.title('System call support per-application')
     #plt.xlabel('Applications')
     plt.ylabel('System call support', fontsize=16)
-    plt.legend((p1[0], p4[0], p3[0], p2[0]), ('Supported syscalls', 'If top 5 syscalls implemented', 'If top 10 syscalls implemented', 'If remaining syscalls implemented'))
+    plt.legend((p1[0], p4[0], p3[0], p2[0]), (
+        'Supported syscalls',
+        'If top 5 syscalls implemented',
+        'If top 10 syscalls implemented',
+        'If remaining syscalls implemented'
+    ), loc='lower left')
 
-    plt.savefig("syscall-support.svg")
+    # plt.show()
+    fig.tight_layout()
+    fig.savefig("fig_07_syscall-support.svg")
+    print("Figure saved into the current repo with the name: fig_07_syscall-support.svg")
 
 
 def main():

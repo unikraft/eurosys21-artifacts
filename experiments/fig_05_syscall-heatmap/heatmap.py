@@ -198,8 +198,8 @@ def plot(data, data_sheet, labels, display_syscall_name, save_heatmap):
         else:
             for i,t in enumerate(ax.texts): t.set_text("")
     if save_heatmap:
-        plt.savefig("syscall-heatmap.svg")
-        print("Figure saved into the current repo with the name syscall-heatmap.svg")
+        plt.savefig("fig_05_syscall-heatmap.svg")
+        print("Figure saved into the current repo with the name: fig_05_syscall-heatmap.svg")
     else:
         plt.show()
 
