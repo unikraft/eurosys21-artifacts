@@ -41,9 +41,9 @@ def plot(data=None, output=None):
   component_colors = {
   }
   text_xlabels = {
-    'buddy': 'Binary Buddy',
-    'mimalloc': 'mimalloc',
-    'region': 'bootalloc',
+    'buddy': 'Binary buddy',
+    'mimalloc': 'Mimalloc',
+    'region': 'Bootalloc',
     'tinyalloc': 'tinyalloc',
     'tlsf': 'TLSF'
   }
