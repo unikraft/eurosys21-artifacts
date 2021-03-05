@@ -26,6 +26,5 @@ rm -vf "${SRC}/fsbench.initrd.gz"
 ##
 rm -rvf "${WORKDIR}/cloned"
 rm -rvf "${WORKDIR}/eval"
-rm -rvf "${WORKDIR}/results"
 
 exit $?

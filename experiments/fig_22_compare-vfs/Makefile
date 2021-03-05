@@ -38,5 +38,5 @@ clean:
 	@./clean.sh "$(WORKDIR)"
 
 .PHONY: properclean
-properclean:
-	@-
+properclean: clean
+	@rm -rvf "${WORKDIR}/results"
