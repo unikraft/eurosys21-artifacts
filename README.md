@@ -18,16 +18,16 @@ the paper: "Unikraft: Fast, Specialized Unikernels the Easy Way"
      repository and recreate the experiments.  
      4.1. [`run.sh` Usage](#41-runsh-usage): Provides the help page for the
           `run.sh` wrapper program.
-  5. [Notes](#7-notes): Additional notes.
+  5. [Notes](#5-notes): Additional notes.
 
 ## 1. Experiments
 
 The paper lists 22 figures and 3 tables worth of experiments, which both
 demonstrate [Unikraft](http://unikraft.org)'s capabilities against other
-existing, similar frameworks as well as demonstrating the
-exstensibility of Unikraft itself.  Each experiment and the relevant scripts to
-generate the data and subsequent plot are included in this reposit
-Each figure, table and corresponding experiment are listed below:
+existing, similar frameworks as well as demonstrating the exstensibility of
+Unikraft itself.  Each experiment and the relevant scripts to generate the data
+and subsequent plot are included in this reposit Each figure, table and
+corresponding experiment are listed below:
 
 | Figure                                                              |                                                                       | Description                                                                                                                                                                                                                   | Est. runtime |
 |---------------------------------------------------------------------|-----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
