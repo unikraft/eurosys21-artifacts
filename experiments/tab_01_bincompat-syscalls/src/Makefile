@@ -4,7 +4,7 @@ CFLAGS+=-Wall -Wextra -O0 -g3 -fpie
 LDFLAGS+=-static-pie
 LDLIBS +=
 
-#include .config
+-include .config
 ifeq ($(CONFIG_SYSCALL_WARMUP),y)
 CFLAGS += -DCONFIG_WARMUP=1
 endif
