@@ -1,7 +1,7 @@
 # Unikraft EuroSys'21 Artifacts
 
 This repository contains the artifacts, including experiments and graphs, for
-the paper: "Unikraft: Building Fast, Specialized Unikernels the Easy Way"
+the paper: "Unikraft: Fast, Specialized Unikernels the Easy Way"
 
 
 ## Experiments
