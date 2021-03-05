@@ -78,7 +78,9 @@ We have organised this repository as follows:
 ### Hardware
 
 Before you can run these experiments, you will need to prepare 3 physical host
-environments.  In the paper, we used three different set ups:
+environments.  **Physical hosts as opposted to virtual machines are recommended
+as they provide better performance.**  In the paper, we used three different
+setups:
 
  1. A Linux host with KVM enabled and Linux kernel 4.19 (most
     experiments). We use a somewhat older kernel because HermiTux will
