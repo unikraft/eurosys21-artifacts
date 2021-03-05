@@ -1,4 +1,4 @@
-]#!/bin/bash
+#!/bin/bash
 
 process_typescript()
 {
