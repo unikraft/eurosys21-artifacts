@@ -234,3 +234,6 @@ with a `README.md` which includes more detail about the individual experiment.
   expected disk storage utilized to conduct all experiments is ~50GB.
 
 * The preparation step for all experiments usually exceeds several hours.
+
+* Experiments cannot be run in parallel due to overlapping CPU core affinities,
+  which will affect measurements.

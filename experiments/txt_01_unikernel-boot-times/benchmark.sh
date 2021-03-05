@@ -5,9 +5,13 @@ set -x
 
 source ../common/set-cpus.sh
 
+TOOLSDIR=$(pwd)/../../tools
 IMAGES=$(pwd)/images/
+RESULTS=$(pwd)/results/
 FIRECRACKER_PATH=$(pwd)/.firecracker
 VMMSOCKET=$(pwd)/.firecracker.socket
+
+mkdir -p $RESULTS
 
 function cleanup {
   # kill all children (evil)
@@ -95,6 +99,11 @@ function runvm {
     docker container stop $CONTAINER > /dev/null 2> /dev/null
     docker rm -f $CONTAINER > /dev/null 2> /dev/null
     firecracker_cleanup
+  elif [ "$vm" = "mirage-solo5" ]; then
+
+    taskset -c ${CPU1} $TOOLSDIR/solo5-hvt-noop-timer ${IMAGES}/mirage-noop.hvt \
+      2>&1 >/dev/null | grep "guest" | awk -F "[()]" '{print $2}'
+
   elif [ "$vm" = "rump" ]; then
     CONTAINER=rump
     docker pull hlefeuvre/rump-solo5-boottime > /dev/null 2> /dev/null
@@ -125,13 +134,14 @@ function benchit  {
 
   for i in $( seq 1 ${num} ); do
     runvm $vm >> rawdata/${vm}.txt
+    sleep 2
   done
 }
 
 mkdir -p rawdata results
 
 for vm in "alpine-vm" "lupine" "lupine-nokml" "hermitux" \
-	  "hermitux-light" "osv-rofs" "rump" "docker-min"
+	  "hermitux-light" "osv-rofs" "rump" "docker-min" "mirage-solo5"
 do
   benchit 30 ${vm}
   echo "boottime_ms" > results/${vm}.csv
