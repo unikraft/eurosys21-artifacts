@@ -174,6 +174,7 @@ Actions:
   clean              Clean intermediate build files from an experiment.
 
 Options:
+     --no-deps       Do not try to install dependencies.
   -D --no-docker     Do not use Docker for plotting.
   -l --list          List all tests and exit.
   -v --verbose       Be verbose.
@@ -182,6 +183,8 @@ Options:
 Influential Environmental Variables
   EXPERIMENTS_DIR    Directory of all the experiments
                        (default: ./experiments).
+  DOCKER_FORCE_BUILD Force build of Docker containers
+                       (default :y).
   DOCKER_IMAGE_PLOT  Docker environment for generating plots
                        (default: unikraft/eurosys21-artifacts-plot:latest).
   PLOT_FORMAT        File format for the plot
