@@ -1,6 +1,6 @@
 
 cd xen/apps/app-helloworld/
-
+make
 echo "" > kvm_9p.results
 echo "With 9pfs (ns)"
 for i in {1..5}
