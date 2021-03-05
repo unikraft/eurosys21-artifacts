@@ -68,8 +68,8 @@ We have organised this repository as follows:
  * `build/` - Intermediate build artifacts necessary for experiments to run.  
    This will be populated by the experiment's preparation (`prepare`) step;
  * `support/` which contains definitions of container images, `Dockerfile`s,
-   which are used by multiple experiments; and,
- * `tools/` which contain programs which are used by multiple experiments;
+   which are used by multiple experiments;
+ * `tools/` which contain programs which are used by multiple experiments; and,
  * `run.sh` This tool wraps all experiments and can be used to run them all or
    individually.  More details on this utility script are detailed below.
 
