@@ -1,9 +1,0 @@
-This experiment provides data for Fig. 18.
-
-Run instructions:
- - cd experiments/18_unikraft-sqlite-alloc
- - ./genimages.sh
- - ./benchmark.sh
- - python3 ./plot.py
-
-./benchmark.sh takes about 16 minutes in average.
