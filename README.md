@@ -177,8 +177,8 @@ If no figure ID or test name is provided, the action is run for all
 experiments.  If no action is provided, all actions are performed.
 
 Examples:
-  ./run.sh fig_01          Runs prepare, run and plot for fig_01.
-  ./run.sh prepare         Prepares all experiments.
+  ./run.sh fig_01    Runs prepare, run and plot for fig_01.
+  ./run.sh prepare   Prepares all experiments.
 
 Actions:
   prepare            Prepares the host and/or builds dependent tools
