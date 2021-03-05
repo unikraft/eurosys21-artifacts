@@ -2,9 +2,10 @@
 
 This experiment provides data for Fig. 18.
 
-We measure the throughput (GET and SET requests) of Redis Unikraft,
-with varying allocators and request type (`redis-benchmark`, 30
-concurrent conns, 100k requests, and a pipelining level of 16.)
+Similarly to Fig. 12, we measure the throughput of Redis Unikraft with varying
+request types (`redis-benchmark`, 30 concurrent conns, 100k requests, and a
+pipelining level of 16.). In this experiment we focus on Unikraft's ability to
+vary allocators.
 
 ## Usage
 
