@@ -1,8 +1,12 @@
 #!/usr/bin/python3
+import os
 import sys
 import numpy
 
+name=None
 tsc_hz=0
+basename = sys.argv[1].split('/')[-1]
+
 if len(sys.argv) >= 3 and int(sys.argv[2]) > 0:
 	tsc_hz=int(sys.argv[2])*1000000
 else:
@@ -38,22 +42,21 @@ with open(sys.argv[1] + ".tsc") as f:
 # Calculate and output median, q1 and q3
 #with open(stdout, "w") as f:
 with sys.stdout as f:
-    f.write("\t\tavg\tmed\tq1\tq3\n")
-    f.write("tsc\t\t" +  str(round(numpy.average(tsc),2)) + "\t"
-			  + str(round(numpy.quantile(tsc, .50),2)) + "\t" + str(round(numpy.quantile(tsc, .25),2)) +
-                 "\t" + str(round(numpy.quantile(tsc, .75),2)) + "\n")
-    f.write("tsc_nsec\t" +  str(round(numpy.average(tsc_nsec),2)) + "\t"
-			  + str(round(numpy.quantile(tsc_nsec, .50),2)) + "\t" + str(round(numpy.quantile(tsc_nsec, .25),2)) +
-                 "\t" + str(round(numpy.quantile(tsc_nsec, .75),2)) + "\n")
-    f.write("fcall\t\t" +  str(round(numpy.average(fcall),2)) + "\t"
-			+ str(round(numpy.quantile(fcall, .50),2)) + "\t" + str(round(numpy.quantile(fcall, .25),2)) +
-                 "\t" + str(round(numpy.quantile(fcall, .75),2)) + "\n")
-    f.write("fcall_nsec\t" +  str(round(numpy.average(fcall_nsec),2)) + "\t"
-			+ str(round(numpy.quantile(fcall_nsec, .50),2)) + "\t" + str(round(numpy.quantile(fcall_nsec, .25),2)) +
-                 "\t" + str(round(numpy.quantile(fcall_nsec, .75),2)) + "\n")
-    f.write("scall\t\t" +  str(round(numpy.average(scall),2)) + "\t"
-			+ str(round(numpy.quantile(scall, .50),2)) + "\t" + str(round(numpy.quantile(scall, .25),2)) +
-                 "\t" + str(round(numpy.quantile(scall, .75),2)) + "\n")
-    f.write("scall_nsec\t" +  str(round(numpy.average(scall_nsec),2)) + "\t"
-			+ str(round(numpy.quantile(scall_nsec, .50),2)) + "\t" + str(round(numpy.quantile(scall_nsec, .25),2)) +
-                 "\t" + str(round(numpy.quantile(scall_nsec, .75),2)) + "\n")
+    f.write(basename + ",tsc," +  str(round(numpy.average(tsc),2)) + ","
+			  + str(round(numpy.quantile(tsc, .50),2)) + "," + str(round(numpy.quantile(tsc, .25),2)) +
+                 "," + str(round(numpy.quantile(tsc, .75),2)) + "\n")
+    f.write(basename + ",tsc_nsec," +  str(round(numpy.average(tsc_nsec),2)) + ","
+			  + str(round(numpy.quantile(tsc_nsec, .50),2)) + "," + str(round(numpy.quantile(tsc_nsec, .25),2)) +
+                 "," + str(round(numpy.quantile(tsc_nsec, .75),2)) + "\n")
+    f.write(basename + ",fcall,," +  str(round(numpy.average(fcall),2)) + ","
+			+ str(round(numpy.quantile(fcall, .50),2)) + "," + str(round(numpy.quantile(fcall, .25),2)) +
+                 "," + str(round(numpy.quantile(fcall, .75),2)) + "\n")
+    f.write(basename + ",fcall_nsec," +  str(round(numpy.average(fcall_nsec),2)) + ","
+			+ str(round(numpy.quantile(fcall_nsec, .50),2)) + "," + str(round(numpy.quantile(fcall_nsec, .25),2)) +
+                 "," + str(round(numpy.quantile(fcall_nsec, .75),2)) + "\n")
+    f.write(basename + ",scall,," +  str(round(numpy.average(scall),2)) + ","
+			+ str(round(numpy.quantile(scall, .50),2)) + "," + str(round(numpy.quantile(scall, .25),2)) +
+                 "," + str(round(numpy.quantile(scall, .75),2)) + "\n")
+    f.write(basename + ",scall_nsec," +  str(round(numpy.average(scall_nsec),2)) + ","
+			+ str(round(numpy.quantile(scall_nsec, .50),2)) + "," + str(round(numpy.quantile(scall_nsec, .25),2)) +
+                 "," + str(round(numpy.quantile(scall_nsec, .75),2)) + "\n")
