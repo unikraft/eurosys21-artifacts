@@ -21,18 +21,9 @@ networking interface."
 
 ## Usage
 
-Run instructions:
+ * `./genimages.sh` takes about 2m in average.
+ * `./benchmark.sh` takes about 6m30s in average.
 
-```
-cd experiments/fig_10_unikraft-boot
-./genimages.sh
-./benchmark.sh
-python3 plot.py
-```
-
-- `./genimages.sh` takes about 2m in average.
-- `./benchmark.sh` takes about 6m30s in average.
-
-Note: like Fig. 14, this experiment relies on Unikraft tracepoints.
-Refer to Fig. 14's [README.md](https://github.com/unikraft/eurosys21-artifacts/blob/master/experiments/fig_14_unikraft-nginx-alloc-boot/README.md)
-for instructions.
+ > **Note**: like [`fig_14`](../fig_14_unikraft-nginx-alloc-boot), this
+ > experiment relies on Unikraft tracepoints.  Please refer to its `README.md`
+ > for further information.
