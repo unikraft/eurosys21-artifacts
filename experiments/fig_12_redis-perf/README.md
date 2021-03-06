@@ -2,7 +2,8 @@
 
 <img align="right" src="../../plots/fig_12_redis-perf.svg" width="300" />
 
-We measure the throughput of Redis in a wide range of systems, including:
+We measure the throughput of [Redis](https://redis.io/) in a wide range of
+systems, including:
 
  * [HermiTux](https://ssrg-vt.github.io/hermitux/) on [uHyve](https://github.com/hermitcore/uhyve);
  * [Lupine](https://github.com/hckuo/Lupine-Linux) on [Firecracker](https://firecracker-microvm.github.io/);
