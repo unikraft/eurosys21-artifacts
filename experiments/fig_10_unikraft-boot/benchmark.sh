@@ -81,6 +81,7 @@ QEMU_PATH=${IMAGES}/qemu/build/x86_64-softmmu/qemu-system-x86_64
 LOG=rawdata/qemumicrovm-${suffix}.csv
 touch $LOG
 cp ${IMAGES}/unikraft+qemu.kernel /tmp/unikraft+qemu.kernel
+cp ${IMAGES}/unikraft+qemu1nic.kernel /tmp/unikraft+qemu1nic.kernel
 for j in $( eval echo {0..$REPS} )
 do
 	{
@@ -179,6 +180,7 @@ do
 	echo "${sum}	${guest_vmm::-2}" >> $RESULTS
 done
 rm /tmp/unikraft+qemu.kernel
+rm /tmp/unikraft+qemu1nic.kernel
 
 # qemu messes up the terminal, reset it
 reset

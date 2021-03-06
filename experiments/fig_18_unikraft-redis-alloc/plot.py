@@ -89,7 +89,7 @@ def plot(data=None, output=None):
   throughput_max += 1 # margin above biggest bar
 
   # Setup matplotlib axis
-  fig = plt.figure(figsize=(8, 5))
+  fig = plt.figure(figsize=(8, 4))
   renderer = fig.canvas.get_renderer()
 
   # image size axis
@@ -144,7 +144,7 @@ def plot(data=None, output=None):
         linewidth=.5
       )
       
-      ax1.text(i + 1 + bar_offset, operations[operation_label][AMAX_KEY] + 0.2, round(operations[operation_label][MEAN_KEY], 2),
+      ax1.text(i + 1 + bar_offset, operations[operation_label][AMAX_KEY] + 0.05, round(operations[operation_label][MEAN_KEY], 2),
         ha='center',
         va='bottom',
         zorder=6,

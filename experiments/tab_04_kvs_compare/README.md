@@ -50,3 +50,9 @@ cd client
 In the test-pmd interactive shell we run the following:
 ```
 ```
+
+
+Connection details
+client                server
+uktut2      <-------> uktut1
+enp1s0f0 	      enp1s0f1
