@@ -98,7 +98,7 @@ run:
 
 .PHONY: plot
 plot:
-	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTSDIR) --output $(PLOT)
+	PYTHONPATH=$(WORKDIR)/../common $(SNAKE) $(WORKDIR)/plot.py --data $(RESULTSDIR) --output $(PLOT)
 
 .PHONY: clean
 clean:
