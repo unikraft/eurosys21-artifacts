@@ -44,3 +44,15 @@ solo5-hvt-noop-timer: $(BUILDDIR)/solo5-hvt-noop-timer
 
 $(BUILDDIR)/solo5-hvt-noop-timer:
 	$(GIT) clone https://github.com/solo5/solo5.git $@
+
+
+.PHONY: solo5-hvt
+
+solo5-hvt: $(BUILDDIR)/solo5-hvt
+	(cd $(BUILDDIR)/$@; $(GIT) checkout $(SOLO5_VERSION))
+	(cd $(BUILDDIR)/$@; ./configure.sh)
+	$(MAKE) -C $(BUILDDIR)/$@
+	$(CP) $(BUILDDIR)/$@/tenders/hvt/solo5-hvt $(TOOLSDIR)/$@
+
+$(BUILDDIR)/solo5-hvt:
+	$(GIT) clone https://github.com/solo5/solo5.git $@
