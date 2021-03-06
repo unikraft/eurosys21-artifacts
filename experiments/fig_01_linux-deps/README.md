@@ -1,6 +1,6 @@
 # Linux Dependency Graph
 
-<img align="right" src="../../plots/fig_01_linux-deps" width="300" />
+<img align="right" src="../../plots/fig_01_linux-deps.svg" width="300" />
 This experiment demonstrates the complexity of the Linux kernel.  To quote the
 paper, "to better quantify this API complexity, we analyzed dependencies between
 the main components of the Linux kernel.  As a rough approximation, we used the
