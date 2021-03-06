@@ -28,8 +28,6 @@ taskset -c 4,5 qemu-system-x86_64 \
 	-cpu host,+invtsc \
 	-smp cpus=2 \
 	-enable-kvm \
-	-object memory-backend-file,id=mem,size=6144M,mem-path=${MEMPATH},share=on \
-	-numa node,memdev=mem \
 	-mem-prealloc \
 	\
 	-netdev tap,ifname=$TAPNAME,id=mgm0,script=no,downscript=no \
@@ -43,11 +41,6 @@ taskset -c 4,5 qemu-system-x86_64 \
 	-display curses \
 	-boot c
 RET=$?
-
-#	-mem-path /dev/ \
-
-##	-object memory-backend-file,id=mem,size=1G,mem-path=/mnt/huge1G/test,share=on \
-##	-numa node,memdev=mem \
 
 # destroy network setup
 ip link set dev $BRNAME down
