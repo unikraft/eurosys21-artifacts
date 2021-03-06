@@ -99,6 +99,12 @@ cd server/linux_dpdk/
 run_server.sh
 ```
 
+## Linux single
+```
+cd server/linux_single/
+./run.sh
+```
+
 # Client
 The client is running on uktut2. The client is a dpdk application that generates traffic. Run the client after starting one of the servers.
 
