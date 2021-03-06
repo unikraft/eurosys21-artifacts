@@ -1,5 +1,7 @@
 # Unikraft Redis TX with varying allocators
 
+<img align="right" src="../../plots/fig_18_unikraft-redis-alloc.svg" width="300" />
+
 This experiment provides data for Fig. 18.
 
 Similarly to Fig. 12, we measure the throughput of Redis Unikraft with varying
