@@ -43,7 +43,7 @@ or running experiments.
      for the experiments.  
       3.1. [Hardware](#31-hardware): Details of hardware setup in the paper and
            general recommendations.  
-      3.2. [Kernel](#32-kernel): Details on kernel requirements for the
+      3.2. [Kernel](#32-kernel-and-parameters): Details on kernel requirements for the
            experiments which must be addressed manually.
   4. [Getting Started](#4-getting-started): Information on how to use this
      repository to fully recreate the experiments.  
@@ -203,7 +203,8 @@ Please note that the following experiments require additional kernel parameters
 e.g., to enable specific CPU frequency scaling governors:
 - [`tab_01`](/experiments/tab_01_bincompat-syscalls/)
 - [`tab_04`](/experiments/tab_04_kvs_compare/)
-- [`fig_22`](/experiments/tab_04_kvs_compare/), , need further 
+- [`fig_22`](/experiments/tab_04_kvs_compare/)
+
 We documented this within the experiment folder.
 
 ## 4. Getting Started

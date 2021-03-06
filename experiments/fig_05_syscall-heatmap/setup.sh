@@ -9,7 +9,7 @@ else
     sudo usermod -aG docker $USER
 fi
 
-mkdir aggregated_dockerfile
+mkdir results
 cd dockerfiles/base
 docker build -t debian_env .
 cd ../../dockerfiles
