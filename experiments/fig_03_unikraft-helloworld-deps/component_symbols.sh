@@ -1,3 +1,4 @@
+#!/bin/bash
 components=("nolibc" "ukalloc" "ukallocbbuddy" "ukargparse" "ukboot" "uksglist")
 
 
