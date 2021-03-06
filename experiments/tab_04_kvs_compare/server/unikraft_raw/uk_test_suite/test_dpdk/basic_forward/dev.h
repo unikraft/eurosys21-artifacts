@@ -14,7 +14,7 @@
 #endif /* CONFIG_USE_DPDK_PMD */
 
 #define MAX_PKT_BURST 512
-#define DEF_PKT_BURST 128
+#define DEF_PKT_BURST 64
 
 #define TIMER_MILLISECOND 3200000ULL /* around 1ms at 3.2 Ghz */
 

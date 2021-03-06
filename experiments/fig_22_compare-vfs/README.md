@@ -59,3 +59,19 @@ All steps together take roughly 5 mins.
 With `./clean.sh` you can delete all compilation units, cloned
 repositories and intermediate measurement data. It keeps the final
 CSV files and plot of the experiment within `results/`.
+
+## Expected kernel panics
+
+While the experiments are running, you may notice kernel panics for
+the Linux experiments:
+
+``` text
+[    1.317775] Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000000
+[...]
+```
+
+This particular panic message (`Attempted to kill init!`) is expected.
+It happens because we do execute our benchmark program as system
+initialization process instead of `/sbin/init`. When our benchmark
+completed, the process exits and returns `0`. As long as the
+`exitcode` is 0 (`0x00000000`), our experiment executed successfully.

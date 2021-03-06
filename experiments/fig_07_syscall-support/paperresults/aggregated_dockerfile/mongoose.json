@@ -1,0 +1,57 @@
+{
+	"static_data": {
+		"dependencies": null,
+		"shared_libs": {},
+		"system_calls": {},
+		"symbols": {}
+	},
+	"dynamic_data": {
+		"shared_libs": {
+			"ld-2.28.so": null,
+			"libc-2.28.so": null,
+			"libgcc_s.so.1": null,
+			"liblzma.so.5.2.4": null,
+			"libpthread-2.28.so": null,
+			"librt-2.28.so": null,
+			"libunwind-ptrace.so.0.0.0": null,
+			"libunwind-x86_64.so.8.0.1": null,
+			"libunwind.so.8.0.1": null
+		},
+		"system_calls": {
+			"accept": "",
+			"access": "",
+			"arch_prctl": "",
+			"bind": "",
+			"brk": "",
+			"clock_gettime": "",
+			"close": "",
+			"connect": "",
+			"execve": "",
+			"exit_group": "",
+			"fcntl": "",
+			"fstat": "",
+			"getcwd": "",
+			"getdents": "",
+			"getsockname": "",
+			"ioctl": "",
+			"listen": "",
+			"lseek": "",
+			"lstat": "",
+			"openat": "",
+			"read": "",
+			"readlink": "",
+			"recvfrom": "",
+			"rt_sigaction": "",
+			"rt_sigreturn": "",
+			"select": "",
+			"sendto": "",
+			"setsockopt": "",
+			"socket": "",
+			"stat": "",
+			"time": "",
+			"uname": "",
+			"write": ""
+		},
+		"symbols": {}
+	}
+}

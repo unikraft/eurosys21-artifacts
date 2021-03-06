@@ -2,12 +2,16 @@
 # Files and directories
 #
 WORKDIR ?= $(CURDIR)
-PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
+RESULTS ?= $(WORKDIR)
+PLOT_FORMAT ?= svg
+PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).$(PLOT_FORMAT)
+GZ ?= $(WORKDIR)/$(notdir $(WORKDIR)).gz
 
 #
 # Tools
 #
 SNAKE ?= python3
+DOT ?= dot
 
 #
 # Targets
@@ -17,7 +21,7 @@ all: prepare run plot
 
 .PHONY: prepare
 prepare:
-	@-
+	$(WORKDIR)/prepare.sh
 
 .PHONY: run
 run:
@@ -25,7 +29,8 @@ run:
 
 .PHONY: plot
 plot:
-	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
+	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(GZ)
+	$(DOT) -T$(PLOT_FORMAT) $(GZ) -o $(PLOT)
 
 .PHONY: clean
 clean:

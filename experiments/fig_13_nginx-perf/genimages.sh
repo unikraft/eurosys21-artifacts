@@ -132,3 +132,9 @@ docker rm -f $CONTAINER
 cp ${IMAGES}/rump/root/rumprun-packages/nginx/bin/nginx.img ${IMAGES}/rump-qemu.img
 cp ${IMAGES}/rump/root/rumprun-packages/nginx/images/data.iso ${IMAGES}/rump-qemu.iso
 chmod u+x ${IMAGES}/rump/root/rumprun/app-tools/rumprun
+
+# ========================================================================
+# Generate Rump VM image
+# ========================================================================
+
+./genimage-mirage-solo5-httpreply.sh

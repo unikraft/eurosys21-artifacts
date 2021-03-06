@@ -1,0 +1,139 @@
+# SPDX-License-Identifier: BSD-3-Clause
+#
+# mTCP Unikraft library
+#
+# Authors: Alexander Jung <alexander.jung@neclab.eu>
+#
+# Copyright (c) 2020, NEC Laboratories Europe GmbH, NEC Corporation.
+#                     All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 3. Neither the name of the copyright holder nor the names of its
+#    contributors may be used to endorse or promote products derived from
+#    this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+# POSSIBILITY OF SUCH DAMAGE.
+
+################################################################################
+# Library registration
+################################################################################
+$(eval $(call addlib_s,libmtcp,$(CONFIG_LIBMTCP)))
+
+################################################################################
+# Sources
+################################################################################]
+LIBMTCP_VERSION = 2.1
+LIBMTCP_URL = https://github.com/mtcp-stack/mtcp/archive/v$(LIBMTCP_VERSION).zip
+LIBMTCP_SUBDIR = mtcp-$(LIBMTCP_VERSION)
+LIBMTCP_PATCHDIR = $(LIBMTCP_BASE)/patches
+$(eval $(call patch,libmtcp,$(LIBMTCP_PATCHDIR),$(LIBMTCP_SUBDIR)))
+$(eval $(call fetch,libmtcp,$(LIBMTCP_URL)))
+
+################################################################################
+# Helpers
+################################################################################
+LIBMTCP_SRC = $(LIBMTCP_ORIGIN)/$(LIBMTCP_SUBDIR)
+
+################################################################################
+# Library includes
+################################################################################
+CINCLUDES-y += -I$(LIBMTCP_BASE)/include
+CINCLUDES-y += -I$(LIBMTCP_BASE)/freebsd-imported
+CINCLUDES-y += -I$(LIBMTCP_SRC)/mtcp/src/include
+CINCLUDES-y += -I$(LIBMTCP_SRC)/io_engine/include
+CINCLUDES-y += -I$(LIBMTCP_SRC)/util/include
+
+################################################################################
+# Flags
+################################################################################
+# LIBMTCP_FLAGS-y += -Wshadow -Wcast-qual -Wwrite-strings -Wundef
+# LIBMTCP_FLAGS-y += -Wdeclaration-after-statement
+# LIBMTCP_FLAGS-y += -Wconversion -Wcast-align -Wmissing-prototypes
+
+# Suppress some warnings to make the build process look neater
+# LIBMTCP_FLAGS-y += -Wno-missing-field-initializers
+#
+LIBMTCP_CFLAGS-y += -I$(LIBMTCP_SRC)/mtcp/src/include
+
+ifneq ($(CONFIG_MTCP_USE_PSIO),y)
+LIBMTCP_CFLAGS-y += -DDISABLE_PSIO
+endif
+
+ifneq ($(CONFIG_MTCP_USE_NETMAP),y)
+LIBMTCP_CFLAGS-y += -DDISABLE_NETMAP
+endif
+
+ifeq ($(CONFIG_MTCP_USE_DPDK),y)
+ifeq ($(ENFORCE_RX_IDLE), 1)
+LIBMTCP_CFLAGS-y += -DENFORCE_RX_IDLE
+endif
+LIBMTCP_CFLAGS-y += -DINFO
+else
+LIBMTCP_CFLAGS-y += -DDISABLE_DPDK
+endif
+
+################################################################################
+# Glue code
+################################################################################
+# Include paths
+# LIBMTCP_CINCLUDES-y   += $(LIBMTCP_COMMON_INCLUDES-y)
+# LIBMTCP_CXXINCLUDES-y += $(LIBMTCP_COMMON_INCLUDES-y)
+
+################################################################################
+# Library sources
+################################################################################
+LIBMTCP_SRCS-y += $(LIBMTCP_BASE)/sockets.c
+
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/core.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/tcp_stream.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/config.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/api.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/eventpoll.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/socket.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/pipe.c
+
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/tcp_util.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/eth_in.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/ip_in.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/tcp_in.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/eth_out.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/ip_out.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/tcp_out.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/arp.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/timer.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/cpu.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/rss.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/addr_pool.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/fhash.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/memory_mgt.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/logger.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/debug.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/tcp_rb_frag_queue.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/tcp_ring_buffer.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/tcp_send_buffer.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/tcp_sb_queue.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/tcp_stream_queue.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/psio_module.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/io_module.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/dpdk_module.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/netmap_module.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/onvm_module.c
+LIBMTCP_SRCS-y += $(LIBMTCP_SRC)/mtcp/src/icmp.c

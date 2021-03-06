@@ -1,6 +1,8 @@
-rm -rf cscope.*
-LNX=linux    
-find  linux/                                                                \
+WORKDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+rm -rf $WORKDIR/cscope.*
+LNX=$WORKDIR/linux    
+find $LNX                                                                \
 	-path "$LNX/arch/*" ! -path "$LNX/arch/i386*" -prune -o               \
 	-path "$LNX/include/asm-*" ! -path "$LNX/include/asm-i386*" -prune -o \
 	-path "$LNX/tmp*" -prune -o                                           \

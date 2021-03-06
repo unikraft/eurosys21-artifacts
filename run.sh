@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: BSD-3-Clause
 # Authors: Alexander Jung <a.jung@lancs.ac.uk>
-WORKDIR=$(dirname $0)
+WORKDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 . $WORKDIR/support/common.sh
 
 # Influential environmental variables
@@ -14,7 +14,7 @@ DOCKER_FORCE_BUILD=${DOCKER_FORCE_BUILD:-y}
 SHOW_HELP=n
 LIST_ALL=n
 DRY_RUN=n
-NO_DOCKER=n
+DOCKER_PLOT=y
 NO_DEPS=n
 VERBOSE=n
 
@@ -29,35 +29,54 @@ If no figure ID or test name is provided, the action is run for all
 experiments.  If no action is provided, all actions are performed.
 
 Examples:
-  $0 fig_01    Runs prepare, run and plot for fig_01.
-  $0 prepare   Prepares all experiments.
+  $0 fig_01      Runs prepare, run and plot for fig_01.
+  $0 prepare     Prepares all experiments.
 
 Actions:
-  prepare            Prepares the host and/or builds dependent tools
-                       and images before the test is run.
-  run                Runs the given experiment and saves the results.
-  plot               Uses the data from the experiment to generate
-                       the plot.
-  clean              Clean intermediate build files from an experiment.
+  prepare              Prepares the host and/or builds dependent tools
+                         and images before the test is run.
+  run                  Runs the given experiment and saves the results.
+  plot                 Uses the data from the experiment to generate
+                         the plot.
+  clean                Clean intermediate build files from an experiment.
 
 Options:
-     --no-deps       Do not try to install dependencies.
-  -D --no-docker     Do not use Docker for plotting.
-  -l --list          List all tests and exit.
-  -v --verbose       Be verbose.
-  -h --help          Show this help menu.
+     --no-deps         Do not try to install dependencies.
+     --no-docker-plot  Do not use Docker for plotting.
+  -l --list            List all tests and exit.
+  -v --verbose         Be verbose.
+  -h --help            Show this help menu.
 
 Influential Environmental Variables
-  EXPERIMENTS_DIR    Directory of all the experiments
-                       (default: ./experiments).
-  DOCKER_FORCE_BUILD Force build of Docker containers
-                       (default :$DOCKER_FORCE_BUILD).
-  DOCKER_IMAGE_PLOT  Docker environment for generating plots
-                       (default: $DOCKER_IMAGE_PLOT).
-  PLOT_FORMAT        File format for the plot
-                       (default: $PLOT_FORMAT).
+  EXPERIMENTS_DIR      Directory of all the experiments
+                         (default: ./experiments).
+  DOCKER_FORCE_BUILD   Force build of Docker containers
+                         (default: $DOCKER_FORCE_BUILD).
+  DOCKER_IMAGE_PLOT    Docker environment for generating plots
+                         (default: $DOCKER_IMAGE_PLOT).
+  PLOT_FORMAT          File format for the plot
+                         (default: $PLOT_FORMAT).
 EOF
 }
+
+# Parse flag arguments
+for i in "$@"; do
+  case $i in
+    -v|--verbose)
+      VERBOSE=y; shift;;
+    -l|--list)
+      LIST_ALL=y; shift;;
+    --no-docker-plot)
+      DOCKER_PLOT=n; shift;;
+    --no-deps)
+      NO_DEPS=y; shift;;
+    -h|--help)
+      _help; exit 0;;
+    *)
+      ;;
+  esac
+done
+
 
 # Dependency management
 function install_dependencies() {
@@ -73,13 +92,14 @@ function install_dependencies() {
         doxygen \
         libhugetlbfs-bin \
         build-essential \
-        sgabios \
         qemu-system-x86 \
         redis-tools \
         socat \
         meson \
         cscope \
+        libseccomp-dev \
         uuid-runtime \
+        cloc \
         uuid-dev \
         libuuid1 \
         bridge-utils \
@@ -98,7 +118,7 @@ function install_dependencies() {
         qemu-utils
       
       # Plot script requirements
-      if [[ $NO_DOCKER == 'y' ]]; then
+      if [[ $DOCKER_PLOT == 'n' ]]; then
         apt-get install -y \
           python3 \
           python3-pip \
@@ -130,9 +150,11 @@ function perform() {
 
   log_inf "Running $ACTION on $BASENAME..."
 
+  export PATH=$PATH:$WORKDIR/tools
+
   case $ACTION in
     plot)
-      if [[ $NO_DOCKER == 'n' ]]; then
+      if [[ $DOCKER_PLOT == 'y' ]]; then
         docker run -it --rm \
           -v $(pwd):/root/workspace -w /root/workspace \
           $DOCKER_IMAGE_PLOT \
@@ -140,7 +162,9 @@ function perform() {
             PLOT=/root/workspace/plots/$BASENAME.$PLOT_FORMAT \
             plot
       else
-        make -C $WORKDIR/experiments/$BASENAME plot
+        make -C $WORKDIR/experiments/$BASENAME \
+          PLOT=$WORKDIR/plots/$BASENAME.$PLOT_FORMAT \
+          plot
       fi
       ;;
     prepare|run|clean)
@@ -152,25 +176,6 @@ function perform() {
   esac
 }
 
-
-# Parse flag arguments
-for i in "$@"; do
-  case $i in
-    -v|--verbose)
-      VERBOSE=y; shift;;
-    -l|--list)
-      LIST_ALL=y; shift;;
-    -D|--no-docker)
-      NO_DOCKER=y; shift;;
-    --no-deps)
-      NO_DEPS=y; shift;;
-    -h|--help)
-      _help; exit 0;;
-    *)
-      ;;
-  esac
-done
-
 # Save positional arguments
 REQUEST=$1
 ACTION=$2
@@ -179,15 +184,28 @@ ACTION=$2
 if [[ $LIST_ALL == 'y' ]]; then
   printf "FIGURE_ID  TEST_NAME\n"
 
-elif [[ $NO_DEPS != 'y' ]]; then
+elif [[ $NO_DEPS != 'y' && $ACTION != "clean" ]]; then
   log_inf "Installing dependencies"
   install_dependencies
 fi
 
-# Do we need Docker?
-if [[ $LIST_ALL != 'y' && $NO_DOCKER == 'n' ]]; then
-  log_inf "Building utility containers..."
-  DOCKER_FORCE_BUILD=y make -C $WORKDIR docker
+# Perform the same action for every experiment?
+case $REQUEST in
+  prepare|run|plot|clean)
+    ACTION=$REQUEST
+    REQUEST=
+    ;;
+esac
+
+# Should we start building dependencies?
+if [[ $LIST_ALL != 'y' && $NO_DEPS == 'n' && $ACTION != "clean" ]]; then
+  if  [[ $DOCKER_PLOT == 'y' ]]; then
+    log_inf "Building docker..."
+    DOCKER_FORCE_BUILD=$DOCKER_FORCE_BUILD make -C $WORKDIR docker
+  else
+    log_inf "Building utilities..."
+    DOCKER_FORCE_BUILD=$DOCKER_FORCE_BUILD make -C $WORKDIR
+  fi
 fi
 
 # Gather list of experiments
@@ -214,14 +232,6 @@ for E in $EXPERIMENTS_DIR/*; do
     log_dbg "No Makefile in $E"
     continue;
   fi
-
-  # Perform the same action for every experiment?
-  case $REQUEST in
-    prepare|run|plot|clean)
-      ACTION=$REQUEST
-      REQUEST=
-      ;;
-  esac
 
   # Run all experiments?
   if [[ -z "$REQUEST" || $FIGURE_ID == $REQUEST || $EXPERIMENT == $REQUEST ]]; then

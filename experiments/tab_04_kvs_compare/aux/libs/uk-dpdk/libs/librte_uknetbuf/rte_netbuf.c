@@ -92,7 +92,7 @@ rte_netbuf_init(struct rte_mempool *mp,
 	/* start of buffer is after mbuf structure and priv data */
 	m->priv_size = priv_size;
 	m->buf_addr = (char *)m + mbuf_size;
-#ifdef __Unikraft_
+#ifdef __Unikraft__
 	m->buf_iova = m + mbuf_size;
 #else
 	m->buf_iova = rte_mempool_virt2iova(m) + mbuf_size;

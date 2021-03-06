@@ -1,9 +1,10 @@
 UK_ROOT ?= $(PWD)/../../../aux/unikraft
-UK_LIBS ?= $(PWD)/../../../aux/libs/
+UK_LIBS ?= $(PWD)/../../../aux/libs
 UK_PLATS ?= $(PWD)/../../plats
 empty:=
 SPACE:=$(empty) $(empty)
-LIBS_NAME ?= pthread newlib intel-intrinsics uk-dpdk 
+LIBS_NAME ?= pthread newlib intel-intrinsics uk-dpdk
+#LIBS_NAME ?= pthread newlib intel-intrinsics uk-dpdk mtcp
 LIBS := $(subst $(SPACE),:,$(addprefix $(UK_LIBS)/,$(LIBS_NAME)))
 #PLAT_NAME ?= container
 #PLATS := $(subst $(SPACE),:,$(addprefix $(UK_PLATS)/,$(PLAT_NAME)))

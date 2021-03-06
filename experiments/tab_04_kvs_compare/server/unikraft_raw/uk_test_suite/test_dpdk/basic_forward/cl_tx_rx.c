@@ -219,12 +219,13 @@ uint64_t process_packet(struct uk_netbuf **nb, int cnt, int idx)
 
 	start_tsc = rte_rdtsc();
 	for (i = 0; i < cnt; i++) {
+		UK_ASSERT(nb[i]);
 		struct rte_mbuf *mbuf = nb[i]->priv;
 		mbuf->pkt_len = nb[i]->len;
 		mbuf->data_len = nb[i]->len;
 		uint64_t *sent_tsc = rte_pktmbuf_mtod_offset(mbuf,
 				char *, offset);
-		UK_ASSERT(sent_tsc && buf->buf_addr);
+		UK_ASSERT(sent_tsc && mbuf->buf_addr);
 		latency += start_tsc - *sent_tsc;
 	}
 	end_tsc = rte_rdtsc();
@@ -289,7 +290,7 @@ int pkt_burst_receive_cnt(int port_id, struct rte_mempool *mpool,
 			break;
 
 		curr_tsc = rte_rdtsc();
-		if (pkt == 0 && (curr_tsc - start_tsc) > (TIMER_MILLISECOND * 20))
+		if (pkt == 0 && (curr_tsc - start_tsc) > (TIMER_MILLISECOND * 50))
 			return -1;
 	}
 
@@ -399,8 +400,10 @@ static int test_tx_rx(int argc, char *argv[])
 	uint64_t j = 0;
 	int cnt = CONFIG_INPIPELINE;
 	uint64_t exp_start = start_tsc, exp_curr, dur = 0;
+#if 0
 	pkt_burst_transmit_cnt(first_portid, mbuf_pool, 1, 0);
 	int rc = pkt_burst_receive_arp(first_portid, mbuf_pool, 0);
+#endif
 	pkt_stats.rxpkt_dropped[0] = 0;
 	do {
 		while (dur < arg_exp_end_time) {

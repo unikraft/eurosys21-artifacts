@@ -48,7 +48,7 @@ def plot(data=None, output=None):
     'lupine': 'Lupine',
     'osv': 'OSv',
     'rump': 'Rumprun',
-    'unikraft': 'Rhea',
+    'unikraft': 'Unikraft',
     'mirage': 'Mirage'
   }
 
@@ -99,7 +99,7 @@ def plot(data=None, output=None):
   ax1.set_ylim(0, imagesize_max)
 
   # Plot coordinates
-  scale = 1. / len(imagestats.keys())
+  scale = 1. / len(labels.keys())
   xlabels = []
 
   # Adjust margining

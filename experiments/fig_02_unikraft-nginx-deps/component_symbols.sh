@@ -1,3 +1,4 @@
+#!/bin/bash
 components=("vfscore" "uktimeconv" "posix-libdl" "posix-process" "posix-process" "posix-user" "ramfs" "ukalloc" "ukallocbbuddy" "ukargparse" "lib-lwip" "lib-newlib" "ukboot" "ukbus" "uklock" "ukmpi" "uknetdev" "uksched" "ukschedcoop" "uktime" "uksglist" "ukswrand")
 
 

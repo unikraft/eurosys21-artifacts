@@ -15,3 +15,4 @@ mkdir -p rawdata results
 ./impl/docker-nginx.sh
 ./impl/native-nginx.sh
 ./impl/unikraft-qemu-nginx.sh
+./impl/mirage-solo5-httpreply.sh

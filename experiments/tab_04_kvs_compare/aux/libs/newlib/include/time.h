@@ -70,4 +70,8 @@ extern long _timezone;
 extern int _daylight;
 extern char *_tzname[2];
 
+#ifndef tzname
+#define tzname _tzname
+#endif
+
 #endif /* NEWLIBGLUE_TIME_H */

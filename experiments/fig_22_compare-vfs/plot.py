@@ -52,7 +52,7 @@ def plot(data=None, output=None):
     # 'orchid',
 
   project_labels = {
-    'unikraft': 'Rhea',
+    'unikraft': 'Unikraft',
     'linux': 'Linux'
   }
 

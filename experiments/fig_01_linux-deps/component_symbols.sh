@@ -1,3 +1,5 @@
+#!/bin/bash
+
 components=("fs" "ipc" "mm" "net" "security" "block")
 
 

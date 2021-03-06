@@ -42,12 +42,12 @@ procedure below:
     
 1. For testing read latency, go to `apps/lib-readfile/`:
     - Run `./run_all.sh` (wait some times) 
-    - Raw results will saved into `rhea-kvm_read.txt`;
-    - Formatted results will be saved into `rhea-kvm_read.csv`;
+    - Raw results will saved into `unikraft-kvm_read.txt`;
+    - Formatted results will be saved into `unikraft-kvm_read.csv`;
 2. For testing write latency, go to `apps/lib-writefile/`:
     - Run `./run_all.sh` (wait some times) 
-    - Raw results will saved into `rhea-kvm_write.txt`;
-    - Formatted results will be saved into `rhea-kvm_write.csv`;
+    - Raw results will saved into `unikraft-kvm_write.txt`;
+    - Formatted results will be saved into `unikraft-kvm_write.csv`;
     - Note that this experiment takes some time.
 
 ### Test VM Linux with 9pfs (require some manual steps):
@@ -67,13 +67,17 @@ procedure below:
 
 ### Generate the graph
 
-Once all the results are generated, run the `./plot.sh` and script to
-generate the 9pfs latency plot. This one will be generated in the
-current folder with the following name: `fig_20_compare-9pfs.svg`.
+Once all the results are generated, run the `./plot.sh`, then the
+`plot.py` script to generate the 9pfs latency plot. This one will
+be generated in the current folder with the following name: 
+`fig_20_compare-9pfs.svg`.
 
 ### Further information about the VM
 
 The VM has been created from a linux kernel 4.15.0-96-generic. We
 didn't patch or modify the kernel code. We just added a 9pfs mount
 point (`test`) which allows to share data between the host and the
-guest.
+guest. In addition, all sources are also provided in the `vm` folder.
+
+If the autologin failed, the login/password is `root` and the
+experiment script is `./script.sh`.
