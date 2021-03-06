@@ -1,27 +1,27 @@
-# Server
-In this scenario, the naming is a little wrong because the server will be genrating traffic. 
+# TX throughput experiment (Unikraft v.s. DPDK)
 
-
+This experiment evaluates the performance of Unikraft's `uknetdev` API.  To
+this end we wrote a simple application that sends as many packets as
+possible from one machine (with varying packet sizes), and measure the
+achieved throughput on a different machine running a DPDK `testpmd`
+application.
 
 # How to run
-## Server
-The server is running un uktut1. For this experiment we change `TXONLY_DEF_PACKET_LEN` from `dpdk/app/test-pmd/testpmd.h`.
 
-The values:
-* 64
-* 128
-* 256
-* 512
-* 1024
-* 1500
+## Server
+
+The server is running on the first machine (in the AE testbed, this is
+`uktut1`). For this experiment we change `TXONLY_DEF_PACKET_LEN` from
+`dpdk/app/test-pmd/testpmd.h` in order to vary packet sizes.
+
+Following sizes are explored: 64, 128, 256, 512, 1024, and 1500.
 
 ### Unikraft vhost user
 
-First prepare the environment
+First, prepare the environment:
 ```
 ./prepare.sh
 ```
-
 
 To run the unikraft generating code
 ```
@@ -72,12 +72,14 @@ rm -rf unikraft/uk_test_suite/
 ```
 
 ### Linux
-We will be using a linux VM with dpdk installed.
 
+For this experiment, we use a linux VM with DPDK preinstalled.
 
 ## Client
 
-The client is running on uktut2.
+The client is running on a second machine, connected to the first machine
+with a 10Gb/s ethernet cable. In the AE testbed, this corresponds to
+`uktut2`.
 
 ```
 ./build.sh
@@ -85,14 +87,18 @@ cd client
 ./prepare.sh
 ./run_client.sh
 ```
+
 We now enter the following commands in the interactive test-pmd shell:
+
 ```
 set fwd rxonly
 start
 ```
 
 ## Cleaning
+
 Run this command on both client and server
-`./clean.sh`
 
-
+```
+./clean.sh
+```
