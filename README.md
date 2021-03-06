@@ -30,8 +30,8 @@ The paper comes with 22 figures, 4 tables and 2 in-line text worth of
 experiments (although not all of them have experimental results, e.g., Figure 4
 is an architecture diagram). Each experiment and the relevant scripts to
 generate the data and subsequent plots are included in this repository.  We
-expect the results generated from this artefact to match one-to-one with the
-results in the paper, given that we used this artefact/scripts to actually
+expect the results generated from this artifact to match one-to-one with the
+results in the paper, given that we used this artifact/scripts to actually
 generate all figures in the paper.
 
 Each figure, table and corresponding experiment are listed below:
