@@ -3,7 +3,7 @@
 This repository contains the artifacts, including experiments and graphs, for
 the paper: "Unikraft: Fast, Specialized Unikernels the Easy Way".
 
-[Unikraft](https://unikraft.org) is a Linux Foundation open source project and
+[Unikraft](http://unikraft.org) is a Linux Foundation open source project and
 Xen Incubator Project.  Most of the code used for this paper is upstream, or is
 in the process of being upstreamed.
 
