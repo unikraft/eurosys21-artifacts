@@ -105,6 +105,13 @@ cd server/linux_single/
 ./run.sh
 ```
 
+
+## Linux batch
+```
+cd server/linux_batch/
+./run.sh
+```
+
 # Client
 The client is running on uktut2. The client is a dpdk application that generates traffic. Run the client after starting one of the servers.
 
