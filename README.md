@@ -128,7 +128,9 @@ setups:
     not run with newer versions, as noted [here](https://github.com/ssrg-vt/hermitux/issues/12).
  2. A Linux host with Linux kernel 4.19 used as a DPDK packet generator
     ([`fig_19`](/experiments/fig_19_compare-dpdk/README.md)) which has an
-    ethernet cable connected to the first host.
+    ethernet cable connected to the first host.  Additionally, we allowed for
+    user-defined CPU frequency by setting `intel_pstate=disable` to produce
+    Table 4. 
  3. A Xen host used for Xen 9pfs experiments.
 
 A single server can be used for almost all experiments, though it would require
@@ -149,10 +151,10 @@ All experiments were run on a physical host with Debian Buster and Linux 4.19
 installed.  All install and preparation scripts in this repository target this
 distribution and kernel version.
 
-For all set ups, we disabled Hyper-Threading (`noht`), isolated 4 CPU cores
-(e.g. `isocpus=4,5,6,7`) and allowed for user-defined CPU frequency
-(`intel_pstate=disable`).  This can be done by setting kernel boot parameters,
-e.g. with pxelinux:
+For all set ups, we disabled Hyper-Threading (`noht`) and isolated 4 CPU cores
+(e.g. `isocpus=4,5,6,7`).  For reproducing Table 4, we allowed for user-defined
+CPU frequency (`intel_pstate=disable`).  This can be done by setting kernel boot
+parameters, e.g. with pxelinux:
 
 ```
 ...
@@ -160,7 +162,7 @@ LABEL item_kernel0
   MENU LABEL Linux
   MENU DEFAULT
   KERNEL vmlinuz-4.19.0
-  APPEND isolcpus=4,5,6,7 noht intel_pstate=disable
+  APPEND isolcpus=4,5,6,7 noht
   ...
 ```
 
