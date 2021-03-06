@@ -103,7 +103,8 @@ We have organised this repository as follows:
       relevant images, tools, and auxiliary services necessary for running the
       experiment.
     - `run`: runs the experiment.
-    - `plot`: produces the figure or table.
+    - `plot`: produces the figure or table.  All plots are automatically saved
+      into the [`plots/`](/plots) directory.
     - `clean`: removes intermediate build files.
        
  * `build/` - Intermediate build artifacts necessary for experiments to run.  
