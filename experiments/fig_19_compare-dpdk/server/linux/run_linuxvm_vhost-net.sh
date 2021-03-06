@@ -5,10 +5,12 @@ if [ $( id -u ) != 0 ]; then
 fi
 
 QCOW="../../aux/debian.qcow2"
-DPDKVHOST="/root/dpdk/build/app/vhost-net"
 MEMPATH="/mnt/huge1G/test"
 TAPNAME="tap88"
 BRNAME="expbr0"
+
+TAPNAME_EXP="tap98"
+BRNAME_EXP="testbr0"
 
 set -x
 
@@ -22,6 +24,16 @@ ip addr add 172.18.0.254/24 dev $BRNAME
 ip link set dev $BRNAME up
 ip link set dev $TAPNAME up
 
+# setup experiment bridge
+ip tuntap add dev $TAPNAME_EXP mode tap
+ip link add $BRNAME_EXP type bridge
+ip link set master $BRNAME_EXP dev $TAPNAME_EXP
+ip link set promisc on dev $BRNAME_EXP
+ip link set promisc on dev $TAPNAME_EXP
+ip addr add 172.17.0.113/24 dev $BRNAME_EXP
+ip link set dev $BRNAME_EXP up
+ip link set dev $TAPNAME_EXP up
+
 # run VM
 taskset -c 4,5 qemu-system-x86_64 \
 	-m 6G \
@@ -33,9 +45,8 @@ taskset -c 4,5 qemu-system-x86_64 \
 	-netdev tap,ifname=$TAPNAME,id=mgm0,script=no,downscript=no \
 	-device virtio-net-pci,netdev=mgm0 \
 	\
-	-chardev "socket,id=char0,path=$DPDKVHOST" \
-	-netdev vhost-user,id=testtap1,chardev=char0,vhostforce \
-	-device virtio-net-pci,netdev=testtap1,id=dpdknet0,rx_queue_size=1024,tx_queue_size=1024 \
+	-netdev tap,ifname=$TAPNAME_EXP,id=testtap1,vhost=on,vhostforce=on,vhostfd=4,script=no,downscript=no 4<>/dev/vhost-net \
+	-device virtio-net-pci,netdev=testtap1,ioeventfd=on,guest_csum=off,gso=off \
 	\
 	-hda "$QCOW" \
 	-display curses \
@@ -43,6 +54,11 @@ taskset -c 4,5 qemu-system-x86_64 \
 RET=$?
 
 # destroy network setup
+ip link set dev $BRNAME_EXP down
+ip link set dev $TAPNAME_EXP down
+ip tuntap del dev $TAPNAME_EXP mode tap
+ip link del $BRNAME_EXP
+
 ip link set dev $BRNAME down
 ip link set dev $TAPNAME down
 ip tuntap del dev $TAPNAME mode tap
