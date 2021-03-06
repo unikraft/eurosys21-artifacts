@@ -1,6 +1,6 @@
 # Unikraft NGINX boot time with varying allocators
 
-This experiment provides data for Fig. 14.
+<img align="right" src="../../plots/fig_14_unikraft-nginx-alloc-boot.svg" width="300" />
 
 We measure the guest boot time (not including VMM overhead) and
 provide a per-component breakdown to highlight the impact of memory
