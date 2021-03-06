@@ -1,0 +1,9 @@
+setup,mode,throughput
+linux-metal,single,590 K/s
+linux-metal,batch,985 K/s
+linux-guest,single,105 K/s
+linux-guest,batch,276 K/s
+linux-guest,dpdk,6.1 M/s
+unikraft-guest,lwip,250 K/s
+unikraft-guest,uknetdev,6 M/s
+unikraft-guest,dpdk,6.1 M/s
