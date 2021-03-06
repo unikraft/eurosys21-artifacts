@@ -93,7 +93,7 @@ Each figure, table and corresponding experiment are listed below:
 | Text                                                  | Experiment                        | Est. runtime |
 |-------------------------------------------------------|-----------------------------------|--------------|
 | [`txt_01`](/experiments/txt_01_unikernel-boot-times/) | Unikernel boot time baseline.     | 0h 21m       |
-| [`txt_02`](/experiments/txt_02_9pfs-boot-times/)      | Measures 9pfs boot time overhead. |              |
+| [`txt_02`](/experiments/txt_02_9pfs-boot-times/)      | Measures 9pfs boot time overhead. | 0h 5m              |
 
 ## 2. Repository structure
 
