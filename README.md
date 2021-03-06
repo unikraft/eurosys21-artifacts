@@ -124,14 +124,13 @@ as they provide better performance.**  In the paper, we used three different
 setups:
 
  1. A Linux host with KVM enabled and Linux kernel 4.19 (most
-    experiments). We use a somewhat older kernel because HermiTux will
+    experiments).  We use a somewhat older kernel because HermiTux will
     not run with newer versions, as noted [here](https://github.com/ssrg-vt/hermitux/issues/12).
  2. A Linux host with Linux kernel 4.19 used as a DPDK packet generator
-    ([`fig_19`](/experiments/fig_19_compare-dpdk/README.md)) which has an
-    ethernet cable connected to the first host.  Additionally, we allowed for
-    user-defined CPU frequency by setting `intel_pstate=disable` to produce
-    Table 4. 
- 3. A Xen host used for Xen 9pfs experiments.
+    ([`fig_19`](/experiments/fig_19_compare-dpdk/) which has an ethernet cable
+    connected to the first host.  Additionally, we allowed for user-defined CPU
+    frequency by setting `intel_pstate=disable` to produce [`tab_04`](/experiments/tab_04_kvs_compare/).
+ 3. A Xen host used for Xen 9pfs experiments ([`txt_02`](/experiments/txt_02_9pfs-boot-times/)).
 
 A single server can be used for almost all experiments, though it would require
 installing different Linux kernel versions, or the Xen hypervisor and rebooting
@@ -152,9 +151,9 @@ installed.  All install and preparation scripts in this repository target this
 distribution and kernel version.
 
 For all set ups, we disabled Hyper-Threading (`noht`) and isolated 4 CPU cores
-(e.g. `isocpus=4,5,6,7`).  For reproducing Table 4, we allowed for user-defined
-CPU frequency (`intel_pstate=disable`).  This can be done by setting kernel boot
-parameters, e.g. with pxelinux:
+(e.g. `isocpus=4,5,6,7`).  For reproducing [`tab_04`](/experiments/tab_04_kvs_compare/),
+we allowed for user-defined CPU frequency (`intel_pstate=disable`).  This can be
+done by setting kernel boot parameters, e.g. with pxelinux:
 
 ```
 ...
