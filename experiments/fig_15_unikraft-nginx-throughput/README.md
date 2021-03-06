@@ -1,5 +1,7 @@
 # Unikraft Nginx TX with varying allocators
 
+<img align="right" src="../../plots/fig_15_unikraft-nginx-throughput.svg" width="300" />
+
 This experiment provides data for Fig. 15. Similary to Fig. 13, we
 evaluate the performance of NGINX with wrk (1 minute, 14 threads, 30
 conns, static 612B HTML page). In this experiment, we evaluate
