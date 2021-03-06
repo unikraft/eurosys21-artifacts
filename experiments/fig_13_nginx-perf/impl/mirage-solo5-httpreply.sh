@@ -60,6 +60,8 @@ for j in {1..5}; do
   benchmark_nginx_server ${BASEIP}.2:8080 $LOG
 
   killall -9 solo5-hvt
+
+  sleep 3
 done
 
 mkdir -p $WORKDIR/../results/
