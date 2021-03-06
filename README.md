@@ -2,7 +2,9 @@
 
 This repository contains the artifacts, including experiments and graphs, for
 the paper:
-<p style="text-align:center;font-weight:bold;">Unikraft: Fast, Specialized Unikernels the Easy Way</p>
+<h4 align="center">
+  Unikraft: Fast, Specialized Unikernels the Easy Way
+</h4>
 
  > **Abstract**:  Unikernels are famous for providing excellent performance in
  > terms of boot times, throughput and memory consumption, to name a few
