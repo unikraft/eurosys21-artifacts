@@ -1,4 +1,6 @@
-# syscalls-heatmap
+# Unikraft Syscall Heatmap
+
+<img align="right" src="../../plots/fig_05_syscall-heatmap.svg" width="300" />
 
 ## Goal
 
