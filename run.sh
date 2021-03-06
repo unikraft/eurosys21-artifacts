@@ -98,6 +98,7 @@ function install_dependencies() {
         meson \
         cscope \
         uuid-runtime \
+        cloc \
         uuid-dev \
         libuuid1 \
         bridge-utils \
