@@ -46,7 +46,7 @@ unikraft: unikraft-helloworld unikraft-nginx unikraft-redis unikraft-sqlite
 .PHONY: unikraft-helloworld
 unikraft-helloworld:
 	$(call DRUN,$(IMPLDIR)/$@,kraft -v list pull -w .unikraft unikraft@0.4)
-	$(call DRUN,$(IMPLDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT))
+	$(call DRUN,$(IMPLDIR)/$@,kraft -v configure -m $(ARCH) -p $(PLAT) -F)
 	$(call DRUN,$(IMPLDIR)/$@,kraft build)
 	cp $(IMPLDIR)/$@/build/app_$(PLAT)-$(ARCH) $(IMAGESDIR)/$@
 
