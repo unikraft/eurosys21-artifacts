@@ -1,5 +1,7 @@
 # TX throughput experiment (Unikraft v.s. DPDK)
 
+<img align="right" src="../../plots/fig_19_compare-dpdk.svg" width="300" />
+
 This experiment evaluates the performance of Unikraft's `uknetdev` API.  To
 this end we wrote a simple application that sends as many packets as
 possible from one machine (with varying packet sizes), and measure the
