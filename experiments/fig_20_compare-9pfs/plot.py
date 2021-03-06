@@ -115,6 +115,9 @@ def plot(data=None, output=None):
   ax1.grid(which='major', axis='y', linestyle=':', alpha=0.5, zorder=0)
   ax1.set_yscale('log')
 
+  ax1_yticks = np.array([1,10,100,1000, 10000, 60000])
+  ax1.set_yticks(ax1_yticks, minor=False)
+  ax1.set_yticklabels([ytick for ytick in ax1_yticks])
   ax1.set_ylim(1, delay_max)
 
   # Plot coordinates
