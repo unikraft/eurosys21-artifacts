@@ -1,5 +1,7 @@
 # 9pfs latency
 
+<img align="right" src="../../plots/fig_20_compare-9pfs.svg" width="300" />
+
 ## Goal
 
 This folder is used for a performance experiment of 9pfs between
