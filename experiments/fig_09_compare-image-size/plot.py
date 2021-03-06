@@ -99,7 +99,7 @@ def plot(data=None, output=None):
   ax1.set_ylim(0, imagesize_max)
 
   # Plot coordinates
-  scale = 1. / len(imagestats.keys())
+  scale = 1. / len(labels.keys())
   xlabels = []
 
   # Adjust margining
