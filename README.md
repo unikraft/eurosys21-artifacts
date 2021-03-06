@@ -133,19 +133,22 @@ environments.  **Physical hosts as opposed to virtual machines are recommended
 as they provide better performance.**  In the paper, we used three different
 setups:
 
- 1. A Linux host with KVM enabled and Linux kernel 4.19 (most
-    experiments).  We use a somewhat older kernel because HermiTux will
-    not run with newer versions, as noted [here](https://github.com/ssrg-vt/hermitux/issues/12).
- 2. A Linux host with Linux kernel 4.19 used as a DPDK packet generator
-    ([`fig_19`](/experiments/fig_19_compare-dpdk/)) which has an ethernet cable
-    connected to the first host.  Additionally, we allowed for user-defined CPU
-    frequency by setting `intel_pstate=disable` to produce [`tab_04`](/experiments/tab_04_kvs_compare/).
- 3. A Xen host used for Xen 9pfs experiments ([`txt_02`](/experiments/txt_02_9pfs-boot-times/)).
+ 1. A Linux host (Debian Buster) with KVM enabled and Linux kernel 4.19. This
+	host is used for most experiments. We use the 4.19 kernel because HermiTux
+	will not run with newer versions, as noted
+	[here](https://github.com/ssrg-vt/hermitux/issues/12).
+ 2. A Linux host (Debian Buster) with Linux kernel 4.19 that has an 10gbit/s
+	Ethernet cable connected to the first host. We use it for the DPDK network
+	experiment [`fig_19`](/experiments/fig_19_compare-dpdk/) and experiments
+	where we need to specifically setup the CPU frequency.
+	See 3.2 for further details.
+ 3. A Xen host (Debian Buster) used for Xen 9pfs experiments
+	([`txt_02`](/experiments/txt_02_9pfs-boot-times/)).
 
 A single server can be used for almost all experiments, though it would require
-installing different Linux kernel versions, or the Xen hypervisor and rebooting
-to switch from one set up to another.  The exception is the DPDK experiment,
-which requires two servers connected to each other via a 10Gb link.
+different Linux kernel parameters, or the Xen hypervisor and rebooting to switch
+from one set up to another.  The exception is the DPDK experiment, which
+requires two servers connected to each other via a 10Gb link.
 
 All of our results were run on inexpensive (roughly EUR 800)
 [Shuttle SH370R6](http://global.shuttle.com/products/productsDetail?productId=2265)
@@ -154,54 +157,54 @@ boxes with an Intel i7 9700K 3.6 GHz (4.9 Ghz with Turbo Boost, 8 cores) and
 cards with the 82599EB chipset.
 
 
-### 3.2. Kernel
+### 3.2. Kernel and Parameters
 
 All experiments were run on a physical host with Debian Buster and Linux 4.19
-installed.  All install and preparation scripts in this repository target this
+installed. All install and preparation scripts in this repository target this
 distribution and kernel version.
 
-For all set ups, we disabled Hyper-Threading (`noht`) and isolated 4 CPU cores
-(e.g. `isocpus=4,5,6,7`). This can be done by setting kernel boot parameters,
-e.g. with pxelinux:
+For all set ups, we disabled Hyper-Threading (`noht`), isolated 4 CPU cores
+(e.g. `isocpus=2-6`), switched off the IOMMU (`intel_iommu=off`), and disabled
+IPv6 (`ipv6.disable=1`). This can be done by setting kernel boot parameters with
+your bootloader, for instance with Grub (`/etc/default/grub`):
 
+``` bash
+GRUB_CMDLINE_LINUX_DEFAULT="isolcpus=2-4 noht intel_iommu=off ipv6.disable=1"
 ```
+
+or with syslinux/pxelinux:
+
+``` text
 ...
 LABEL item_kernel0
   MENU LABEL Linux
   MENU DEFAULT
   KERNEL vmlinuz-4.19.0
-  APPEND isolcpus=4,5,6,7 noht
+  APPEND isolcpus=2-6 noht intel_iommu=off ipv6.disable=1
   ...
 ```
 
-For reproducing [`tab_04`](/experiments/tab_04_kvs_compare/), we additionally
-allowed for user-defined CPU frequency (`intel_pstate=disable`):
-```
-  ...
-  APPEND isolcpus=4,5,6,7 noht intel_pstate=disable
-  ...
-```
+On Xen we use the following parameters (please adjust the amount of pinned
+memory for Dom0 according to your available RAM, we gave the half of 32GB RAM to
+Dom0; We also pinned 4 CPU cores to Dom0):
+Grub (`/etc/default/grub`):
 
-From the remaining 4 CPU cores, we pinned one to the VM, another one to the VMM
-(e.g., `qemu-system-x86_64`), and another one to the client tool (e.g., `wrk` or
-`redis-benchmark`).  For all experiments, we set the governor to performance,
-which can be done generally by:
+``` bash
+GRUB_CMDLINE_LINUX_XEN_REPLACE_DEFAULT=""
+GRUB_CMDLINE_LINUX_XEN_REPLACE="earlyprintk=xen console=hvc0 ipv6.disable=1"
 
-```
-echo "performance" > /sys/devices/system/cpu/cpu$CPU_ID/cpufreq/scaling_governor
+# Xen boot parameters for all Xen boots
+GRUB_CMDLINE_XEN=""
+# Xen boot parameters for non-recovery Xen boots (in addition to GRUB_CMDLINE_XEN)
+GRUB_CMDLINE_XEN_DEFAULT="dom0_vcpus_pin dom0_max_vcpus=4 smt=0 dom0_mem=15360M,max:16384M cpufreq=xen gnttab_max_frames=256"
 ```
 
-However, both the pinning and governor settings are handled by the scripts in
-this repo (as opposed to the kernel boot parameters, which you will need to take
-care of manually).
-
-We recommend to use
-[qemu-system-x86](https://packages.debian.org/buster-backports/qemu-system-x86)
-from the official Debian Buster repositories, version `1:3.1+dfsg-8+deb10u8`.
-Note that Rumprun experiments fail with the version from buster-backports
-(`1:5.2+dfsg-3~bpo10+1`), possibly due to a bug either in Rumprun or in the
-Debian package.
-
+Please note that the following experiments require additional kernel parameters
+e.g., to enable specific CPU frequency scaling governors:
+- [`tab_01`](/experiments/tab_01_bincompat-syscalls/)
+- [`tab_04`](/experiments/tab_04_kvs_compare/)
+- [`fig_22`](/experiments/tab_04_kvs_compare/), , need further 
+We documented this within the experiment folder.
 
 ## 4. Getting Started
 
@@ -227,6 +230,12 @@ Debian package.
 5. Once prepared, simply call the relevant experiment you wish to re-create
    using the `run.sh` script.
 
+Please note that we recommend to use
+[qemu-system-x86](https://packages.debian.org/buster-backports/qemu-system-x86)
+from the official Debian Buster repositories, version `1:3.1+dfsg-8+deb10u8`.
+Note that Rumprun experiments fail with the version from buster-backports
+(`1:5.2+dfsg-3~bpo10+1`), possibly due to a bug either in Rumprun or in the
+Debian package.
 
 ### 4.1. `run.sh` Usage
 

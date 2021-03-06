@@ -7,8 +7,29 @@ On the second machine we run 4 different server implementations. We use dpdk vho
 * `linux vm` we run a udp server over the socket API in a linux vm
 * `linux dpdk` we run a udp server over dpdk in a linux vm
 
-
 The results are stored in the client
+
+Please note that for reproducing, we additionally allowed for user-defined CPU
+frequency scaling setup (`intel_pstate=disable`) with the boot configuration.
+For instance with Grub (`/etc/default/grub`):
+``` bash
+GRUB_CMDLINE_LINUX_DEFAULT="isolcpus=2-6 noht intel_iommu=off ipv6.disable=1 intel_pstate=disable"
+```
+
+From the isolated 4 CPU cores, we pinned one to the VM, another one to the VMM
+(e.g., `qemu-system-x86_64`), and another one to the client tool (e.g., `wrk` or
+`redis-benchmark`).  For all experiments, we set the governor to performance,
+which can be done generally by:
+
+```
+echo "performance" > /sys/devices/system/cpu/cpu$CPU_ID/cpufreq/scaling_governor
+```
+
+However, both the pinning and governor settings are handled by the scripts in
+this repo (as opposed to the kernel boot parameters, which you will need to take
+care of manually).
+
+
 # Script description
 * `run_vhost.sh` runs the dpdk vhost
 * `build_all.sh` builds all the necessary binaries
