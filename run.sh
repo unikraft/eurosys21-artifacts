@@ -189,6 +189,20 @@ elif [[ $NO_DEPS != 'y' && $ACTION != "clean" ]]; then
   install_dependencies
 fi
 
+# Install Unikraft tracepoints scripts
+GDBsetup=$(cat ~/.gdbinit | grep -c "uk-gdb.py")
+if [ $GDBsetup -eq 0 ]; then
+  rm -rf ~/.unikraft-eurosys21
+  mkdir -p ~/.unikraft-eurosys21
+  pushd ~/.unikraft-eurosys21
+  git clone https://github.com/unikraft/unikraft.git
+  pushd unikraft
+  git checkout 7fd6797bd5917acc515ef6ddbfa85621f4aacf5f
+  popd
+  popd
+  echo "source ~/.unikraft-eurosys21/unikraft/support/scripts/uk-gdb.py" >> ~/.gdbinit
+fi
+
 # Perform the same action for every experiment?
 case $REQUEST in
   prepare|run|plot|clean)
