@@ -1,5 +1,7 @@
 # UDP key-value store performance (Unikraft v.s. DPDK)
 
+<img align="right" src="../../plots/tab_04_kvs_compare.svg" width="300" />
+
 This experiment demonstrates the potential of specialization for
 network applications. To this end we implement a UDP-based in-memory
 key-value store using the `recvmsg`/`sendmsg` syscalls and apply
