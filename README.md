@@ -72,8 +72,8 @@ Each figure, table and corresponding experiment are listed below:
 | [`fig_15`](/experiments/fig_15_unikraft-nginx-throughput/) | <img src="plots/fig_15_unikraft-nginx-throughput.svg" width="200" /> | NGINX throughput with different memory allocators.                                                                                                                                                                            | 0h 30m       |
 | [`fig_16`](/experiments/fig_16_unikraft-sqlite-alloc/)     | <img src="plots/fig_16_unikraft-sqlite-alloc.svg" width="200" />     | Execution speedup in SQLite Unikraft, relative to [mimalloc](https://github.com/microsoft/mimalloc).                                                                                                                          | 0h 21m       |
 | [`fig_17`](/experiments/fig_17_unikraft-sqlite-libc/)      | <img src="plots/fig_17_unikraft-sqlite-libc.svg" width="200" />      | Time for 60k SQLite insertions with native Linux, [newlib](https://sourceware.org/newlib/) and [musl](https://www.musl-libc.org/) on Unikraft (marked as native) and SQLite ported automatically to Unikraft (musl external). |              |
-| [`fig_18`](/experiments/fig_18_unikraft-redis-alloc/)      | <img src="plots/fig_18_unikraft-redis-alloc.svg" width="200" />      | Throughput for Redis Unikraft, with varying memory allocators and request type (`redis-benchmark`, 30 concurrent conns, 100k requests, and a pipelining level of 16.)                                                         | 0h 5m        |
-| [`fig_19`](/experiments/fig_19_compare-dpdk/)              | <img src="plots/fig_19_compare-dpdk.svg" width="200" />              | TX throughput comparison of Unikraft versus [DPDK](https://www.dpdk.org/) in a Linux VM.                                                                                                                                      |              |
+| [`fig_18`](/experiments/fig_18_unikraft-redis-alloc/)      | <img src="plots/fig_18_unikraft-redis-alloc.svg" width="200" />      | Throughput for Redis Unikraft, with varying allocators and request type (`redis-benchmark`, 30 concurrent conns, 100k requests, and a pipelining level of 16.)                                                                | 0h 5m        |
+| [`fig_19`](/experiments/fig_19_compare-dpdk/)              | <img src="plots/fig_19_compare-dpdk.svg" width="200" />              | TX throughput comparison of Unikraft versus [DPDK](https://www.dpdk.org/) in a Linux VM.                                                                                                                                      | 0h 30        |
 | [`fig_20`](/experiments/fig_20_compare-9pfs/)              | <img src="plots/fig_20_compare-9pfs.svg" width="200" />              | [9pfs](https://xenbits.xen.org/docs/unstable/misc/9pfs.html) latency for read and write operations, compared to Linux.                                                                                                        | 2h 0m        |
 | [`fig_21`](/experiments/fig_21_unikraft-boot-pages/)       | <img src="plots/fig_21_unikraft-boot-pages.svg" width="200" />       | Unikraft boot times with static and dynamic initialization of page tables.                                                                                                                                                    | 0h 3m        |
 | [`fig_22`](/experiments/fig_22_compare-vfs/)               | <img src="plots/fig_22_compare-vfs.svg" width="200" />               | Filesystem specialization and removal of the vfs layer yields important performance gains for a web cache when performing a look up and file open operation.                                                                  | 0h 5m        |
@@ -178,6 +178,13 @@ echo "performance" > /sys/devices/system/cpu/cpu$CPU_ID/cpufreq/scaling_governor
 However, both the pinning and governor settings are handled by the scripts in
 this repo (as opposed to the kernel boot parameters, which you will need to take
 care of manually).
+
+We recommend to use
+[qemu-system-x86](https://packages.debian.org/buster-backports/qemu-system-x86)
+from the official Debian Buster repositories, version `1:3.1+dfsg-8+deb10u8`.
+Note that Rumprun experiments fail with the version from buster-backports
+(`1:5.2+dfsg-3~bpo10+1`), possibly due to a bug either in Rumprun or in the
+Debian package.
 
 
 ## 4. Getting Started
