@@ -14,7 +14,7 @@ If the server is down you can download it from the [backup] server.
 
 **APPROXIMATIVE EXECUTION TIME=2h**
 
-**NOTE THAT THIS EXPERIMENT REQUIRES SOME DISK SPACE (+/-1.5GB in the /tmp folder)**
+**NOTE THAT THIS EXPERIMENT REQUIRES SOME DISK SPACE (+/-2GB in the /tmp folder)**
 
 ## How to Use (automatic test)
 
@@ -65,7 +65,6 @@ CSV files respectively called `musl-compat.csv` (in the folder
 `apps_musl_compat/`) and `musl-std.csv` (in the folder
 `apps_musl_std/`).
 
-
 ### Test with newlib
 
 To test with `newlib`, enter the following commands from the experiment
@@ -82,7 +81,7 @@ cd abi/apps_newlib_std/
 
 The first part will compute the size of all unikernels when the
 compatibility layer is enabled.
-The second part will display a checkmark (V) or a fail (V) when the
+The second part will display a checkmark (V) or a fail (X) when the
 compatibility is disabled. A checkmark means that the application has
 been successfully built. Otherwise, it will display a fail.
 
