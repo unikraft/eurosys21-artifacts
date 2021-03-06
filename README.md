@@ -12,7 +12,7 @@ the paper: "Unikraft: Fast, Specialized Unikernels the Easy Way".
  > so that it is easy to customize the unikernel and include only relevant
  > components and (2) exposes a set of composable, performance-oriented APIs in
  > order to make it easy for developers to obtain high performance.
-
+ > 
  > Our evaluation using off-the-shelf popular applications such as NGINX,
  > SQLite, and Redis shows that running such applications on Unikraft results in
  > a 1.7x-2.7x performance improvement compared to Linux guests.  In addition,
@@ -25,7 +25,8 @@ the paper: "Unikraft: Fast, Specialized Unikernels the Easy Way".
 Xen Incubator Project.  Most of the code used for this paper is upstream, or is
 in the process of being upstreamed.
 
-If at all possible, please read through this entire document before installing or running experiments.
+If at all possible, please read through this entire document before installing
+or running experiments.
 
 ## Contents of this Document
 
