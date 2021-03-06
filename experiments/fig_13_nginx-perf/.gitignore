@@ -17,3 +17,5 @@ src/mirage-solo5-httpreply/*.opam
 src/mirage-solo5-httpreply/myocamlbuild.ml
 src/mirage-solo5-httpreply/static1.ml
 src/mirage-solo5-httpreply/static1.mli
+src/mirage-solo5-httpreply/static2.ml
+src/mirage-solo5-httpreply/static2.mli
