@@ -62,7 +62,7 @@ for j in {1..5}; do
   killall -9 solo5-hvt
 done
 
-mkdir -p $WORKDIR/results/
-RESULTS=$WORKDIR/results/unikraft-solo5.csv
+mkdir -p $WORKDIR/../results/
+RESULTS=$WORKDIR/../results/mirage-solo5.csv
 echo "throughput_reqs" > $RESULTS
 parse_nginx_results $LOG $RESULTS
