@@ -28,8 +28,9 @@ You can automatically run all the experiment by running the `make all`
 command. This command will:
 
 1. Prepare the environment by executing the `./setup.sh` script. Note
-that this script takes a long time...
-2. Run the syscalls experiment by running `./run_all.sh`. 
+that this script may take some time...
+2. Run the syscalls experiment by running `./run_all.sh`. The results
+are saved into several json files in the `results` folder.
 3. Generate the heatmap by running the `./plot.sh` script and then the
 figure is saved into the current repository as `fig_05_syscall-heatmap.svg`.
 
