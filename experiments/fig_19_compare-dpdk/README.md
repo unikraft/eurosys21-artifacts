@@ -18,18 +18,19 @@ Following sizes are explored: 64, 128, 256, 512, 1024, and 1500.
 
 ### Unikraft vhost user
 
-First, prepare the environment:
+First, prepare the environment and build the Unikraft unikernel:
 ```
 ./prepare.sh
 ```
 
-To run the unikraft generating code
+Then, we start the vhost:
 ```
 cd server
 ./run_vhost.sh
 ```
 
-In the vhost interactive shell:
+This is going to pop an interactive shell. In this shell, enter the following
+commands:
 ```
 port stop all
 set fwd mac
@@ -37,7 +38,8 @@ port start all
 start
 ```
 
-In another terminal:
+Finally, in another terminal, start the Unikraft unikernel that uses the
+vhost-user port:
 ```
 cd server
 ./prepare.sh
@@ -45,7 +47,7 @@ cd unikraft/uk_test_suite/
 ./run_vhost_user.sh
 ```
 
-We'll see an output of 10 iteration like:
+This is going to output ten iterations such as the following one:
 ```
 ******************** ITERATION: 2 ******************
 The count of packet to transmitted/NR of packet sent to virtio per sec/Total iteration
@@ -62,10 +64,12 @@ The latency of pkt alloc/pkt gen/ pkt send
 246885880/1033856334/1369072622
 247798612/1031452360/1367364560
 ```
-The first column is the result, the number of packet/s per second transmited.
 
-Note: If the value of `TXONLY_DEF_PACKET_LEN` is changed, we have to
-rebuild Unikraft. To do this we run
+The first column is the result, followed by the number of packet/s per second
+transmitted.
+
+Note: If the value of `TXONLY_DEF_PACKET_LEN` is changed, Unikraft has to be rebuilt.
+To do this, run:
 ```
 rm -rf unikraft/uk_test_suite/
 ./prepare.sh
