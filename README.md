@@ -43,7 +43,7 @@ or running experiments.
      for the experiments.  
       3.1. [Hardware](#31-hardware): Details of hardware setup in the paper and
            general recommendations.  
-      3.2. [Kernel](#32-kernel): Details on kernel requirements for the
+      3.2. [Kernel](#32-kernel-and-parameters): Details on kernel requirements for the
            experiments which must be addressed manually.
   4. [Getting Started](#4-getting-started): Information on how to use this
      repository to fully recreate the experiments.  
