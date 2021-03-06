@@ -7,7 +7,7 @@ systems is their low resource consumption."  To demonstrate this, we evaluated
 the image size of 4 representative applications in Unikraft and on other
 unikernel projects, including [HermiTux](https://ssrg-vt.github.io/hermitux/),
 [Lupine](https://github.com/hckuo/Lupine-Linux), [MirageOS](mirage.io),
-[OSv](https://github.com/cloudius-systems/osv), [Rumprun](*https://github.com/rumpkernel/rumprun),
+[OSv](https://github.com/cloudius-systems/osv), [Rumprun](https://github.com/rumpkernel/rumprun),
 and as a stripped, dynamically-linked native Linux userspace binary.  This
 figure shows that "Unikraft images are all under 2MBs for all of these
 applications."
