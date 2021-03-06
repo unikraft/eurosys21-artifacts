@@ -97,6 +97,7 @@ function install_dependencies() {
         socat \
         meson \
         cscope \
+        libseccomp-dev \
         uuid-runtime \
         cloc \
         uuid-dev \
