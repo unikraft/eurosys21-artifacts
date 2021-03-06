@@ -19,6 +19,8 @@ machine to perform this experiment.
 
 **APPROXIMATIVE EXECUTION TIME=30/45minutes**
 
+**NOTE THAT THE EXPERIMENT CAN BE FASTER IF FIG_05 EXPERIENCE HAS BEEN EXECUTED BEFORE**
+
 **This experiment requires at least docker client 20 and**
 **docker engine 19 otherwise results may be less accurate**
 
@@ -42,7 +44,8 @@ execute first the `./setup.sh` script. This script will setup all the
 environment to generate the graph. Once the setup is done, you can run
 the dependency analyser by running the `./run_all.sh`. Note that the
 setup takes time since each application must be built as a docker
-container.
+container. The results are saved into several json files
+in the `results` folder.
 
 Once all the results are generated, run the `./plot.sh` script to
 generate the graph. This one will be generated in the current folder

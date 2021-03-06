@@ -42,7 +42,8 @@ execute first the `./setup.sh` script. This script will setup all the
 environment to generate the heatmap. Once the setup is done, you
 can run the dependency analyser by running the `./run_all.sh`. Note
 that the setup takes time since each application must be built as a
-docker container.
+docker container. The results are saved into several json files
+in the `results` folder.
 
 Once all the results are generated, run the `./plot.sh` script to
 generate the heatmap. This one will be generated in the current folder

@@ -1,5 +1,5 @@
 #!/bin/bash
-DIR="aggregated_dockerfile"
+DIR="results"
 if [ -d "$DIR" ]; then
     python3 cruncher.py --plot
 else

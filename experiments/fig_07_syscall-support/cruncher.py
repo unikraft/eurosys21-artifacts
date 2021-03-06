@@ -18,7 +18,7 @@ import matplotlib.ticker as ticker
 
 # Folder storing application JSON files from syscall analysis tool:
 # one JSON file per-application
-APPLICATION_JSON_FOLDER = 'aggregated_dockerfile'
+APPLICATION_JSON_FOLDER = 'results'
 
 # Excel file that contains the syscall implementation
 # TODO: Use Google DOC API.
