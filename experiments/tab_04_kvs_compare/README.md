@@ -1,5 +1,7 @@
 # UDP key-value store performance (Unikraft v.s. DPDK)
 
+<img align="right" src="../../plots/tab_04_kvs_compare.svg" width="300" />
+
 This experiment demonstrates the potential of specialization for
 network applications. To this end we implement a UDP-based in-memory
 key-value store using the `recvmsg`/`sendmsg` syscalls and apply
@@ -31,6 +33,13 @@ For instance with Grub (`/etc/default/grub`):
 
 ``` bash
 GRUB_CMDLINE_LINUX_DEFAULT="isolcpus=2-6 noht intel_iommu=off ipv6.disable=1 intel_pstate=disable"
+```
+
+We make use of huge pages for this experiment, which has the following Linux
+kernel parameters:
+
+```
+default_hugepagesz=1G hugepagesz=1G hugepages=4
 ```
 
 From the isolated 4 CPU cores, we pinned one to the VM, another one to the VMM
