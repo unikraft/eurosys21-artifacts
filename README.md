@@ -203,7 +203,8 @@ Please note that the following experiments require additional kernel parameters
 e.g., to enable specific CPU frequency scaling governors:
 - [`tab_01`](/experiments/tab_01_bincompat-syscalls/)
 - [`tab_04`](/experiments/tab_04_kvs_compare/)
-- [`fig_22`](/experiments/tab_04_kvs_compare/), , need further 
+- [`fig_22`](/experiments/tab_04_kvs_compare/)
+
 We documented this within the experiment folder.
 
 ## 4. Getting Started
