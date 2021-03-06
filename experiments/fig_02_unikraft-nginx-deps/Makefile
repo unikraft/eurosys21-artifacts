@@ -5,7 +5,7 @@ WORKDIR ?= $(CURDIR)
 RESULTS ?= $(WORKDIR)
 PLOT_FORMAT ?= svg
 PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).$(PLOT_FORMAT)
-GZ ?= $(WORKDIR)$(notdir $(WORKDIR)).gz
+GZ ?= $(WORKDIR)/$(notdir $(WORKDIR)).gz
 
 #
 # Tools
