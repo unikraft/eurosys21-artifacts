@@ -1,5 +1,7 @@
 # System Call Performance
 
+<img align="right" src="../../plots/tab_01_bincompat-syscalls.svg" width="300" />
+
 The experiments in this folder will evaluate the costs of a `noop`
 system call and a function call on a Linux KVM VM and Unikraft KVM
 VM. The same benchmark ELF binary (sources under `src/`) is executed
