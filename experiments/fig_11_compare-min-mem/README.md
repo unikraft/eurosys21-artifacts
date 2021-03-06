@@ -7,8 +7,6 @@ a single server when RAM is a bottleneck, we ran experiments to measure the
 minimum amount of memory required to boot various applications as unikernels,
 finding that 2-6MBs of memory suffice for Unikraft guests."
 
-This experiment provides data for Fig. 11.
-
 ## Usage
 
 Run instructions:
