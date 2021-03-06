@@ -1,6 +1,16 @@
 # Comparison of Unikernel Image Sizes
 
-This experiment provides data for Figure 10.
+<img align="right" src="../../plots/fig_09_compare-image-size.svg" width="300" />
+
+From the paper, "the main advantage of unikernels over traditional operating
+systems is their low resource consumption."  To demonstrate this, we evaluated
+the image size of 4 representative applications in Unikraft and on other
+unikernel projects, including [HermiTux](https://ssrg-vt.github.io/hermitux/),
+[Lupine](https://github.com/hckuo/Lupine-Linux), [MirageOS](mirage.io),
+[OSv](https://github.com/cloudius-systems/osv), [Rumprun](*https://github.com/rumpkernel/rumprun),
+and as a stripped, dynamically-linked native Linux userspace binary.  This
+figure shows that "Unikraft images are all under 2MBs for all of these
+applications."
 
 ## Usage
 
