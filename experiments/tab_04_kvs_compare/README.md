@@ -22,15 +22,23 @@ Run prepare.sh from the root folder of the experiment on both server and client.
 # Server
 The server is running on uktut1. We first run the server and next the client. Each folder from the server directory represents an experiment(e.g. unikraft raw netdev, lwip over unikraft etc.). To run an experiment we do the following:
 
+We run `./prepare.sh` in the root. Then we run the following:
 ```
 cd server
-./prepare.sh # only one needed
+./prepare.sh 
 ```
+
 We run the vhost in one terminal
 ```
 ./run_vhost.sh
 ```
-We run the server in another terminal
+In the vhost terminal we run
+```
+set fwd mac
+start
+```
+
+We run the server in another terminal. Depending on which server we want to run. There is a `./run.sh`. 
 
 ## Raw netdev
 ```
@@ -40,19 +48,39 @@ cd unikraft_raw/uk_test_suite
 
 
 # Client
-The client is running on uktut2. The client is a dpdk application that generates traffic. Run the client after starting one of the servers
+The client is running on uktut2. The client is a dpdk application that generates traffic. Run the client after starting one of the servers.
 
+We run `./prepare.sh` in the root. Then we run the following:
 ```
 cd client
-./run_client
+./prepare.sh
 ```
 
 In the test-pmd interactive shell we run the following:
 ```
+set fwd mac
+start
 ```
 
+To run the client we add:
+```
+cd unikraft/uk_test_suite
+./run.sh
+```
 
-Connection details
+The client will output the results every second:
+```
+******iteration: 95*********************                
+The latency, iteration, count of packet to received/transmitted per sec
+458197340378,877788,6514181,0                           
+The count of packet to received: 617872698                             
+The latency of pkt recv/0 pkt recv/pkt process/ pkt free
+1052610566/640142000/1141215506/83314356  
+```
+We're interested in the third value in the second row:6514181. That 
+is the number of packets/s. The client can be kept up while changing servers.
+
+# Connection details
 client                server
 uktut2      <-------> uktut1
 enp1s0f0 	      enp1s0f1
