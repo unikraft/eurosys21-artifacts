@@ -179,6 +179,13 @@ However, both the pinning and governor settings are handled by the scripts in
 this repo (as opposed to the kernel boot parameters, which you will need to take
 care of manually).
 
+We recommend to use
+[qemu-system-x86](https://packages.debian.org/buster-backports/qemu-system-x86)
+from the official Debian Buster repositories, version `1:3.1+dfsg-8+deb10u8`.
+Note that Rumprun experiments fail with the version from buster-backports
+(`1:5.2+dfsg-3~bpo10+1`), possibly due to a bug either in Rumprun or in the
+Debian package.
+
 
 ## 4. Getting Started
 
