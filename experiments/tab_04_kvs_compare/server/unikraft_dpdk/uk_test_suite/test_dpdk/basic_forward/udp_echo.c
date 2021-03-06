@@ -12,7 +12,7 @@
 #include "pktgen.h"
 #include "dev.h"
 #include <uk/netdev.h>
-
+#define CONFIG_USE_DPDK_PMD
 #define PRINT_ITERATION		10
 #define RX_NUM_BUF 16384
 #define TX_NUM_BUF 16384
