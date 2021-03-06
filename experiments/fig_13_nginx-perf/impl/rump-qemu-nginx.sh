@@ -32,14 +32,15 @@ trap "cleanup" EXIT
 
 for j in {1..5}
 do
-	cp ${IMAGES}/rump-qemu.img ${IMAGES}/rump-qemu.img.disposible
+	cp ${IMAGES}/rump-qemu.img /tmp/rump-qemu.img.disposible
+	cp ${IMAGES}/rump-qemu.iso /tmp/rump-qemu.iso
 
 	taskset -c ${CPU1},${CPU2} ${IMAGES}/rump/root/rumprun/app-tools/rumprun \
 			kvm -i -M 1024 -g '-daemonize' \
         		-I if,vioif,"-net tap,script=no,ifname=$NETIF" \
         		-W if,inet,dhcp \
-			-b ${IMAGES}/rump-qemu.iso,/data \
-        		-- ${IMAGES}/rump-qemu.img
+			-b /tmp/rump-qemu.iso,/data \
+			-- /tmp/rump-qemu.img.disposible
 
 	# make sure that the server has properly started
 	sleep 15
@@ -53,7 +54,8 @@ do
 
 	# stop server
 	kill_qemu
-	rm ${IMAGES}/rump-qemu.img.disposible
+	rm /tmp/rump-qemu.img.disposible
+	rm /tmp/rump-qemu.iso
 done
 
 RESULTS=results/rump-qemu.csv
