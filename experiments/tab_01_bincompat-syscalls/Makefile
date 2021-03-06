@@ -4,6 +4,11 @@
 WORKDIR ?= $(CURDIR)
 
 #
+# Tools
+#
+SNAKE ?= python3
+
+#
 # Targets
 #
 .PHONY: all
@@ -20,11 +25,11 @@ prepare:
 run:
 	$(WORKDIR)/run.sh "$(WORKDIR)"
 	$(WORKDIR)/parse.sh "$(WORKDIR)"
-	$(WORKDIR)/process.sh "$(WORKDIR)"
 
 .PHONY: plot
 plot:
-	@-
+	$(WORKDIR)/process.sh "$(WORKDIR)"
+	$(SNAKE) $(WORKDIR)/plot.py
 
 .PHONY: clean
 clean:

@@ -25,6 +25,8 @@ the paper: "Unikraft: Fast, Specialized Unikernels the Easy Way".
 Xen Incubator Project.  Most of the code used for this paper is upstream, or is
 in the process of being upstreamed.
 
+If at all possible, please read through this entire document before installing or running experiments.
+
 ## Contents of this Document
 
   1. [Experiments](#1-experiments): List of all experiments in the paper. 
