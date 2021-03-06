@@ -1,9 +1,11 @@
 # 9pfs latency
 
+<img align="right" src="../../plots/fig_20_compare-9pfs.svg" width="300" />
+
 ## Goal
 
 This folder is used for a performance experiment of 9pfs between
-[Unikraft][] and a Linux VM (write and read latency). Since these
+Unikraft and a Linux VM (write and read latency). Since these
 experiments require a large VM, we decided to host the zip file which
 contains the Linux VM on another [server]. If the server is down
 you can download it from the [backup] server.
