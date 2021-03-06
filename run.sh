@@ -190,8 +190,8 @@ elif [[ $NO_DEPS != 'y' && $ACTION != "clean" ]]; then
 fi
 
 # Install Unikraft tracepoints scripts
-GDBsetup=$(cat ~/.gdbinit | grep -c "uk-gdb.py")
-if [ $GDBsetup -eq 0 ]; then
+touch ~/.gdbinit
+if ! grep -q 'uk-gdb.py' ~/.gdbinit; then
   rm -rf ~/.unikraft-eurosys21
   mkdir -p ~/.unikraft-eurosys21
   pushd ~/.unikraft-eurosys21
