@@ -2,6 +2,14 @@
 # Files and directories
 #
 WORKDIR ?= $(CURDIR)
+RESULTS ?= $(WORKDIR)/results/merged.csv
+PLOT_FORMAT ?= svg
+PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
+
+#
+# Tools
+#
+SNAKE ?= python3
 
 #
 # Targets
@@ -15,7 +23,7 @@ clean:
 
 .PHONY: plot
 plot:
-	$(WORKDIR)/plot.sh
+	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
 
 .PHONY: prepare
 prepare:
@@ -24,3 +32,4 @@ prepare:
 .PHONY: run
 run:
 	$(WORKDIR)/run_all.sh
+	$(WORKDIR)/merge.sh

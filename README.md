@@ -1,31 +1,38 @@
-# Unikraft EuroSys'21 Artifacts
+<h1 align="center">Unikraft EuroSys'21 Artifacts</h1>
 
-This repository contains the artifacts, including experiments and graphs, for
-the paper: "Unikraft: Fast, Specialized Unikernels the Easy Way".
+<p align="center">
+  This repository contains the artifacts, including experiments and graphs, for
+  the paper:
+</p>
+
+<h3 align="center">
+  Unikraft: Fast, Specialized Unikernels the Easy Way
+</h3>
 
  > **Abstract**:  Unikernels are famous for providing excellent performance in
  > terms of boot times, throughput and memory consumption, to name a few
  > metrics.  However, they are infamous for making it hard and extremely time
  > consuming to extract such performance, and for needing significant
  > engineering effort in order to port applications to them.  We introduce
- > [Unikraft](http://unikraft.org), a novel micro-library OS that (1) fully
- > modularizes OS primitives so that it is easy to customize the unikernel and
- > include only relevant components and (2) exposes a set of composable,
- > performance-oriented APIs in order to make it easy for developers to obtain
- > high performance.
- >
+ > Unikraft, a novel micro-library OS that (1) fully modularizes OS primitives
+ > so that it is easy to customize the unikernel and include only relevant
+ > components and (2) exposes a set of composable, performance-oriented APIs in
+ > order to make it easy for developers to obtain high performance.
+ > 
  > Our evaluation using off-the-shelf popular applications such as NGINX,
- > SQLite, and Redis shows that running such applications on Unikraft results
- > in a 1.7x-2.7x performance improvement compared to Linux guests.  In addition,
+ > SQLite, and Redis shows that running such applications on Unikraft results in
+ > a 1.7x-2.7x performance improvement compared to Linux guests.  In addition,
  > Unikraft images for these apps are around 1MB, require less than 10MB of RAM
  > to run, and boot in around 1ms on top of the VMM time (total boot time
- > 2ms-70ms).
+ > 3ms-40ms). Unikraft is a Linux Foundation open source project and can be
+ > found at www.unikraft.org.
 
 [Unikraft](http://unikraft.org) is a Linux Foundation open source project and
 Xen Incubator Project.  Most of the code used for this paper is upstream, or is
 in the process of being upstreamed.
 
-If at all possible, please read through this entire document before installing or running experiments.
+If at all possible, please read through this entire document before installing
+or running experiments.
 
 ## Contents of this Document
 
@@ -73,23 +80,23 @@ Each figure, table and corresponding experiment are listed below:
 | [`fig_14`](/experiments/fig_14_unikraft-nginx-alloc-boot/) | <img src="plots/fig_14_unikraft-nginx-alloc-boot.svg" width="200" /> | Unikraft Boot time for NGINX with different memory allocators.                                                                                                                                                                | 0h 8m        |
 | [`fig_15`](/experiments/fig_15_unikraft-nginx-throughput/) | <img src="plots/fig_15_unikraft-nginx-throughput.svg" width="200" /> | NGINX throughput with different memory allocators.                                                                                                                                                                            | 0h 30m       |
 | [`fig_16`](/experiments/fig_16_unikraft-sqlite-alloc/)     | <img src="plots/fig_16_unikraft-sqlite-alloc.svg" width="200" />     | Execution speedup in SQLite Unikraft, relative to [mimalloc](https://github.com/microsoft/mimalloc).                                                                                                                          | 0h 21m       |
-| [`fig_17`](/experiments/fig_17_unikraft-sqlite-libc/)      | <img src="plots/fig_17_unikraft-sqlite-libc.svg" width="200" />      | Time for 60k SQLite insertions with native Linux, [newlib](https://sourceware.org/newlib/) and [musl](https://www.musl-libc.org/) on Unikraft (marked as native) and SQLite ported automatically to Unikraft (musl external). |              |
-| [`fig_18`](/experiments/fig_18_unikraft-redis-alloc/)      | <img src="plots/fig_18_unikraft-redis-alloc.svg" width="200" />      | Throughput for Redis Unikraft, with varying allocators and request type (`redis-benchmark`, 30 concurrent conns, 100k requests, and a pipelining level of 16.)                                                                | 0h 5m        |
+| [`fig_17`](/experiments/fig_17_unikraft-sqlite-libc/)      | <img src="plots/fig_17_unikraft-sqlite-libc.svg" width="200" />      | Time for 60k SQLite insertions with native Linux, [newlib](https://sourceware.org/newlib/) and [musl](https://www.musl-libc.org/) on Unikraft (marked as native) and SQLite ported automatically to Unikraft (musl external). | 0h 6m        |
+| [`fig_18`](/experiments/fig_18_unikraft-redis-alloc/)      | <img src="plots/fig_18_unikraft-redis-alloc.svg" width="200" />      | Throughput for Redis Unikraft, with varying memory allocators and request type (`redis-benchmark`, 30 concurrent conns, 100k requests, and a pipelining level of 16.)                                                         | 0h 5m        |
 | [`fig_19`](/experiments/fig_19_compare-dpdk/)              | <img src="plots/fig_19_compare-dpdk.svg" width="200" />              | TX throughput comparison of Unikraft versus [DPDK](https://www.dpdk.org/) in a Linux VM.                                                                                                                                      | 0h 30        |
 | [`fig_20`](/experiments/fig_20_compare-9pfs/)              | <img src="plots/fig_20_compare-9pfs.svg" width="200" />              | [9pfs](https://xenbits.xen.org/docs/unstable/misc/9pfs.html) latency for read and write operations, compared to Linux.                                                                                                        | 2h 0m        |
 | [`fig_21`](/experiments/fig_21_unikraft-boot-pages/)       | <img src="plots/fig_21_unikraft-boot-pages.svg" width="200" />       | Unikraft boot times with static and dynamic initialization of page tables.                                                                                                                                                    | 0h 3m        |
 | [`fig_22`](/experiments/fig_22_compare-vfs/)               | <img src="plots/fig_22_compare-vfs.svg" width="200" />               | Filesystem specialization and removal of the vfs layer yields important performance gains for a web cache when performing a look up and file open operation.                                                                  | 0h 5m        |
 
-| Table                                               | Experiment                                                                                                                                                                                                                           | Est. runtime |
-|-----------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
-| [`tab_01`](/experiments/tab_01_bincompat-syscalls/) | Cost of binary compatibility/syscalls with and without security mitigations.                                                                                                                                                         | 0h 25m       |
-| [`tab_02`](/experiments/tab_02_abi/)                | Results from automated porting based on externally-built archives when linked against Unikraft using musl and newlib. We show whether the port succeeded with the glibc compatibility layer ("compat layer") and without it ("std"). | 2h 0m        |
-| [`tab_04`](/experiments/tab_04_kvs_compare/)        | Performance of a specialized UDP-based in-memory key-value store on Unikraft vs. Linux.                                                                                                                                              |              |
+| Table                                               |                                                               | Experiment                                                                                                                                                                                                                           | Est. runtime |
+|-----------------------------------------------------|---------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
+| [`tab_01`](/experiments/tab_01_bincompat-syscalls/) | <img src="plots/tab_01_bincompat-syscalls.svg" width="200" /> | Cost of binary compatibility/syscalls with and without security mitigations.                                                                                                                                                         | 0h 25m       |
+| [`tab_02`](/experiments/tab_02_abi/)                | <img src="plots/tab_02_abi.svg" width="200" />                | Results from automated porting based on externally-built archives when linked against Unikraft using musl and newlib. We show whether the port succeeded with the glibc compatibility layer ("compat layer") and without it ("std"). | 2h 0m        |
+| [`tab_04`](/experiments/tab_04_kvs_compare/)        | N/A                                                           | Performance of a specialized UDP-based in-memory key-value store on Unikraft vs. Linux.                                                                                                                                              |              |
 
 | Text                                                  | Experiment                        | Est. runtime |
 |-------------------------------------------------------|-----------------------------------|--------------|
 | [`txt_01`](/experiments/txt_01_unikernel-boot-times/) | Unikernel boot time baseline.     | 0h 21m       |
-| [`txt_02`](/experiments/txt_02_9pfs-boot-times/)      | Measures 9pfs boot time overhead. | 0h 5m              |
+| [`txt_02`](/experiments/txt_02_9pfs-boot-times/)      | Measures 9pfs boot time overhead. | 0h 5m        |
 
 ## 2. Repository structure
 
@@ -108,7 +115,7 @@ We have organised this repository as follows:
     - `plot`: produces the figure or table.  All plots are automatically saved
       into the [`plots/`](/plots) directory.
     - `clean`: removes intermediate build files.
-       
+
  * `build/` - Intermediate build artifacts necessary for experiments to run.  
    This will be populated by the experiment's preparation (`prepare`) step.
  * `support/` - contains definitions of container images, `Dockerfile`s,
@@ -122,23 +129,26 @@ We have organised this repository as follows:
 ### 3.1. Hardware
 
 Before you can run these experiments, you will need to prepare 3 physical host
-environments.  **Physical hosts as opposted to virtual machines are recommended
+environments.  **Physical hosts as opposed to virtual machines are recommended
 as they provide better performance.**  In the paper, we used three different
 setups:
 
- 1. A Linux host with KVM enabled and Linux kernel 4.19 (most
-    experiments).  We use a somewhat older kernel because HermiTux will
-    not run with newer versions, as noted [here](https://github.com/ssrg-vt/hermitux/issues/12).
- 2. A Linux host with Linux kernel 4.19 used as a DPDK packet generator
-    ([`fig_19`](/experiments/fig_19_compare-dpdk/)) which has an ethernet cable
-    connected to the first host.  Additionally, we allowed for user-defined CPU
-    frequency by setting `intel_pstate=disable` to produce [`tab_04`](/experiments/tab_04_kvs_compare/).
- 3. A Xen host used for Xen 9pfs experiments ([`txt_02`](/experiments/txt_02_9pfs-boot-times/)).
+ 1. A Linux host (Debian Buster) with KVM enabled and Linux kernel 4.19. This
+	host is used for most experiments. We use the 4.19 kernel because HermiTux
+	will not run with newer versions, as noted
+	[here](https://github.com/ssrg-vt/hermitux/issues/12).
+ 2. A Linux host (Debian Buster) with Linux kernel 4.19 that has an 10gbit/s
+	Ethernet cable connected to the first host. We use it for the DPDK network
+	experiment [`fig_19`](/experiments/fig_19_compare-dpdk/) and experiments
+	where we need to specifically setup the CPU frequency.
+	See 3.2 for further details.
+ 3. A Xen host (Debian Buster) used for Xen 9pfs experiments
+	([`txt_02`](/experiments/txt_02_9pfs-boot-times/)).
 
 A single server can be used for almost all experiments, though it would require
-installing different Linux kernel versions, or the Xen hypervisor and rebooting
-to switch from one set up to another.  The exception is the DPDK experiment,
-which requires two servers connected to each other via a 10Gb link.
+different Linux kernel parameters, or the Xen hypervisor and rebooting to switch
+from one set up to another.  The exception is the DPDK experiment, which
+requires two servers connected to each other via a 10Gb link.
 
 All of our results were run on inexpensive (roughly EUR 800)
 [Shuttle SH370R6](http://global.shuttle.com/products/productsDetail?productId=2265)
@@ -147,47 +157,54 @@ boxes with an Intel i7 9700K 3.6 GHz (4.9 Ghz with Turbo Boost, 8 cores) and
 cards with the 82599EB chipset.
 
 
-### 3.2. Kernel
+### 3.2. Kernel and Parameters
 
 All experiments were run on a physical host with Debian Buster and Linux 4.19
-installed.  All install and preparation scripts in this repository target this
+installed. All install and preparation scripts in this repository target this
 distribution and kernel version.
 
-For all set ups, we disabled Hyper-Threading (`noht`) and isolated 4 CPU cores
-(e.g. `isocpus=4,5,6,7`).  For reproducing [`tab_04`](/experiments/tab_04_kvs_compare/),
-we allowed for user-defined CPU frequency (`intel_pstate=disable`).  This can be
-done by setting kernel boot parameters, e.g. with pxelinux:
+For all set ups, we disabled Hyper-Threading (`noht`), isolated 4 CPU cores
+(e.g. `isocpus=2-6`), switched off the IOMMU (`intel_iommu=off`), and disabled
+IPv6 (`ipv6.disable=1`). This can be done by setting kernel boot parameters with
+your bootloader, for instance with Grub (`/etc/default/grub`):
 
+``` bash
+GRUB_CMDLINE_LINUX_DEFAULT="isolcpus=2-4 noht intel_iommu=off ipv6.disable=1"
 ```
+
+or with syslinux/pxelinux:
+
+``` text
 ...
 LABEL item_kernel0
   MENU LABEL Linux
   MENU DEFAULT
   KERNEL vmlinuz-4.19.0
-  APPEND isolcpus=4,5,6,7 noht
+  APPEND isolcpus=2-6 noht intel_iommu=off ipv6.disable=1
   ...
 ```
 
-From the remaining 4 CPU cores, we pinned one to the VM, another one to the VMM
-(e.g., `qemu-system-x86_64`), and another one to the client tool (e.g., `wrk` or
-`redis-benchmark`).  For all experiments, we set the governor to performance,
-which can be done generally by:
+On Xen we use the following parameters (please adjust the amount of pinned
+memory for Dom0 according to your available RAM, we gave the half of 32GB RAM to
+Dom0; We also pinned 4 CPU cores to Dom0):
+Grub (`/etc/default/grub`):
 
+``` bash
+GRUB_CMDLINE_LINUX_XEN_REPLACE_DEFAULT=""
+GRUB_CMDLINE_LINUX_XEN_REPLACE="earlyprintk=xen console=hvc0 ipv6.disable=1"
+
+# Xen boot parameters for all Xen boots
+GRUB_CMDLINE_XEN=""
+# Xen boot parameters for non-recovery Xen boots (in addition to GRUB_CMDLINE_XEN)
+GRUB_CMDLINE_XEN_DEFAULT="dom0_vcpus_pin dom0_max_vcpus=4 smt=0 dom0_mem=15360M,max:16384M cpufreq=xen gnttab_max_frames=256"
 ```
-echo "performance" > /sys/devices/system/cpu/cpu$CPU_ID/cpufreq/scaling_governor
-```
 
-However, both the pinning and governor settings are handled by the scripts in
-this repo (as opposed to the kernel boot parameters, which you will need to take
-care of manually).
-
-We recommend to use
-[qemu-system-x86](https://packages.debian.org/buster-backports/qemu-system-x86)
-from the official Debian Buster repositories, version `1:3.1+dfsg-8+deb10u8`.
-Note that Rumprun experiments fail with the version from buster-backports
-(`1:5.2+dfsg-3~bpo10+1`), possibly due to a bug either in Rumprun or in the
-Debian package.
-
+Please note that the following experiments require additional kernel parameters
+e.g., to enable specific CPU frequency scaling governors:
+- [`tab_01`](/experiments/tab_01_bincompat-syscalls/)
+- [`tab_04`](/experiments/tab_04_kvs_compare/)
+- [`fig_22`](/experiments/tab_04_kvs_compare/), , need further 
+We documented this within the experiment folder.
 
 ## 4. Getting Started
 
@@ -213,6 +230,12 @@ Debian package.
 5. Once prepared, simply call the relevant experiment you wish to re-create
    using the `run.sh` script.
 
+Please note that we recommend to use
+[qemu-system-x86](https://packages.debian.org/buster-backports/qemu-system-x86)
+from the official Debian Buster repositories, version `1:3.1+dfsg-8+deb10u8`.
+Note that Rumprun experiments fail with the version from buster-backports
+(`1:5.2+dfsg-3~bpo10+1`), possibly due to a bug either in Rumprun or in the
+Debian package.
 
 ### 4.1. `run.sh` Usage
 
@@ -267,7 +290,7 @@ experiment.
 ## 5. Notes
 
  * We use intermediate Docker containers for building images and accessing
-   pre-built binaries for many of the experiments.  In addition to this, this 
+   pre-built binaries for many of the experiments.  In addition to this, this
    repository clones the Linux kernel to make changes for testing.  As a result,
    expected disk storage utilized to conduct all experiments is ~50GB.
 

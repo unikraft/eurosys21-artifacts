@@ -23,9 +23,10 @@ command. This command will:
 
 1. Prepare the environment by executing the `./setup.sh` script. Note
 that this script takes a long time...
-2. Run the ABI compatibility experiment by running `./run_all.sh`. 
-3. Generate the table by running the `./plot.sh` script. It will be
-saved into the current repository as `merged.csv`.
+2. Run the ABI compatibility experiment by running the `./run_all.sh`
+script and then the `./merge.sh` script. CSV table will be saved into
+the current repository as `merged.csv`.
+3. Generate the table as a figure by running the `plot.py` script. 
 
 ## How to Use (manual test)
 
@@ -105,9 +106,10 @@ Output will be displayed on stdout and saved into a CSV file
 
 ### Generate the CSV file
 
-Once all the results are generated, run the `./plot.sh` script to
+Once all the results are generated, run the `./merge.sh` script to
 generate the table 2 as a CSV file. This one will be generated in the
-current folder with the following name: `merged.csv`.
+`results` folder with the following name: `merged.csv`. If you also want
+to generate the table as a figure, please run the `plot.py` script.
 
 ### Further information about the archive
 

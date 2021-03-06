@@ -6,11 +6,9 @@ PROCESS_DS="${1:-.}/do_process_dataset.py"
 
 process()
 {
-	echo "$( basename ${1} )"
 	local TSC_MHZ=$( cat "${EVAL}/tsc_mhz.txt" )
 
 	"${PROCESS_DS}" "${1}" "${TSC_MHZ}"
-	echo ""
 }
 
 cd "${1:-.}"
