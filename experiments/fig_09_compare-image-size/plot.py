@@ -48,7 +48,7 @@ def plot(data=None, output=None):
     'lupine': 'Lupine',
     'osv': 'OSv',
     'rump': 'Rumprun',
-    'unikraft': 'Rhea',
+    'unikraft': 'Unikraft',
     'mirage': 'Mirage'
   }
 
