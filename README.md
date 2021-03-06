@@ -65,10 +65,10 @@ Each figure, table and corresponding experiment are listed below:
 | [`tab_02`](/experiments/tab_02_abi/)                | Results from automated porting based on externally-built archives when linked against Unikraft using musl and newlib. We show whether the port succeeded with the glibc compatibility layer ("compat layer") and without it ("std"). | 2h 0m        |
 | [`tab_04`](/experiments/tab_04_kvs_compare/)        | kvs_compare                                                                                                                                                                                                                          |              |
 
-| Text                                                  | Experiment                    | Est. runtime |
-|-------------------------------------------------------|-------------------------------|--------------|
-| [`txt_01`](/experiments/txt_01_unikernel-boot-times/) | Unikernel boot time baseline. | 0h 21m       |
-| [`txt_02`](/experiments/txt_02_9pfs-boot-times/)      |                               |              |
+| Text                                                  | Experiment                        | Est. runtime |
+|-------------------------------------------------------|-----------------------------------|--------------|
+| [`txt_01`](/experiments/txt_01_unikernel-boot-times/) | Unikernel boot time baseline.     | 0h 21m       |
+| [`txt_02`](/experiments/txt_02_9pfs-boot-times/)      | Measures 9pfs boot time overhead. |              |
 
 ## 2. Repository structure
 
