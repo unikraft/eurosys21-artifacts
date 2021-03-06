@@ -2,21 +2,20 @@
 
 <img align="right" src="../../plots/fig_15_unikraft-nginx-throughput.svg" width="300" />
 
-This experiment provides data for Fig. 15. Similary to Fig. 13, we
-evaluate the performance of NGINX with wrk (1 minute, 14 threads, 30
-conns, static 612B HTML page). In this experiment, we evaluate
-Unikraft's ability to vary memory allocators.
+Similar to [`fig_13`](../fig_13_nginx-perf), we evaluate the performance with
+[`wrk`](https://github.com/wg/wrk) for 1 minute using 14 threads, 30
+connections, and a static 612B HTML page against various memory allocators,
+including:
+
+ * [Mimalloc](https://github.com/unikraft/lib-mimalloc);
+ * [TLSF](https://github.com/unikraft/lib-tlsf);
+ * [binary buddy](https://github.com/unikraft/unikraft/tree/staging/lib/ukallocbbuddy); and,
+ * [tinyalloc](https://github.com/unikraft/lib-tinyalloc).
 
 ## Usage
 
-Run instructions:
-
-```
-cd experiments/15_unikraft-nginx-throughput
-./genimages.sh
-./benchmark.sh
-./plot.py
-```
-
-- `./genimages.sh` takes about 5 minutes in average.
-- `./benchmark.sh` takes about 20-25 minutes in average.
+ * `./genimages.sh` downloads and builds the tested images and takes about 5
+   minutes on average;
+ * `./benchmark.sh` runs the experiment and takes about 20-25 minutes on
+   average; and
+ * `./plot.py` is used to generate the figure.
