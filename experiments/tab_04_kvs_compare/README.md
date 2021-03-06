@@ -58,6 +58,10 @@ care of manually).
 
 Run prepare.sh from the root folder of the experiment on both server and client.
 
+!!!! After each experiment, it is necessary to do a `clean.sh` and take everything from
+0 for the next experiment.
+
+
 # Server
 
 The server is running on uktut1. We first run the server and next the
