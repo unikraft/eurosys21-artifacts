@@ -9,7 +9,7 @@ source ../common/nginx.sh
 
 WORKDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
 IMAGESDIR=$WORKDIR/../images
-TOOLSDIR=$WORKDIR/../../../tools/
+TOOLSDIR=$WORKDIR/../../../tools
 
 BASEIP=172.190.0
 LOG=$WORKDIR/../rawdata/mirage-solo5-httpreply.txt
