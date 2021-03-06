@@ -276,8 +276,9 @@ experiment.
    is the case, this is documented in an experiment's sub-directory, in its own
    `README.md` file.
 
- * All plots are placed in each experiment's sub-directory, under a
-   [`plots/`](/plots) directory.
+ * All plots are saved into the global [`plots/`](/plots) directory when run via
+   `run.sh`.  When using the individual experiment's `Makefile`, it is saved to
+   the experiment's folder.
 
 ## 6. Beyond the Paper
 
