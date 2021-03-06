@@ -1,5 +1,7 @@
 # Unikraft page table initialization boot times
 
+<img align="right" src="../../plots/fig_21_unikraft-boot-pages.svg" width="300" />
+
 This experiment provides data for Fig. 21.
 
 ## Usage
