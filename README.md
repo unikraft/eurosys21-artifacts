@@ -4,7 +4,7 @@ This repository contains the artifacts, including experiments and graphs, for
 the paper: "Unikraft: Fast, Specialized Unikernels the Easy Way".
 
  > **Abstract**:  Unikernels are famous for providing excellent performance in
- > terms of boot times, throughput and memory consump- tion, to name a few
+ > terms of boot times, throughput and memory consumption, to name a few
  > metrics.  However, they are infamous for making it hard and extremely time
  > consuming to extract such performance, and for needing significant
  > engineering effort in order to port applications to them.  We introduce
@@ -41,6 +41,7 @@ in the process of being upstreamed.
      4.1. [`run.sh` Usage](#41-runsh-usage): Provides the help page for the
           `run.sh` wrapper program.
   5. [Notes](#5-notes): Additional notes.
+  6. [Beyond the Paper](#6-beyond-the-paper): Run Unikraft in production!
 
 ## 1. Experiments
 
@@ -262,3 +263,13 @@ populated with a `README.md` which includes more detail about the individual exp
 
 * Experiments cannot be run in parallel due to overlapping CPU core affinities,
   which will affect measurements.
+
+## 6. Beyond the Paper
+
+This repository only contains the performance evaluation of Unikraft.
+In addition to this README, the Unikraft project provides [extensive
+documentation](http://docs.unikraft.org/) on how to use Unikraft in
+real-world environments. In addition, interested researchers are
+welcome to join the community via the Xen project [mailing
+list](https://lists.xenproject.org/cgi-bin/mailman/listinfo/minios-devel)
+and [GitHub](https://github.com/unikraft).
