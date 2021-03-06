@@ -30,7 +30,7 @@ run:
 .PHONY: plot
 plot:
 	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(GZ)
-	$(DOT) -T$(PLOT_FORMAT) $(GZ) -o $(PLOT)
+	$(DOT) $(GZ) -T$(PLOT_FORMAT) -Kfdp -o $(PLOT)
 
 .PHONY: clean
 clean:
