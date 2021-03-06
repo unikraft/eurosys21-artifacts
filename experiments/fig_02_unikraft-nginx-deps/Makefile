@@ -21,7 +21,7 @@ all: prepare run plot
 
 .PHONY: prepare
 prepare:
-	@-
+	$(WORKDIR)/prepare.sh
 
 .PHONY: run
 run:
