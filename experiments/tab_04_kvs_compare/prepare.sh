@@ -21,3 +21,7 @@ meson build
 cd build
 ninja
 
+if [[ ! -d /mnt/huge1G ]]; then
+  mkdir /mnt/huge1G
+  mount -t hugetlbfs -o pagesize=1G none /mnt/huge1G
+fi
