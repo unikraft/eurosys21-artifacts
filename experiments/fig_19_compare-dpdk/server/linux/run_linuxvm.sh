@@ -5,7 +5,7 @@ if [ $( id -u ) != 0 ]; then
 fi
 
 QCOW="../../aux/debian.qcow2"
-DPDKVHOST="/root/dpdk/build/app/vhost-net"
+DPDKVHOST="../vhost-net"
 MEMPATH="/mnt/huge1G/test"
 TAPNAME="tap88"
 BRNAME="expbr0"
