@@ -1,4 +1,6 @@
-# syscalls-supported-application
+# Unikraft Syscall support for top 30 applications
+
+<img align="right" src="../../plots/fig_07_syscall-support.svg" width="300" />
 
 ## Goal
 
