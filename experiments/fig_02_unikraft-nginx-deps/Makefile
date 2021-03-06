@@ -3,7 +3,8 @@
 #
 WORKDIR ?= $(CURDIR)
 RESULTS ?= $(WORKDIR)
-PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
+PLOT_FORMAT ?= svg
+PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).$(PLOT_FORMAT)
 GZ ?= $(WORKDIR)$(notdir $(WORKDIR)).gz
 
 #
@@ -29,7 +30,7 @@ run:
 .PHONY: plot
 plot:
 	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(GZ)
-	$(DOT) -Tsvg $(GZ) -o $(PLOT)
+	$(DOT) -T$(PLOT_FORMAT) $(GZ) -o $(PLOT)
 
 .PHONY: clean
 clean:
