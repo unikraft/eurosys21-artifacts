@@ -35,6 +35,13 @@ For instance with Grub (`/etc/default/grub`):
 GRUB_CMDLINE_LINUX_DEFAULT="isolcpus=2-6 noht intel_iommu=off ipv6.disable=1 intel_pstate=disable"
 ```
 
+We make use of huge pages for this experiment, which has the following Linux
+kernel parameters:
+
+```
+default_hugepagesz=1G hugepagesz=1G hugepages=4
+```
+
 From the isolated 4 CPU cores, we pinned one to the VM, another one to the VMM
 (e.g., `qemu-system-x86_64`), and another one to the client tool (e.g., `wrk` or
 `redis-benchmark`).  For all experiments, we set the governor to performance,

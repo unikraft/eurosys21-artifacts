@@ -123,3 +123,12 @@ Run this command on both client and server
 ```
 ./clean.sh
 ```
+
+## Notes
+
+We make use of huge pages for this experiment, which has the following Linux
+kernel parameters:
+
+```
+default_hugepagesz=1G hugepagesz=1G hugepages=4
+```
