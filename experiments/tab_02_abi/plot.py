@@ -91,7 +91,7 @@ def plot(data=None, output=None):
 
   # Draw table
   table = plt.table(cellText=table_vals,
-                        colWidths=[0.11, 0.05, 0.04, 0.06, 0.05, 0.05, 0.06, 0.05],
+                        colWidths=[0.12, 0.05, 0.04, 0.06, 0.05, 0.05, 0.06, 0.05],
                         colLabels=col_labels,
                         loc='center',
                         cellLoc='left')
