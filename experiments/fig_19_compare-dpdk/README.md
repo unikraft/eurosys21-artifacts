@@ -16,7 +16,7 @@ The server is running on the first machine (in the AE testbed, this is
 
 Following sizes are explored: 64, 128, 256, 512, 1024, and 1500.
 
-### Unikraft vhost user
+### unikraft vhost user
 
 First, prepare the environment and build the Unikraft unikernel:
 ```
@@ -73,6 +73,21 @@ To do this, run:
 ```
 rm -rf unikraft/uk_test_suite/
 ./prepare.sh
+```
+
+### unikraft vhost net
+Similar with the vhost user, but without dpdk:
+
+First, prepare the environment and build the Unikraft unikernel:
+```
+./prepare.sh
+```
+
+```
+cd server
+./prepare.sh
+cd unikraft/uk_test_suite/
+./run_vhost_net.sh
 ```
 
 ### Linux
