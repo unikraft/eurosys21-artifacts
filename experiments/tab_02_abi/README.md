@@ -1,4 +1,6 @@
-# abi compatibility
+# ABI compatibility
+
+<img align="right" src="../../plots/tab_02_abi.svg" width="300" />
 
 ## Goal
 

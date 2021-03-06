@@ -1,5 +1,7 @@
 # VFS Specialization Performance
 
+<img align="right" src="../../plots/fig_22_compare-vfs.svg" width="300" />
+
 The experiments in this folder will evaluate the performance
 when specializing the VFS with Unikraft.
 The same benchmark program under `src/` is compiled as (1) Unikraft
