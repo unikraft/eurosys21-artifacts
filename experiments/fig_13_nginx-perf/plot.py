@@ -115,7 +115,7 @@ def plot(data=None, output=None):
   i = 0
   line_offset = 0
   for unikernel in [
-    'mirage-qemu',
+    'mirage-solo5',
     'microvm-fc', 
     'lupine-fc', 
     'microvm-qemu', 
