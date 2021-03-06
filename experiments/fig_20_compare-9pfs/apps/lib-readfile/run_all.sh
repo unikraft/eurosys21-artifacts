@@ -1,6 +1,6 @@
 #!/bin/bash
-RAW="rhea-kvm_read.txt"
-CSV="rhea-kvm_read.csv"
+RAW="unikraft-kvm_read.txt"
+CSV="unikraft-kvm_read.csv"
 echo "RUN ALL (9pfs read)... This can take some time..."
 echo "--------------------------------------------------"
 echo "Running 9pfs read with 4K..."

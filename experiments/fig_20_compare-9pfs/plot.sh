@@ -2,8 +2,8 @@
 #Use this script to generate the plot (after running experiment)
 CURRENT_FOLDER=$(dirname $0)
 DATA_FOLDER="data"
-FILE1="$PWD/apps/lib-readfile/rhea-kvm_read.csv"
-FILE2="$PWD/apps/lib-writefile/rhea-kvm_write.csv"
+FILE1="$PWD/apps/lib-readfile/unikraft-kvm_read.csv"
+FILE2="$PWD/apps/lib-writefile/unikraft-kvm_write.csv"
 FILE3="$PWD/vm/test/linux-kvm_read.csv"
 FILE4="$PWD/vm/test/linux-kvm_write.csv"
 

@@ -57,21 +57,21 @@ def plot(data=None, output=None):
   stats = {}
   delay_max = 0 # maximum observed rx mpps
   bar_colors = {
-    'rhea-kvm_read': '#0B5DA2',
-    'rhea-kvm_write': '#000000',
+    'unikraft-kvm_read': '#0B5DA2',
+    'unikraft-kvm_write': '#000000',
     'linux-kvm_read': '#DC000F',
     'linux-kvm_write': '#8000CA'
   }
   markers = {
-    'rhea-kvm_read': 'x',
-    'rhea-kvm_write': ',',
+    'unikraft-kvm_read': 'x',
+    'unikraft-kvm_write': ',',
     'linux-kvm_read': '.',
     'linux-kvm_write': '4'
   }
 
   labels = {
-    'rhea-kvm_read': 'rhea-kvm (read)',
-    'rhea-kvm_write': 'rhea-kvm (write)',
+    'unikraft-kvm_read': 'unikraft-kvm (read)',
+    'unikraft-kvm_write': 'unikraft-kvm (write)',
     'linux-kvm_read': 'linux-kvm (read)',
     'linux-kvm_write': 'linux-kvm (write)'
   }
