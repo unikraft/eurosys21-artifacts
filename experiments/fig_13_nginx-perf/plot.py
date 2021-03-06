@@ -49,7 +49,7 @@ def plot(data=None, output=None):
     'lupine-fc': 'Lupine FC',
     'native': 'Linux Native',
     'microvm-fc': 'Linux FC',
-    'mirage-qemu': 'Mirage KVM'
+    'mirage-solo5': 'Mirage Solo5'
   }
 
   for f in os.listdir(RESULTSDIR):
