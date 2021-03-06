@@ -5,7 +5,8 @@ for d in *; do
         echo "Enter to $d repository"
         cd $d
         echo "Glue code size $d:"
-        ./cloc.sh $d 2>&1 | tee -a ../cloc.csv
+        ./cloc.sh $d
+        ./cloc.sh $d >> ../cloc.csv
         cd ..
         echo "---------------------------------------------"
     fi
