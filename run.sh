@@ -182,7 +182,7 @@ ACTION=$2
 if [[ $LIST_ALL == 'y' ]]; then
   printf "FIGURE_ID  TEST_NAME\n"
 
-elif [[ $NO_DEPS != 'y' ]]; then
+elif [[ $NO_DEPS != 'y' && $ACTION != "clean" ]]; then
   log_inf "Installing dependencies"
   install_dependencies
 fi
