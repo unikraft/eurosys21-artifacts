@@ -14,7 +14,7 @@ In order to run this experiment you have to run `run.sh`.  This will download
 Unikraft from github and checkout to commit `775dc01`.  This program will return
 a `.dot` and a `.pdf` output in the output folder.
 
-  **N.B.**: We can use:the following to generete a pdf from the.dor:
+  **N.B.**: We can use the following to generete a pdf from the.dor:
   ```bash
   dot fis.dot -Tpdf -o fis.pdf
   ```
