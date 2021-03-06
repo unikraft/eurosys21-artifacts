@@ -1,4 +1,0 @@
-/include/ "foundation-v8.dtsi"
-/include/ "foundation-v8-gicv3.dtsi"
-/include/ "foundation-v8-spin-table.dtsi"
-
