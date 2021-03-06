@@ -2,7 +2,7 @@ import os
 from os import listdir
 from os.path import isfile, join
 
-DATA = "data"
+RESULTS = "results"
 CLOC = "cloc.csv"
 MERGED = "merged.csv"
 
@@ -64,7 +64,7 @@ def main():
     for h in header:
         map_name[h] = list()
 
-    total_apps = read_csv_files(DATA, map_name)
+    total_apps = read_csv_files(RESULTS, map_name)
     write_merged_file(MERGED, header, map_name, total_apps)
 
 if __name__ == "__main__":

@@ -108,7 +108,7 @@ Output will be displayed on stdout and saved into a CSV file
 
 Once all the results are generated, run the `./merge.sh` script to
 generate the table 2 as a CSV file. This one will be generated in the
-current folder with the following name: `merged.csv`. If you also want
+`results` folder with the following name: `merged.csv`. If you also want
 to generate the table as a figure, please run the `plot.py` script.
 
 ### Further information about the archive
