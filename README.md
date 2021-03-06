@@ -3,7 +3,9 @@
 This repository contains the artifacts, including experiments and graphs, for
 the paper: "Unikraft: Fast, Specialized Unikernels the Easy Way".
 
-In addition, it is worth pointing out that Unikraft is a Linux Foundation open source project ([www.unikraft.org](http://unikraft.org)); most of the code used for this paper is upstream, or is in the process of being upstreamed.
+[Unikraft](https://unikraft.org) is a Linux Foundation open source project and
+Xen Incubator Project.  Most of the code used for this paper is upstream, or is
+in the process of being upstreamed.
 
 ## Contents of this Document
 
@@ -24,10 +26,18 @@ In addition, it is worth pointing out that Unikraft is a Linux Foundation open s
 
 ## 1. Experiments
 
-The paper comes with 22 figures, 4 tables and 2 in-line text worth of experiments (although not all of them have experimental results, e.g., Fig 4 is an architecture diagram). Each experiment and the relevant scripts to generate the data and subsequent plots are included in this repository. We expect the results generated from this artefact to match one-to-one with the results in the paper, given that we used this artefact/scripts to actually generate all figures in the paper. Each figure, table and corresponding experiment are listed below:
+The paper comes with 22 figures, 4 tables and 2 in-line text worth of
+experiments (although not all of them have experimental results, e.g., Figure 4
+is an architecture diagram). Each experiment and the relevant scripts to
+generate the data and subsequent plots are included in this repository.  We
+expect the results generated from this artefact to match one-to-one with the
+results in the paper, given that we used this artefact/scripts to actually
+generate all figures in the paper.
 
-| Figure                                                     |                                                                       | Description                                                                                                                                                                                                                   | Est. runtime |
-|------------------------------------------------------------|-----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
+Each figure, table and corresponding experiment are listed below:
+
+| Figure                                                     |                                                                      | Description                                                                                                                                                                                                                   | Est. runtime |
+|------------------------------------------------------------|----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|
 | [`fig_01`](/experiments/fig_01_linux-deps/)                | <img src="plots/fig_01_linux-deps.svg" width="200" />                | Linux kernel dependency graph.                                                                                                                                                                                                | 0h 50m       |
 | [`fig_02`](/experiments/fig_02_unikraft-nginx-deps/)       | <img src="plots/fig_02_unikraft-nginx-deps.svg" width="200" />       | NGINX Unikraft dependency graph.                                                                                                                                                                                              | 0h 5m        |
 | [`fig_03`](/experiments/fig_03_unikraft-helloworld-deps/)  | <img src="plots/fig_03_unikraft-helloworld-deps.svg" width="200" />  | "Hello World" Unikraft dependency graph.                                                                                                                                                                                      | 0h 1m        |
@@ -54,8 +64,6 @@ The paper comes with 22 figures, 4 tables and 2 in-line text worth of experiment
 | [`tab_01`](/experiments/tab_01_bincompat-syscalls/) | Cost of binary compatibility/syscalls with and without security mitigations.                                                                                                                                                         | 0h 25m       |
 | [`tab_02`](/experiments/tab_02_abi/)                | Results from automated porting based on externally-built archives when linked against Unikraft using musl and newlib. We show whether the port succeeded with the glibc compatibility layer ("compat layer") and without it ("std"). | 2h 0m        |
 | [`tab_04`](/experiments/tab_04_kvs_compare/)        | kvs_compare                                                                                                                                                                                                                          |              |
-
-The paper also mentions several results in-line, which can be found at:
 
 | Text                                                  | Experiment                    | Est. runtime |
 |-------------------------------------------------------|-------------------------------|--------------|
@@ -217,7 +225,8 @@ Influential Environmental Variables
                          (default: svg).
 ```
 
-Each experiment, and more specifically its sub-directory in `experiments/`, is populated with a `README.md` which includes more detail about the individual experiment.
+Each experiment, and more specifically its sub-directory in `experiments/`, is
+populated with a `README.md` which includes more detail about the individual experiment.
 
 ## 5. Notes
 
