@@ -6,5 +6,3 @@ export TMPDIR=$PWD/tmp
 cscope -b -R
 
 ./component_symbols.sh
-
-python3 plot.py

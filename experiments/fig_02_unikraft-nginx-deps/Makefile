@@ -2,12 +2,15 @@
 # Files and directories
 #
 WORKDIR ?= $(CURDIR)
+RESULTS ?= $(WORKDIR)
 PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
+GZ ?= $(WORKDIR)$(notdir $(WORKDIR)).gz
 
 #
 # Tools
 #
 SNAKE ?= python3
+DOT ?= dot
 
 #
 # Targets
@@ -25,7 +28,8 @@ run:
 
 .PHONY: plot
 plot:
-	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
+	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(GZ)
+	$(DOT) -Tsvg $(GZ) -o $(PLOT)
 
 .PHONY: clean
 clean:
