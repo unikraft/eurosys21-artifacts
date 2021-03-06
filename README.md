@@ -127,7 +127,7 @@ setups:
     experiments).  We use a somewhat older kernel because HermiTux will
     not run with newer versions, as noted [here](https://github.com/ssrg-vt/hermitux/issues/12).
  2. A Linux host with Linux kernel 4.19 used as a DPDK packet generator
-    ([`fig_19`](/experiments/fig_19_compare-dpdk/) which has an ethernet cable
+    ([`fig_19`](/experiments/fig_19_compare-dpdk/)) which has an ethernet cable
     connected to the first host.  Additionally, we allowed for user-defined CPU
     frequency by setting `intel_pstate=disable` to produce [`tab_04`](/experiments/tab_04_kvs_compare/).
  3. A Xen host used for Xen 9pfs experiments ([`txt_02`](/experiments/txt_02_9pfs-boot-times/)).
