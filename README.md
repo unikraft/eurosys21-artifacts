@@ -16,7 +16,7 @@ the paper: "Unikraft: Fast, Specialized Unikernels the Easy Way".
  >
  > Our evaluation using off-the-shelf popular applications such as NGINX,
  > SQLite, and Redis shows that running such applications on Unikraft results
- > in a 60%-70% performance improvement compared to Linux guests.  In addition,
+ > in a 1.7x-2.7x performance improvement compared to Linux guests.  In addition,
  > Unikraft images for these apps are around 1MB, require less than 10MB of RAM
  > to run, and boot in around 1ms on top of the VMM time (total boot time
  > 2ms-70ms).
