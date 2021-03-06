@@ -1,3 +1,11 @@
+# This container is used by a number of experiments in the Unikraft
+# Eurosys'21 paper. It provides a ready-to-use Unikraft environments
+# for our experiments, including configurations, and instrumented
+# VMMs.
+#
+# You can easily build it with the following command:
+# $ docker build -f unikraft-eurosys21.dockerfile .
+
 # base is Debian 10
 FROM hlefeuvre/instrumented-vmms
 
