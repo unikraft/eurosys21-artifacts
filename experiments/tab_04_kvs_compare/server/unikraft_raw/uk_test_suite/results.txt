@@ -1,0 +1,46 @@
+init function init_rte_log_init
+init function init_classinitfn_eth
+init function init_rte_timer_init
+init function init_rte_rand_init
+init function init_rte_rtm_init
+init function init_tailqinitfn_rte_ring_tailq
+init function init_mp_hdlr_init_ops_sp_mc
+init function init_mp_hdlr_init_ops_mp_sc
+init function init_mp_hdlr_init_ops_sp_sc
+init function init_mp_hdlr_init_ops_mp_mc
+init function init_tailqinitfn_rte_mempool_tailq
+init function init_rte_net_crc_init
+init function init_ethdev_init_log
+init function init_eth_dev_init_cb_lists
+init function init_tailqinitfn_rte_hash_tailq
+init function init_rte_hash_crc_init_alg
+init function init_tailqinitfn_rte_fbk_hash_tailq
+init function init_rte_hash_crc_init_alg
+init function init_rte_hash_crc_init_alg
+init function init_mp_hdlr_init_pmd_uk_netbuf
+Welcome to  _ __             _____
+ __ _____  (_) /__ _______ _/ _/ /_
+/ // / _ \/ /  '_// __/ _ `/ _/ __/
+\_,_/_//_/_/_/\_\/_/  \_,_/_/ \__/
+                Rhea 0.4.0~15355c0a
+Called main with 1 args build/uk_test_suite_kvm-x86_64
+Executing instruction at 0x11b760
+EAL: Detected 1 lcore(s)
+EAL: Detected 1 NUMA nodes
+eal_hugepage_info_init: left memory: 1027055616 huge pages of size: 2097152 and count: 489
+mmap_len: 188416 len: 2560 elt_sz: 72
+rte_eal_hugepage_init: Configure 32768 of segments
+mmap_len: 1581056 len: 32768 elt_sz: 48
+1 number of ports detected Pool Size: 2176
+Initializing cache of size: 512
+ring_uk_netbuf:  mempool created
+In function uk_ring_alloc to create MP_MBUF_POOL ring of size 65536
+ring name: 670329664
+ring size: 65536
+ring capacity: 65535
+port_init: Memory pool: 670854656
+uk_ethdev_configure: Configuring ethdev 0x256a80
+Configuring the Virtio Net TX chain 
+Configuring the 1024 descriptors on queue: 0
+Configuring the 1024 descriptors on queue: 1
+Port 0 MAC: 52 54 00 12 34 56
