@@ -35,6 +35,7 @@ qemu-system-x86_64 \
 	-device virtio-net-pci,netdev=testtap0,addr=0x4,ioeventfd=on,guest_csum=off,gso=off \
 	-kernel build/uk_test_suite_kvm-x86_64 \
 	| tee results.txt
+RET=$?
 
 # destroy network setup
 ip link set dev $BRNAME down
@@ -42,4 +43,4 @@ ip link set dev $TAPNAME down
 ip tuntap del dev $TAPNAME mode tap
 ip link del $BRNAME
 
-exit $?
+exit $RET
