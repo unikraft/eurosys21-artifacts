@@ -53,12 +53,6 @@ expect the results generated from this artifact to match one-to-one with the
 results in the paper, given that we used this artifact/scripts to actually
 generate all figures in the paper.
 
-Please note:
-
- * While each experiment has its own sub-directory and a `run.sh` script within it, we strongly suggest to use the main `run.sh` script that wraps all experiments (more on this in Section 4.1 below).
- * Some experiments (e.g., Fig 22) produce some error messages but still finish and correctly produce the plot; if this is the case, this is documented in an experiment's sub-directory, in its own `README` file.
- * All plots are placed in each experiment's sub-directory, under a `plot/` directory.
-
 Each figure, table and corresponding experiment are listed below:
 
 | Figure                                                     |                                                                      | Description                                                                                                                                                                                                                   | Est. runtime |
@@ -258,19 +252,32 @@ Influential Environmental Variables
 ```
 
 Each experiment, and more specifically its sub-directory in `experiments/`, is
-populated with a `README.md` which includes more detail about the individual experiment.
+populated with a `README.md` which includes more detail about the individual
+experiment.
 
 ## 5. Notes
 
-* We use intermediate Docker containers for building images and accessing
-  pre-built binaries for many of the experiments.  In addition to this, this 
-  repository clones the Linux kernel to make changes for testing.  As a result,
-  expected disk storage utilized to conduct all experiments is ~50GB.
+ * We use intermediate Docker containers for building images and accessing
+   pre-built binaries for many of the experiments.  In addition to this, this 
+   repository clones the Linux kernel to make changes for testing.  As a result,
+   expected disk storage utilized to conduct all experiments is ~50GB.
 
-* The preparation step for all experiments usually exceeds several hours.
+ * The preparation step for all experiments usually exceeds several hours.
 
-* Experiments cannot be run in parallel due to overlapping CPU core affinities,
-  which will affect measurements.
+ * Experiments cannot be run in parallel due to overlapping CPU core affinities,
+   which will affect measurements.
+
+ * While each experiment has its own sub-directory and a `Makefile` script
+   within it, we strongly suggest to use the main `run.sh` script that wraps all
+   experiments (more on this in Section 4.1 above).
+
+ * Some experiments (e.g., [`fig_22`](/experiments/fig_22_compare-vfs/)) produce
+   some error messages but still finish and correctly produce the plot; if this
+   is the case, this is documented in an experiment's sub-directory, in its own
+   `README.md` file.
+
+ * All plots are placed in each experiment's sub-directory, under a
+   [`plots/`](/plots) directory.
 
 ## 6. Beyond the Paper
 
