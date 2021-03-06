@@ -43,8 +43,6 @@ def plot(data=None, output=None):
       
       parsed[row[0]][row[1]] = row[3]
 
-  print(parsed)
-
   # Setup matplotlib axis
   fig = plt.figure(figsize=(12, 3))
   renderer = fig.canvas.get_renderer()
