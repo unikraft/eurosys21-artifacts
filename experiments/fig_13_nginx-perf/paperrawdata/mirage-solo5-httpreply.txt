@@ -1,0 +1,64 @@
+Running 1m test @ http://172.190.0.2:8080/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.08ms  206.31us  42.95ms   77.72%
+    Req/Sec     1.87k    14.17     2.05k    83.78%
+  1564322 requests in 1.00m, 1.05GB read
+Requests/sec:  26028.69
+Transfer/sec:     17.92MB
+Running 1m test @ http://172.190.0.2:8080/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.09ms  573.69us  44.22ms   99.90%
+    Req/Sec     1.86k    38.71     2.42k    98.72%
+  1559942 requests in 1.00m, 1.05GB read
+Requests/sec:  25956.09
+Transfer/sec:     17.87MB
+Running 1m test @ http://172.190.0.2:8080/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.10ms  732.37us  45.85ms   99.85%
+    Req/Sec     1.86k    85.21     6.32k    99.31%
+  1552605 requests in 1.00m, 1.04GB read
+Requests/sec:  25833.68
+Transfer/sec:     17.79MB
+Running 1m test @ http://172.190.0.2:8080/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.10ms  651.06us  45.33ms   99.93%
+    Req/Sec     1.85k    36.74     2.42k    97.80%
+  1547888 requests in 1.00m, 1.04GB read
+Requests/sec:  25755.25
+Transfer/sec:     17.73MB
+Running 1m test @ http://172.190.0.2:8080/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.08ms  271.93us  45.60ms   90.30%
+    Req/Sec     1.86k    18.95     2.23k    90.39%
+  1555183 requests in 1.00m, 1.05GB read
+Requests/sec:  25876.72
+Transfer/sec:     17.82MB
+Running 1m test @ http://172.190.0.2:8080/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.08ms  272.48us  45.76ms   91.13%
+    Req/Sec     1.86k    17.78     2.19k    93.65%
+  1558603 requests in 1.00m, 1.05GB read
+Requests/sec:  25933.70
+Transfer/sec:     17.86MB
+Running 1m test @ http://172.190.0.2:8080/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.09ms  515.59us  46.03ms   99.88%
+    Req/Sec     1.86k    29.72     2.21k    96.67%
+  1553434 requests in 1.00m, 1.04GB read
+Requests/sec:  25847.55
+Transfer/sec:     17.80MB
+Running 1m test @ http://172.190.0.2:8080/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.08ms  167.87us   2.31ms   71.60%
+    Req/Sec     1.86k    29.41     2.67k    97.63%
+  1553797 requests in 1.00m, 1.04GB read
+Requests/sec:  25853.57
+Transfer/sec:     17.80MB
