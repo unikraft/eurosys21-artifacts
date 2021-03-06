@@ -22,11 +22,11 @@ From the paper, "we did not optimize application or kernel configurations for
 performance, however we took care of removing obvious performance bottlenecks
 for each system, _e.g._, switching on memory pools in Unikraft's networking
 stack (based on [lwIP](https://github.com/unikraft/lib-lwip)), or porting Lupine
-to QEMU/KVM in order to avoid Firecracker performance bottlenecks.
+to QEMU/KVM in order to avoid Firecracker performance bottlenecks."
 
 ## Usage
 
- * `./genimages.sh` downloads and builds the tested images anm takes about 3m
+ * `./genimages.sh` downloads and builds the tested images and takes about 3m
    on average;
  * `./benchmark.sh` runs the experiment and takes about 6m on average; and
  * `./plot.py` is used to generate the figure.
