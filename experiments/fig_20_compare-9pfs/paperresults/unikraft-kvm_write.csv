@@ -1,0 +1,6 @@
+block_size_kb,avg_latency_microseconds
+4,100.222
+8,100.323
+16,103.83
+32,113.049
+64,121.529

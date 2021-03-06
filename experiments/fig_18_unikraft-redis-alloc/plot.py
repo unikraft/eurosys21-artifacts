@@ -45,7 +45,7 @@ def plot(data=None, output=None):
   labels = {
     'mimalloc': 'Mimalloc',
     'tlsf': 'TLSF',
-    'buddy': 'Binary Buddy',
+    'buddy': 'Binary buddy',
     'tinyalloc': 'tinyalloc'
   }
 
@@ -86,7 +86,7 @@ def plot(data=None, output=None):
   # General style
   common_style(plt)
 
-  throughput_max += 0.7 # margin above biggest bar
+  throughput_max += 1 # margin above biggest bar
 
   # Setup matplotlib axis
   fig = plt.figure(figsize=(8, 5))
@@ -144,7 +144,7 @@ def plot(data=None, output=None):
         linewidth=.5
       )
       
-      ax1.text(i + 1 + bar_offset, operations[operation_label][AMAX_KEY] + 0.1, round(operations[operation_label][MEAN_KEY], 2),
+      ax1.text(i + 1 + bar_offset, operations[operation_label][AMAX_KEY] + 0.2, round(operations[operation_label][MEAN_KEY], 2),
         ha='center',
         va='bottom',
         zorder=6,

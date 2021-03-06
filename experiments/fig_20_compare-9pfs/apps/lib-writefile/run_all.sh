@@ -1,6 +1,6 @@
 #!/bin/bash
-RAW="rhea-kvm_write.txt"
-CSV="rhea-kvm_write.csv"
+RAW="unikraft-kvm_write.txt"
+CSV="unikraft-kvm_write.csv"
 echo "RUN ALL (9pfs write)... This can take a very long time..."
 echo "--------------------------------------------------"
 echo "Running 9pfs write with 4K..."

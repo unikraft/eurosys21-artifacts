@@ -92,13 +92,14 @@ function install_dependencies() {
         doxygen \
         libhugetlbfs-bin \
         build-essential \
-        sgabios \
         qemu-system-x86 \
         redis-tools \
         socat \
         meson \
         cscope \
+        libseccomp-dev \
         uuid-runtime \
+        cloc \
         uuid-dev \
         libuuid1 \
         bridge-utils \
@@ -183,7 +184,7 @@ ACTION=$2
 if [[ $LIST_ALL == 'y' ]]; then
   printf "FIGURE_ID  TEST_NAME\n"
 
-elif [[ $NO_DEPS != 'y' ]]; then
+elif [[ $NO_DEPS != 'y' && $ACTION != "clean" ]]; then
   log_inf "Installing dependencies"
   install_dependencies
 fi

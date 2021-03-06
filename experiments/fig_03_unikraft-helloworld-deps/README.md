@@ -2,11 +2,8 @@ In order to run this experiment you have to run `run.sh`.
 This program will return a .dot and a .pdf output in the output folder.
 For cleaning we use the scrip `clean.sh`
 
-Note: We can use `dot fis.dot -Tpdf -o fis.pdf` to generate a pdf from the.dor
+Note: We can use `dot fis.dot -Tpdf -Kfdp -o fis.pdf` to generate a pdf from the.dor
 
-Note2: We use the following two aesthetic options in the .dot file from the paper:
-edge [ fontname=Helvetica, fontcolor=blue, fontsize=35 ];
-node [ fontname=Helvetica, fontcolor=black, fontsize=80,shape=box];	
 
 Dependencies:
 * cscope

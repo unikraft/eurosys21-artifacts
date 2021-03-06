@@ -1,0 +1,5 @@
+*.deps
+*.out
+*.symbols
+tmp/
+*.files

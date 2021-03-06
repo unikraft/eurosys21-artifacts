@@ -1,0 +1,40 @@
+Running 1m test @ http://172.190.0.2/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   416.31us   15.75us   5.77ms   98.57%
+    Req/Sec     4.82k    27.65     4.99k    78.25%
+  4038538 requests in 1.00m, 3.20GB read
+Requests/sec:  67197.10
+Transfer/sec:     54.47MB
+Running 1m test @ http://172.190.0.2/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   404.75us   13.81us   5.40ms   96.58%
+    Req/Sec     4.96k    41.33     6.23k    98.19%
+  4152493 requests in 1.00m, 3.29GB read
+Requests/sec:  69093.18
+Transfer/sec:     56.01MB
+Running 1m test @ http://172.190.0.2/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   410.38us   14.67us   5.49ms   98.27%
+    Req/Sec     4.89k    25.11     4.96k    66.77%
+  4096750 requests in 1.00m, 3.24GB read
+Requests/sec:  68166.10
+Transfer/sec:     55.26MB
+Running 1m test @ http://172.190.0.2/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   393.91us   18.10us   5.49ms   87.69%
+    Req/Sec     5.10k    38.76     5.28k    71.36%
+  4267928 requests in 1.00m, 3.38GB read
+Requests/sec:  71014.40
+Transfer/sec:     57.57MB
+Running 1m test @ http://172.190.0.2/index.html
+  14 threads and 30 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency   392.08us   17.77us   5.43ms   83.55%
+    Req/Sec     5.12k    46.84     5.34k    78.41%
+  4287546 requests in 1.00m, 3.39GB read
+Requests/sec:  71340.91
+Transfer/sec:     57.83MB
