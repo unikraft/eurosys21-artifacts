@@ -53,6 +53,12 @@ expect the results generated from this artifact to match one-to-one with the
 results in the paper, given that we used this artifact/scripts to actually
 generate all figures in the paper.
 
+Please note:
+
+ * While each experiment has its own sub-directory and a `run.sh` script within it, we strongly suggest to use the main `run.sh` script that wraps all experiments (more on this in Section 4.1 below).
+ * Some experiments (e.g., Fig 22) produce some error messages but still finish and correctly produce the plot; if this is the case, this is documented in an experiment's sub-directory, in its own `README` file.
+ * All plots are placed in each experiment's sub-directory, under a `plot/` directory.
+
 Each figure, table and corresponding experiment are listed below:
 
 | Figure                                                     |                                                                      | Description                                                                                                                                                                                                                   | Est. runtime |
@@ -87,7 +93,7 @@ Each figure, table and corresponding experiment are listed below:
 | Text                                                  | Experiment                        | Est. runtime |
 |-------------------------------------------------------|-----------------------------------|--------------|
 | [`txt_01`](/experiments/txt_01_unikernel-boot-times/) | Unikernel boot time baseline.     | 0h 21m       |
-| [`txt_02`](/experiments/txt_02_9pfs-boot-times/)      | Measures 9pfs boot time overhead. |              |
+| [`txt_02`](/experiments/txt_02_9pfs-boot-times/)      | Measures 9pfs boot time overhead. | 0h 5m              |
 
 ## 2. Repository structure
 
