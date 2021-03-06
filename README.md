@@ -1,10 +1,13 @@
-# Unikraft EuroSys'21 Artifacts
+<h1 align="center">Unikraft EuroSys'21 Artifacts</h1>
 
-This repository contains the artifacts, including experiments and graphs, for
-the paper:
-<h4 align="center">
+<p align="center">
+  This repository contains the artifacts, including experiments and graphs, for
+  the paper:
+</p>
+
+<h3 align="center">
   Unikraft: Fast, Specialized Unikernels the Easy Way
-</h4>
+</h3>
 
  > **Abstract**:  Unikernels are famous for providing excellent performance in
  > terms of boot times, throughput and memory consumption, to name a few
