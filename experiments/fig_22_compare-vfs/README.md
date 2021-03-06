@@ -13,15 +13,15 @@ was originally developed for MiniCache
 can be used as a web content cache node.
 
 Please note that these experiments do their measurement with the TSC.
-You need to make sure that your machine does dynamically scale the CPU
-frequency while running the experiment. This makes sure that the TSC
-clock can be considered stable.
+You need to make sure that your machine does _not_ dynamically scale
+the CPU frequency while the experiment is running. This makes sure
+that the TSC clock can be considered stable.
 On recent Intel CPUs you can achieve pinning the CPU frequency by
 adding `intel_pstate=disable` to the Linux kernel arguments of
 the host (on Debian see `/etc/default/grub`). After a reboot, our
 script `/tools/tunecpumax` can help you enabling the `userspace`
 frequency scaling governor on your host and setting up the maximum
-non-turbo frequency to your CPU.
+non-turbo frequency permanently to your CPU.
 
 ## Usage
 
