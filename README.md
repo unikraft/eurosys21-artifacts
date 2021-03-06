@@ -74,8 +74,12 @@ Each figure, table and corresponding experiment are listed below:
 
 We have organised this repository as follows:
 
- * `experiments/` - All experiments are listed in this directory. Each sub-directory is named with the figure number along with a short description of the experiment (e.g., `fig_01_linux-deps`). In addition, each experiment sub-directory has a corresponding `README.md` which explains in more detail how
-   the experiment works and how to run it.  Along with this, each sub-directory also comes with a `Makefile` with the following targets:
+ * `experiments/` - All experiments are listed in this directory.  Each
+   sub-directory is named with the figure number along with a short description
+   of the experiment (e.g., `fig_01_linux-deps`).  In addition, each experiment
+   sub-directory has a corresponding `README.md` which explains in more detail
+   how the experiment works and how to run it.  Along with this, each
+   sub-directory also comes with a `Makefile` with the following targets:
     - `prepare`: prepares the experiment, by usually downloading and building
       relevant images, tools, and auxiliary services necessary for running the
       experiment.
@@ -88,7 +92,8 @@ We have organised this repository as follows:
  * `support/` - contains definitions of container images, `Dockerfile`s,
    which are used by multiple experiments.
  * `tools/` - contain programs which are used by multiple experiments.
- * `run.sh` - A tool that wraps all experiments and can be used to run them all or individually.  More details on this utility script are detailed below.
+ * `run.sh` - A tool that wraps all experiments and can be used to run them all
+   or individually.  More details on this utility script are detailed below.
 
 ## 3. Prerequisites
 
@@ -115,7 +120,7 @@ which requires two servers connected to each other via a 10Gb link.
 All of our results were run on inexpensive (roughly EUR 800)
 [Shuttle SH370R6](http://global.shuttle.com/products/productsDetail?productId=2265)
 boxes with an Intel i7 9700K 3.6 GHz (4.9 Ghz with Turbo Boost, 8 cores) and
-32GB of RAM. For the DPDK experiment we used[Intel X520-T2](https://ark.intel.com/content/www/de/de/ark/products/69655/intel-ethernet-converged-network-adapter-x520-t2.html)
+32GB of RAM. For the DPDK experiment we used [Intel X520-T2](https://ark.intel.com/content/www/de/de/ark/products/69655/intel-ethernet-converged-network-adapter-x520-t2.html)
 cards with the 82599EB chipset.
 
 
