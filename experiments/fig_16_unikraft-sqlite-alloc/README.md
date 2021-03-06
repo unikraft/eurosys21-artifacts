@@ -1,5 +1,7 @@
 # Unikraft SQLite with varying allocators
 
+<img align="right" src="../../plots/fig_16_unikraft-sqlite-alloc.svg" width="300" />
+
 This experiment provides data for Fig. 16.
 
 ## Usage
