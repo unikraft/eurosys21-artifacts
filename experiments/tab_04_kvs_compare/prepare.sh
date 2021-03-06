@@ -12,3 +12,12 @@ cd dpdk2
 meson build
 cd build
 ninja
+
+cd ../../
+wget http://vmx.cs.pub.ro/~vmchecker/dpdk3.zip
+unzip dpdk3
+cd dpdk3
+meson build
+cd build
+ninja
+
