@@ -1,2 +1,58 @@
+#!/bin/bash
+if [ $( id -u ) != 0 ]; then
+	echo "Try to run as root..." 1>&2
+	exec sudo "$0" "$@"
+fi
 
-sudo qemu-system-x86_64 -m 6G -cpu host,+invtsc -smp cpus=2  -enable-kvm -mem-path /dev/ -netdev tap,id=testtap0,ifname=tap0,br=br0,script=no,downscript=no,vhost=on -device virtio-net-pci,netdev=testtap0,guest_csum=off,gso=off -object memory-backend-file,id=mem,size=6144M,mem-path=/mnt/linux-huge,share=on -numa node,memdev=mem -mem-prealloc -chardev socket,id=char0,path=/root/dpdk/build/app/vhost-net -netdev vhost-user,id=testtap1,chardev=char0,vhostforce -device virtio-net-pci,netdev=testtap1,rx_queue_size=1024,tx_queue_size=1024  -hda /root/debian.qcow2 -display curses -boot c
+QCOW="../../aux/debian.qcow2"
+DPDKVHOST="/root/dpdk/build/app/vhost-net"
+MEMPATH="/mnt/huge1G/test"
+TAPNAME="tap88"
+BRNAME="expbr0"
+
+set -x
+
+# setup mgmt bridge
+ip tuntap add dev $TAPNAME mode tap
+ip link add $BRNAME type bridge
+ip link set master $BRNAME dev $TAPNAME
+ip link set promisc on dev $BRNAME
+ip link set promisc on dev $TAPNAME
+ip addr add 172.18.0.254/24 dev $BRNAME
+ip link set dev $BRNAME up
+ip link set dev $TAPNAME up
+
+# run VM
+taskset -c 4,5 qemu-system-x86_64 \
+	-m 6G \
+	-cpu host,+invtsc \
+	-smp cpus=2 \
+	-enable-kvm \
+	-object memory-backend-file,id=mem,size=6144M,mem-path=${MEMPATH},share=on \
+	-numa node,memdev=mem \
+	-mem-prealloc \
+	\
+	-netdev tap,ifname=$TAPNAME,id=mgm0,script=no,downscript=no \
+	-device virtio-net-pci,netdev=mgm0 \
+	\
+	-chardev "socket,id=char0,path=$DPDKVHOST" \
+	-netdev vhost-user,id=testtap1,chardev=char0,vhostforce \
+	-device virtio-net-pci,netdev=testtap1,id=dpdknet0,rx_queue_size=1024,tx_queue_size=1024 \
+	\
+	-hda "$QCOW" \
+	-display curses \
+	-boot c
+RET=$?
+
+#	-mem-path /dev/ \
+
+##	-object memory-backend-file,id=mem,size=1G,mem-path=/mnt/huge1G/test,share=on \
+##	-numa node,memdev=mem \
+
+# destroy network setup
+ip link set dev $BRNAME down
+ip link set dev $TAPNAME down
+ip tuntap del dev $TAPNAME mode tap
+ip link del $BRNAME
+
+exit $RET
