@@ -185,7 +185,6 @@ exit:
 		struct rte_mbuf *mbuf = mpkts[i];
 		rte_pktmbuf_reset_headroom(mbuf);
 		pkts[i] = (struct uk_netbuf *)mbuf->userdata;
-		printf("###### %p\n", mbuf->userdata);
 		UK_ASSERT(mbuf->userdata);
 		uk_netbuf_prepare_buf(pkts[i], sizeof(struct uk_netbuf) +
 				      mbuf->buf_len + sizeof(*mbuf) +

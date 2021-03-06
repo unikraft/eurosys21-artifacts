@@ -1,12 +1,12 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Unikraft/0.4.0~ad7ba54c Configuration
+# Unikraft/0.4.0~3b7a9fa3 Configuration
 #
-CONFIG_UK_FULLVERSION="0.4.0~ad7ba54c"
+CONFIG_UK_FULLVERSION="0.4.0~3b7a9fa3"
 CONFIG_UK_CODENAME="Rhea"
 CONFIG_UK_ARCH="x86_64"
-CONFIG_UK_BASE="/home/vladb/eurosys21-artifacts/experiments/tab_04_kvs_compare/aux/unikraft"
-CONFIG_UK_APP="/home/vladb/eurosys21-artifacts/experiments/tab_04_kvs_compare/server/unikraft_raw/uk_test_suite"
+CONFIG_UK_BASE="/home/vlad/eurosys21-artifacts/experiments/tab_04_kvs_compare/aux/unikraft"
+CONFIG_UK_APP="/home/vlad/eurosys21-artifacts/experiments/fig_19_compare-dpdk/server/unikraft/uk_test_suite"
 CONFIG_UK_DEFNAME="uk_test_suite"
 
 #
@@ -236,12 +236,12 @@ CONFIG_APPTESTSUITE_UK_DPDK=y
 # CONFIG_APPTESTSUITE_DPDK_MEMORY is not set
 # CONFIG_PKT_TIMESTAMP is not set
 CONFIG_APPTESTSUITE_DPDK_BASIC_FWD=y
-# CONFIG_APPTESTSUITE_DPDK_TXONLY is not set
+CONFIG_APPTESTSUITE_DPDK_TXONLY=y
 # CONFIG_APPTESTSUITE_DPDK_RTT is not set
 # CONFIG_APPTESTSUITE_DPDK_CLOSED_LOOP is not set
 # CONFIG_APPTESTSUITE_DPDK_RXONLY is not set
 # CONFIG_APPTESTSUITE_DPDK_CL_SERVER is not set
-CONFIG_APPTESTSUITE_DPDK_UDP_ECHO=y
+# CONFIG_APPTESTSUITE_DPDK_UDP_ECHO is not set
 # end of APPTESTSUITE_DPDK
 
 #

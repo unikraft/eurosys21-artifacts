@@ -16,7 +16,7 @@
 #define MAX_PKT_BURST 512
 #define DEF_PKT_BURST 64
 
-#define TIMER_MILLISECOND 3200000ULL /* around 1ms at 3.2 Ghz */
+#define TIMER_MILLISECOND 3600000ULL /* around 1ms at 3.2 Ghz */
 
 #define IPv4(a,b,c,d) ((uint32_t)(((a) & 0xff) << 24) | \
 		                 (((b) & 0xff) << 16) | \
