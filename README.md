@@ -73,8 +73,8 @@ Each figure, table and corresponding experiment are listed below:
 | [`fig_14`](/experiments/fig_14_unikraft-nginx-alloc-boot/) | <img src="plots/fig_14_unikraft-nginx-alloc-boot.svg" width="200" /> | Unikraft Boot time for NGINX with different memory allocators.                                                                                                                                                                | 0h 8m        |
 | [`fig_15`](/experiments/fig_15_unikraft-nginx-throughput/) | <img src="plots/fig_15_unikraft-nginx-throughput.svg" width="200" /> | NGINX throughput with different memory allocators.                                                                                                                                                                            | 0h 30m       |
 | [`fig_16`](/experiments/fig_16_unikraft-sqlite-alloc/)     | <img src="plots/fig_16_unikraft-sqlite-alloc.svg" width="200" />     | Execution speedup in SQLite Unikraft, relative to [mimalloc](https://github.com/microsoft/mimalloc).                                                                                                                          | 0h 21m       |
-| [`fig_17`](/experiments/fig_17_unikraft-sqlite-libc/)      | <img src="plots/fig_17_unikraft-sqlite-libc.svg" width="200" />      | Time for 60k SQLite insertions with native Linux, [newlib](https://sourceware.org/newlib/) and [musl](https://www.musl-libc.org/) on Unikraft (marked as native) and SQLite ported automatically to Unikraft (musl external). |              |
-| [`fig_18`](/experiments/fig_18_unikraft-redis-alloc/)      | <img src="plots/fig_18_unikraft-redis-alloc.svg" width="200" />      | Throughput for Redis Unikraft, with varying allocators and request type (`redis-benchmark`, 30 concurrent conns, 100k requests, and a pipelining level of 16.)                                                                | 0h 5m        |
+| [`fig_17`](/experiments/fig_17_unikraft-sqlite-libc/)      | <img src="plots/fig_17_unikraft-sqlite-libc.svg" width="200" />      | Time for 60k SQLite insertions with native Linux, [newlib](https://sourceware.org/newlib/) and [musl](https://www.musl-libc.org/) on Unikraft (marked as native) and SQLite ported automatically to Unikraft (musl external). | 0h 6m        |
+| [`fig_18`](/experiments/fig_18_unikraft-redis-alloc/)      | <img src="plots/fig_18_unikraft-redis-alloc.svg" width="200" />      | Throughput for Redis Unikraft, with varying memory allocators and request type (`redis-benchmark`, 30 concurrent conns, 100k requests, and a pipelining level of 16.)                                                         | 0h 5m        |
 | [`fig_19`](/experiments/fig_19_compare-dpdk/)              | <img src="plots/fig_19_compare-dpdk.svg" width="200" />              | TX throughput comparison of Unikraft versus [DPDK](https://www.dpdk.org/) in a Linux VM.                                                                                                                                      | 0h 30        |
 | [`fig_20`](/experiments/fig_20_compare-9pfs/)              | <img src="plots/fig_20_compare-9pfs.svg" width="200" />              | [9pfs](https://xenbits.xen.org/docs/unstable/misc/9pfs.html) latency for read and write operations, compared to Linux.                                                                                                        | 2h 0m        |
 | [`fig_21`](/experiments/fig_21_unikraft-boot-pages/)       | <img src="plots/fig_21_unikraft-boot-pages.svg" width="200" />       | Unikraft boot times with static and dynamic initialization of page tables.                                                                                                                                                    | 0h 3m        |
@@ -89,7 +89,7 @@ Each figure, table and corresponding experiment are listed below:
 | Text                                                  | Experiment                        | Est. runtime |
 |-------------------------------------------------------|-----------------------------------|--------------|
 | [`txt_01`](/experiments/txt_01_unikernel-boot-times/) | Unikernel boot time baseline.     | 0h 21m       |
-| [`txt_02`](/experiments/txt_02_9pfs-boot-times/)      | Measures 9pfs boot time overhead. | 0h 5m              |
+| [`txt_02`](/experiments/txt_02_9pfs-boot-times/)      | Measures 9pfs boot time overhead. | 0h 5m        |
 
 ## 2. Repository structure
 
@@ -108,7 +108,7 @@ We have organised this repository as follows:
     - `plot`: produces the figure or table.  All plots are automatically saved
       into the [`plots/`](/plots) directory.
     - `clean`: removes intermediate build files.
-       
+
  * `build/` - Intermediate build artifacts necessary for experiments to run.  
    This will be populated by the experiment's preparation (`prepare`) step.
  * `support/` - contains definitions of container images, `Dockerfile`s,
@@ -122,7 +122,7 @@ We have organised this repository as follows:
 ### 3.1. Hardware
 
 Before you can run these experiments, you will need to prepare 3 physical host
-environments.  **Physical hosts as opposted to virtual machines are recommended
+environments.  **Physical hosts as opposed to virtual machines are recommended
 as they provide better performance.**  In the paper, we used three different
 setups:
 
@@ -154,9 +154,8 @@ installed.  All install and preparation scripts in this repository target this
 distribution and kernel version.
 
 For all set ups, we disabled Hyper-Threading (`noht`) and isolated 4 CPU cores
-(e.g. `isocpus=4,5,6,7`).  For reproducing [`tab_04`](/experiments/tab_04_kvs_compare/),
-we allowed for user-defined CPU frequency (`intel_pstate=disable`).  This can be
-done by setting kernel boot parameters, e.g. with pxelinux:
+(e.g. `isocpus=4,5,6,7`). This can be done by setting kernel boot parameters,
+e.g. with pxelinux:
 
 ```
 ...
@@ -165,6 +164,14 @@ LABEL item_kernel0
   MENU DEFAULT
   KERNEL vmlinuz-4.19.0
   APPEND isolcpus=4,5,6,7 noht
+  ...
+```
+
+For reproducing [`tab_04`](/experiments/tab_04_kvs_compare/), we additionally
+allowed for user-defined CPU frequency (`intel_pstate=disable`):
+```
+  ...
+  APPEND isolcpus=4,5,6,7 noht intel_pstate=disable
   ...
 ```
 
@@ -267,7 +274,7 @@ experiment.
 ## 5. Notes
 
  * We use intermediate Docker containers for building images and accessing
-   pre-built binaries for many of the experiments.  In addition to this, this 
+   pre-built binaries for many of the experiments.  In addition to this, this
    repository clones the Linux kernel to make changes for testing.  As a result,
    expected disk storage utilized to conduct all experiments is ~50GB.
 
