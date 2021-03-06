@@ -1,5 +1,12 @@
 # Comparing image sizes of Unikraft applications
 
+<img align="right" src="../../plots/fig_08_unikraft-image-size.svg" width="300" />
+
+From the paper, "the main advantage of unikernels over traditional operating
+systems is their low resource consumption."  To demonstrate this, we evaluated
+the image size of 4 representative applications in Unikraft.  This figure shows
+that "Unikraft images are all under 2MBs for all of these applications."
+
 This experiment tests 4 configurations:
 
  * Default configuration;
