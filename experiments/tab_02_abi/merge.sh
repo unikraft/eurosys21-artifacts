@@ -65,7 +65,7 @@ python3 merge_csv.py
 
 echo "Copy results and move to base folder"
 base_folder=$(cat .init_folder.txt)
-cp $PWD/merged.csv $base_folder
+cp $PWD/merged.csv $RESULT_FOLDER
 cp -r $RESULT_FOLDER $base_folder
 
 echo "Raw results are available in the results folder and CSV merged table is written in merged.csv"
