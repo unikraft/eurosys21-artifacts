@@ -1,4 +1,4 @@
-# UDP-based key-value store performance (Unikraft v.s. DPDK)
+# UDP key-value store performance (Unikraft v.s. DPDK)
 
 This experiment demonstrates the potential of specialization for
 network applications. To this end we implement a UDP-based in-memory
@@ -11,8 +11,8 @@ achieve or exceed the performance of DPDK with less resources.
 
 This experiment leverages a two-machine setup. The first machine (in
 the AE testbed `uktut1`) sends UDP packets with different degrees of
-specialization (Linux/Unikraft). The second machine simply receives
-them. We use dpdk vhost for all of the VMs.
+specialization (Linux/Unikraft). The second machine (in the AE testbed
+`uktut2`) simply receives them. We use dpdk vhost for all of the VMs.
 
 The different servers (representing the different degrees of
 specialization) run on the first machine are:
