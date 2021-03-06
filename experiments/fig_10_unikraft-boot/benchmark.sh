@@ -161,7 +161,7 @@ do
 	taskset -c ${CPU1},${CPU2} ${QEMU_PATH} \
 		-L ${IMAGES}/qemu/pc-bios/ \
 		-enable-kvm -nographic -device isa-debug-exit \
-		-kernel /tmp/unikraft+qemu.kernel -m 2M \
+		-kernel /tmp/unikraft+qemu1nic.kernel -m 2M \
 		-nodefaults -no-user-config -serial stdio \
 		-cpu host,migratable=no,+invtsc -no-reboot \
 		-netdev tap,ifname=qemuif,id=uknetdev,script=no \

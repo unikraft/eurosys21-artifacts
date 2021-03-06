@@ -92,7 +92,6 @@ function install_dependencies() {
         doxygen \
         libhugetlbfs-bin \
         build-essential \
-        sgabios \
         qemu-system-x86 \
         redis-tools \
         socat \
