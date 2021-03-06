@@ -52,4 +52,4 @@ cd $CURRENT_FOLDER/abi/apps_newlib_std/
 ./script_check.sh newlib-std
 rm script_check.sh
 
-echo "All results are saved in /tmp/abi, please run 'make plot' to generate the csv table and copy results in the base folder"
+echo "All results are saved in /tmp/abi, please run 'merge.sh' to generate the csv table and copy results in the base folder"
