@@ -2,6 +2,9 @@
 # Files and directories
 #
 WORKDIR ?= $(CURDIR)
+RESULTS ?= $(WORKDIR)/results/table.txt
+PLOT_FORMAT ?= svg
+PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
 
 #
 # Tools
@@ -25,11 +28,11 @@ prepare:
 run:
 	$(WORKDIR)/run.sh "$(WORKDIR)"
 	$(WORKDIR)/parse.sh "$(WORKDIR)"
+	$(WORKDIR)/process.sh "$(WORKDIR)"
 
 .PHONY: plot
 plot:
-	$(WORKDIR)/process.sh "$(WORKDIR)"
-	$(SNAKE) $(WORKDIR)/plot.py
+	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
 
 .PHONY: clean
 clean:
