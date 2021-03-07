@@ -1,6 +1,6 @@
 # Unikraft "Hello World" Dependency Graph
 
-<img align="right" src="../../plots/fig_02_unikraft-nginx-deps.svg" width="300" />
+<img align="right" src="../../plots/fig_03_unikraft-helloworld-deps.svg" width="300" />
 
 In contrast to [`fig_01`](../fig_01) and in conjunction with
 [`fig_02`](../fig_02) we demonstrate the simplicty of a [Unikraft "Hello World"
