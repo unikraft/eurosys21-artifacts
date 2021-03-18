@@ -8,7 +8,7 @@ connections, and a static 612B HTML page against various memory allocators,
 including:
 
  * [Mimalloc](https://github.com/unikraft/lib-mimalloc);
- * [TLSF](https://github.com/unikraft/lib-tlsf);
+ * [TLSF](https://github.com/skuenzer/lib-tlsf) branch: skuenzer/eurosys21;
  * [binary buddy](https://github.com/unikraft/unikraft/tree/staging/lib/ukallocbbuddy); and,
  * [tinyalloc](https://github.com/unikraft/lib-tinyalloc).
 
