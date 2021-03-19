@@ -44,7 +44,8 @@ def plot(data=None, output=None):
     **dict.fromkeys(["ukboot"], "ukboot1"),
     **dict.fromkeys(["ukargparse"], "ukargparse1"),
     }
-
+    # indirect calls
+    adj_list["ukallocbbuddy"]["ukalloc"] += 2
     G = {}
     for i in components:
         G[myDict[i]] = {}
@@ -67,21 +68,20 @@ def plot(data=None, output=None):
             c.attr(color="lightgrey")
             c.attr(overlap='false')
             c.attr(style='rounded, filled')
-            c.attr(fontsize='10')
+            c.attr(fontsize='20')
 
             for j, value2 in myDict.items():
                 if value2 == i:
                     c.node(j, shape="box", style="filled, rounded",color="white",fontsize="12")
 
+    for i in components:
+        for j in components:
+            if i != j and j in adj_list[i] and adj_list[i][j] > 0:
+                dot.edge(i,j, label=str(adj_list[i][j]))
 
-    for i, value in G.items():
-        for j, value2 in value.items():
-            if i != j:
-                dot.edge("cluster"+i,"cluster"+j, label=str(value2))
-
-    dot.edge("clusterposix-layer", "clustermm", "6")
+    dot.edge("nolibc", "ukalloc", "6")
     dot.attr("node", fontcolor="white", fontsize="25", shape="box", style="filled", color="black")
-    dot.edge("Hello World", "clusterposix-layer")
+    dot.edge("Hello World", "nolibc", "1")
     dot.render(output)
 
 if __name__ == '__main__':
