@@ -50,32 +50,11 @@ cd unikraft/uk_test_suite/
 ./run_vhost_user.sh
 ```
 
-This is going to output ten iterations such as the following one:
-```
-******************** ITERATION: 2 ******************
-The count of packet to transmitted/NR of packet sent to virtio per sec/Total iteration
-12432480/1216/12431264/0/558524000/8921195
-12450784/256/12450528/0/559758560/8940771
-12440448/0/12440448/0/560478464/8951858
-12445632/0/12445632/0/560391936/8950587
-12435296/0/12435296/0/562330272/8980712
-The count of packets : 123644384
-The latency of pkt alloc/pkt gen/ pkt send
-247069368/1033896958/1370259576
-246913586/1035093974/1368389088
-247222812/1033868874/1367967382
-246885880/1033856334/1369072622
-247798612/1031452360/1367364560
-```
-
-The first column is the result, followed by the number of packet/s per second
-transmitted.
 
 Note: If the value of `TXONLY_DEF_PACKET_LEN` is changed, Unikraft has to be rebuilt.
 To do this, run:
 ```
-rm -rf unikraft/uk_test_suite/
-./prepare.sh
+make
 ```
 
 ### unikraft vhost net
@@ -115,7 +94,28 @@ We now enter the following commands in the interactive test-pmd shell:
 ```
 set fwd rxonly
 start
+
+To see the results:
 ```
+show ports stats all
+```
+
+Example output, the result is 14204107.
+```
+testpmd> show port stats all
+
+  ######################## NIC statistics for port 0  ########################
+  RX-packets: 3064735220 RX-missed: 0          RX-bytes:  253701795528
+  RX-errors: 0
+  RX-nombuf:  0
+  TX-packets: 0          TX-errors: 0          TX-bytes:  0
+
+  Throughput (since last show)
+  Rx-pps:     14204107
+  Tx-pps:            0
+  ############################################################################
+```
+
 
 ## Cleaning
 
