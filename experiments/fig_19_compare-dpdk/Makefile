@@ -3,7 +3,8 @@
 #
 WORKDIR ?= $(CURDIR)
 RESULTS ?= $(WORKDIR)/results
-PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
+PLOT_FORMAT ?= svg
+PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).$(PLOT_FORMAT)
 
 #
 # Tools
