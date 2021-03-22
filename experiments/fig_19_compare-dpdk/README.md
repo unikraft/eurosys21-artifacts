@@ -14,7 +14,8 @@ application.
 
 The server is running on the first machine (in the AE testbed, this is
 `uktut1`). For this experiment we change `TXONLY_DEF_PACKET_LEN` from
-`dpdk/app/test-pmd/testpmd.h` in order to vary packet sizes.
+`dpdk/app/test-pmd/testpmd.h` in linux dpdk and test_dpdk/basic_forward/pktgen.h
+in unikraft in order to vary packet sizes.
 
 Following sizes are explored: 64, 128, 256, 512, 1024, and 1500.
 
