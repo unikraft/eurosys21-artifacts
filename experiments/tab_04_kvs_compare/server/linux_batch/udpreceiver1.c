@@ -494,7 +494,7 @@ int main(int argc, const char *argv[])
 {
 	const char *listen_addr_str = "0.0.0.0:4321";
 	int recv_buf_size = 4*1024;
-	int thread_num = 1;
+	int thread_num = 4;
 	int reuseport = 0;
 
 	switch (argc) {
@@ -519,7 +519,7 @@ int main(int argc, const char *argv[])
             }                                                                                                                                                                                                     
                                                                                                                                                                                                                   
             addr.sin_family = AF_INET;                                                                                                                                                                            
-            addr.sin_addr.s_addr = (inet_addr("172.17.0.4"));                                                                                                                 
+            addr.sin_addr.s_addr = (inet_addr("172.18.0.4"));                                                                                                                 
             addr.sin_port = htons(9000);  
 			           if (connect(sockfd, (struct sockaddr *) &addr, sizeof(addr)) == -1) {
 			}
