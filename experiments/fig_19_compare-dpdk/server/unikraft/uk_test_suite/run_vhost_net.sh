@@ -9,16 +9,11 @@ BRNAME="testbr0"
 
 set -x
 
-# setup experiment bridge
-ip tuntap add dev $TAPNAME mode tap
-ip link add $BRNAME type bridge
-ip link set master $BRNAME dev $TAPNAME
-ip link set promisc on dev $BRNAME
-ip link set promisc on dev $TAPNAME
-ip addr add 172.17.0.113/24 dev $BRNAME
-ip link set dev $BRNAME up
-ip link set dev $TAPNAME up
-
+ip link add link enp1s0f1 macvtap2 address 00:22:33:44:55:66 type macvtap mode bridge
+ip link set promisc on dev enp1s0f1
+ip link set macvtap2 up
+ip link set dev enp1s0f1 up
+my_fd=$(cat /sys/class/net/macvtap2/ifindex)
 # execute VM
 qemu-system-x86_64 \
 	-cpu host,+invtsc \
@@ -31,16 +26,11 @@ qemu-system-x86_64 \
 	-object memory-backend-file,id=mem,size=1G,mem-path=/mnt/huge1G/test,share=on \
 	-numa node,memdev=mem \
 	-mem-prealloc \
-	-netdev tap,ifname=$TAPNAME,id=testtap0,vhost=on,vhostforce=on,vhostfd=4,script=no,downscript=no 4<>/dev/vhost-net \
+	-netdev tap,fd=5,id=testtap0,vhost=on,vhostforce=on 4<>/dev/vhost-net 5<>/dev/tap$my_fd\
 	-device virtio-net-pci,netdev=testtap0,addr=0x4,ioeventfd=on,guest_csum=off,gso=off \
 	-kernel build/uk_test_suite_kvm-x86_64 \
 	| tee results.txt
 RET=$?
 
-# destroy network setup
-ip link set dev $BRNAME down
-ip link set dev $TAPNAME down
-ip tuntap del dev $TAPNAME mode tap
-ip link del $BRNAME
-
+ip link del macvtap2
 exit $RET
