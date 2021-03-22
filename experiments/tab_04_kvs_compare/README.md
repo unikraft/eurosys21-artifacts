@@ -109,6 +109,17 @@ run_server.sh
 ```
 
 ## Linux single
+For experiments that need ARP we comment this guard from client:
+
+`client/unikraft/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c`
+
+```
+403 #if 0
+404         pkt_burst_transmit_cnt(first_portid, mbuf_pool, 1, 0);
+405         int rc = pkt_burst_receive_arp(first_portid, mbuf_pool, 0);
+406 #endif
+```
+
 ```
 cd server/linux_single/
 ./run.sh
@@ -116,10 +127,62 @@ cd server/linux_single/
 
 
 ## Linux batch
+
+For experiments that need ARP we comment this guard from client:
+
+`client/unikraft/uk_test_suite/test_dpdk/basic_forward/cl_tx_rx.c`
+
+```
+403 #if 0
+404         pkt_burst_transmit_cnt(first_portid, mbuf_pool, 1, 0);
+405         int rc = pkt_burst_receive_arp(first_portid, mbuf_pool, 0);
+406 #endif
+```
+
 ```
 cd server/linux_batch/
 ./run.sh
 ```
+
+## Linux VM dpdk
+Start the vm.
+```
+cd server/linux
+./run_linuxvm.sh
+```
+
+On the VM:
+```
+echo 1024 > /sys/kernel/mm/hugepages/hugepages-2048kB/nr_hugepages
+modprobe ixgbe
+modprobe uio_pci_generic
+ip a flush ens4
+python3 usertools/dpdk-devbind.py --bind=uio_pci_generic ens4
+./dpdk-testpmd-64b -m 1024 -n 4 --proc-type=primary  -- -i
+```
+
+In testpmd:
+```
+set fwd udpecho
+start
+```
+
+## Linux VM Single
+We start the VM.
+
+```
+cd server/linux
+./run_linuxvm.sh
+```
+
+On the VM:
+```
+ip a a 172.18.0.114 dev ens4
+ifconfig ens4 hw ether 52:54:00:12:34:57
+ip l set ens4 up
+./server
+```
+
 
 # Client
 The client is running on uktut2. The client is a dpdk application that generates traffic. Run the client after starting one of the servers.
