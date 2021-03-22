@@ -99,8 +99,11 @@ RUN cd plat-solo5 && git apply /root/workspace/patches/solo5-instrumented.patch
 
 WORKDIR /root/workspace/libs
 
-RUN git clone https://github.com/unikraft/lib-tlsf.git
-RUN cd lib-tlsf && git checkout 4c81761bf35088fd7c8698aae07aaba11a8e022e
+RUN git clone https://github.com/skuenzer/lib-tlsf.git
+# use a temporary fork of the tlsf repository to workaround dead upstream
+# tarball link
+RUN cd lib-tlsf && git checkout skuenzer/eurosys21
+RUN cd lib-tlsf && git checkout 851522e788424914a1a7763449eb7225d7a12832
 
 RUN git clone https://github.com/unikraft/lib-mimalloc.git
 RUN cd lib-mimalloc && git checkout 24089078de67be4b4709325e8479aca0c3184c23
