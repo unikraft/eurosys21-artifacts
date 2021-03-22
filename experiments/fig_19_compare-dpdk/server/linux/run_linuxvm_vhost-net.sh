@@ -24,15 +24,11 @@ ip addr add 172.18.0.254/24 dev $BRNAME
 ip link set dev $BRNAME up
 ip link set dev $TAPNAME up
 
-# setup experiment bridge
-ip tuntap add dev $TAPNAME_EXP mode tap
-ip link add $BRNAME_EXP type bridge
-ip link set master $BRNAME_EXP dev $TAPNAME_EXP
-ip link set promisc on dev $BRNAME_EXP
-ip link set promisc on dev $TAPNAME_EXP
-ip addr add 172.18.0.113/24 dev $BRNAME_EXP
-ip link set dev $BRNAME_EXP up
-ip link set dev $TAPNAME_EXP up
+ip link add link enp1s0f1 macvtap2 address 00:22:33:44:55:66 type macvtap mode bridge
+ip link set promisc on dev enp1s0f1
+ip link set macvtap2 up
+ip link set dev enp1s0f1 up
+my_fd=$(cat /sys/class/net/macvtap2/ifindex)
 
 # run VM
 taskset -c 4,5 qemu-system-x86_64 \
@@ -45,7 +41,7 @@ taskset -c 4,5 qemu-system-x86_64 \
 	-netdev tap,ifname=$TAPNAME,id=mgm0,script=no,downscript=no \
 	-device virtio-net-pci,netdev=mgm0 \
 	\
-	-netdev tap,ifname=$TAPNAME_EXP,id=testtap1,vhost=on,vhostforce=on,vhostfd=4,script=no,downscript=no 4<>/dev/vhost-net \
+	-netdev tap,fd=5,id=testtap1,vhost=on,vhostforce=on 4<>/dev/vhost-net 5<>/dev/tap$my_fd\
 	-device virtio-net-pci,netdev=testtap1,ioeventfd=on,guest_csum=off,gso=off \
 	\
 	-hda "$QCOW" \
@@ -54,10 +50,7 @@ taskset -c 4,5 qemu-system-x86_64 \
 RET=$?
 
 # destroy network setup
-ip link set dev $BRNAME_EXP down
-ip link set dev $TAPNAME_EXP down
-ip tuntap del dev $TAPNAME_EXP mode tap
-ip link del $BRNAME_EXP
+ip link del macvtap2
 
 ip link set dev $BRNAME down
 ip link set dev $TAPNAME down
