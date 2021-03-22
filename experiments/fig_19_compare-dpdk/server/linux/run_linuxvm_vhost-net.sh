@@ -30,7 +30,7 @@ ip link add $BRNAME_EXP type bridge
 ip link set master $BRNAME_EXP dev $TAPNAME_EXP
 ip link set promisc on dev $BRNAME_EXP
 ip link set promisc on dev $TAPNAME_EXP
-ip addr add 172.17.0.113/24 dev $BRNAME_EXP
+ip addr add 172.18.0.113/24 dev $BRNAME_EXP
 ip link set dev $BRNAME_EXP up
 ip link set dev $TAPNAME_EXP up
 
@@ -40,7 +40,7 @@ taskset -c 4,5 qemu-system-x86_64 \
 	-cpu host,+invtsc \
 	-smp cpus=2 \
 	-enable-kvm \
-	-mem-prealloc \
+	-object memory-backend-file,id=mem,size=6144M,mem-path=/mnt/linux-huge,share=on -numa node,memdev=mem \
 	\
 	-netdev tap,ifname=$TAPNAME,id=mgm0,script=no,downscript=no \
 	-device virtio-net-pci,netdev=mgm0 \

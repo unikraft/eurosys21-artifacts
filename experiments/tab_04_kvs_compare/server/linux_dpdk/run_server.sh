@@ -1,4 +1,4 @@
-sudo ../../aux/dpdk/build/app/dpdk-testpmd   -m 1024 -n 4 --proc-type=primary  -- -i
+sudo ../../aux/dpdk2/build/app/dpdk-testpmd   -m 1024 -n 4 --proc-type=primary  -- -i
 
 
 # in testpmd
