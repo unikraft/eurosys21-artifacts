@@ -79,7 +79,7 @@ def plot(data=None, output=None):
   throughput_max += KBYTES * KBYTES * 1 # add "margin" above tallest bar
 
   # Setup matplotlib axis
-  fig = plt.figure(figsize=(8, 5))
+  fig = plt.figure(figsize=(8, 4))
   renderer = fig.canvas.get_renderer()
 
   # image size axis
