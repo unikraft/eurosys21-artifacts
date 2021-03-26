@@ -308,6 +308,9 @@ experiment.
 
 ## 5. Notes
 
+ * All experiments should be run as the `root` user on the host as it will
+   require modifications to the host and running with elevated privileges.
+
  * We use intermediate Docker containers for building images and accessing
    pre-built binaries for many of the experiments.  In addition to this, this
    repository clones the Linux kernel to make changes for testing.  As a result,
