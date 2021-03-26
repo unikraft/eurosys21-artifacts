@@ -302,7 +302,8 @@ experiment.
 ## 5. Notes
 
  * All experiments should be run as the `root` user on the host as it will
-   require modifications to the host and running with elevated privileges.
+   require modifications to the host and running commands with elevated
+   privileges, e.g. creating and destroying VMs, setting limits in `/proc`, etc.
 
  * We use intermediate Docker containers for building images and accessing
    pre-built binaries for many of the experiments.  In addition to this, this
