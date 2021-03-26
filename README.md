@@ -249,13 +249,6 @@ We documented this within the experiment folder.
 5. Once prepared, simply call the relevant experiment you wish to re-create
    using the `run.sh` script.
 
-Please note that we recommend to use
-[qemu-system-x86](https://packages.debian.org/buster-backports/qemu-system-x86)
-from the official Debian Buster repositories, version `1:3.1+dfsg-8+deb10u8`.
-Note that Rumprun experiments fail with the version from buster-backports
-(`1:5.2+dfsg-3~bpo10+1`), possibly due to a bug either in Rumprun or in the
-Debian package.
-
 ### 4.1. `run.sh` Usage
 
 We have wrapped all the individual experiments with the `run.sh` tool.  This
