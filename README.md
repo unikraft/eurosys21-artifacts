@@ -1,11 +1,12 @@
-<h1 align="center">Unikraft EuroSys'21 Artifacts</h1>
+<img width="40%" src="https://user-images.githubusercontent.com/905927/113136804-14c70f80-9224-11eb-8d44-f910166660dd.png" align="right" />
+<h1 align="left">Unikraft EuroSys'21 Artifacts</h1>
 
-<p align="center">
+<p align="left">
   This repository contains the artifacts, including experiments and graphs, for
   the paper:
 </p>
 
-<h3 align="center">
+<h3 align="left">
   Unikraft: Fast, Specialized Unikernels the Easy Way
 </h3>
 
@@ -34,9 +35,11 @@ in the process of being upstreamed.
 ```
 @inproceedings{Kuenzer2021,
   title = {Unikraft: Fast, Specialized Unikernels the Easy Way},
-  author = {Kuenzer, Simon and Bădoiu, Vlad-Andrei and Lefeuvre, Hugo and Santhanam, Sharan and Jung, Alexander \
-            and Gain, Gaulthier and Soldani, Cyril and Lupu, Costin and Teodorescu, Ștefan and Răducanu, Costi \
-            and Banu, Cristian and Mathy, Laurent and Deaconescu, Răzvan and Raiciu, Costin and Huici, Felipe},
+  author = {Kuenzer, Simon     and Bădoiu, Vlad-Andrei and Lefeuvre, Hugo     and \
+            Santhanam, Sharan  and Jung, Alexander     and Gain, Gaulthier    and \
+	    Soldani, Cyril     and Lupu, Costin        and Teodorescu, Ștefan and \
+	    Răducanu, Costi    and Banu, Cristian      and Mathy, Laurent     and \
+            Deaconescu, Răzvan and Raiciu, Costin      and Huici, Felipe},
   journal = {Sixteenth European Conference on Computer Systems},
   year = {2021},
   series = {{EuroSys}{\textquotesingle}21},
