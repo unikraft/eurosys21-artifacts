@@ -87,6 +87,7 @@ unikraft-sqlite:
 
 .PHONY: run
 run:
+	mkdir -p $(RESULTSDIR)
 	$(IMPLDIR)/hermitux-light-size.sh
 	$(IMPLDIR)/hermitux-size.sh
 	$(IMPLDIR)/lupine-size.sh

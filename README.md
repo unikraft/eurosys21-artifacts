@@ -1,13 +1,11 @@
-<h1 align="center">Unikraft EuroSys'21 Artifacts</h1>
+<img width="40%" src="https://user-images.githubusercontent.com/905927/113136804-14c70f80-9224-11eb-8d44-f910166660dd.png" align="right" />
 
-<p align="center">
-  This repository contains the artifacts, including experiments and graphs, for
-  the paper:
-</p>
+# Unikraft EuroSys'21 Artifacts
 
-<h3 align="center">
-  Unikraft: Fast, Specialized Unikernels the Easy Way
-</h3>
+This repository contains the artifacts, including experiments and graphs, for
+the paper:
+
+### Unikraft: Fast, Specialized Unikernels the Easy Way
 
  > **Abstract**:  Unikernels are famous for providing excellent performance in
  > terms of boot times, throughput and memory consumption, to name a few
@@ -30,6 +28,25 @@
 [Unikraft](http://unikraft.org) is a Linux Foundation open source project and
 Xen Incubator Project.  Most of the code used for this paper is upstream, or is
 in the process of being upstreamed.
+
+```
+@inproceedings{Kuenzer2021,
+  title     = {Unikraft: Fast, Specialized Unikernels the Easy Way},
+  author    = {Kuenzer, Simon     and Bădoiu, Vlad-Andrei and Lefeuvre, Hugo     and \
+               Santhanam, Sharan  and Jung, Alexander     and Gain, Gaulthier    and \
+	       Soldani, Cyril     and Lupu, Costin        and Teodorescu, Ștefan and \
+	       Răducanu, Costi    and Banu, Cristian      and Mathy, Laurent     and \
+               Deaconescu, Răzvan and Raiciu, Costin      and Huici, Felipe},
+  journal   = {Sixteenth European Conference on Computer Systems},
+  year      = {2021},
+  series    = {{EuroSys}{\textquotesingle}21},
+  publisher = {ACM},
+  address   = {New York, NY, USA},
+  doi       = {10.1145/3447786.3456248},
+  isbn      = {978-1-4503-8334-9/21/04}
+}
+```
+
 
 If at all possible, please read through this entire document before installing
 or running experiments.
@@ -232,13 +249,6 @@ We documented this within the experiment folder.
 5. Once prepared, simply call the relevant experiment you wish to re-create
    using the `run.sh` script.
 
-Please note that we recommend to use
-[qemu-system-x86](https://packages.debian.org/buster-backports/qemu-system-x86)
-from the official Debian Buster repositories, version `1:3.1+dfsg-8+deb10u8`.
-Note that Rumprun experiments fail with the version from buster-backports
-(`1:5.2+dfsg-3~bpo10+1`), possibly due to a bug either in Rumprun or in the
-Debian package.
-
 ### 4.1. `run.sh` Usage
 
 We have wrapped all the individual experiments with the `run.sh` tool.  This
@@ -290,6 +300,10 @@ populated with a `README.md` which includes more detail about the individual
 experiment.
 
 ## 5. Notes
+
+ * All experiments should be run as the `root` user on the host as it will
+   require modifications to the host and running commands with elevated
+   privileges, e.g. creating and destroying VMs, setting limits in `/proc`, etc.
 
  * We use intermediate Docker containers for building images and accessing
    pre-built binaries for many of the experiments.  In addition to this, this

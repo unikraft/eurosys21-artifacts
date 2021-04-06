@@ -86,7 +86,7 @@ def plot(data=None, output=None):
   # General style
   common_style(plt)
 
-  throughput_max += 1 # margin above biggest bar
+  throughput_max += .4 # margin above biggest bar
 
   # Setup matplotlib axis
   fig = plt.figure(figsize=(8, 4))
@@ -174,7 +174,7 @@ def plot(data=None, output=None):
   handles, labels = plt.gca().get_legend_handles_labels()
   by_label = dict(zip(labels, handles))
   leg = plt.legend(by_label.values(), by_label.keys(),
-    loc='upper left',
+    loc='upper right',
     ncol=2,
     fontsize=LARGE_SIZE,
   )

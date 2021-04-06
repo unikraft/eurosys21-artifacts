@@ -3,7 +3,8 @@
 #
 WORKDIR ?= $(CURDIR)
 RESULTS ?= $(WORKDIR)/results
-PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).svg
+PLOT_FORMAT ?= svg
+PLOT ?= $(WORKDIR)/$(notdir $(WORKDIR)).$(PLOT_FORMAT)
 
 #
 # Tools
@@ -26,7 +27,7 @@ run:
 
 .PHONY: plot
 plot:
-	$(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
+	PYTHONPATH=$(WORKDIR)/../common $(SNAKE) $(WORKDIR)/plot.py --data $(RESULTS) --output $(PLOT)
 
 .PHONY: clean
 clean:

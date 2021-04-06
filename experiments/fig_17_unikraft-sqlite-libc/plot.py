@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import sys
+from common import sizeof_fmt, common_style, mk_groups, KBYTES, SMALL_SIZE, MEDIUM_SIZE, LARGE_SIZE
 
 labels = {
         'app-sqlite-linux-native.dat': 'Linux\n(native)',
@@ -34,8 +35,8 @@ if __name__ == "__main__":
         if stats[fn]['max'] > max_time:
             max_time = stats[fn]['max']
 
-    # TODO import general style
-    LARGE_SIZE = 18
+    # General style
+    common_style(plt)
 
     max_time *= 1.2 # Margin above biggest bar
 
@@ -68,7 +69,7 @@ if __name__ == "__main__":
                 color='#5697C4',
                 linewidth=0.5
                 )
-        ax.text(i + 1, time['avg'] + yerr + .1, "%3.3f" % time['avg'],
+        ax.text(i + 1, time['avg'] + yerr + .05, "%3.3f" % time['avg'],
                 ha='center',
                 va='bottom',
                 zorder=6,
