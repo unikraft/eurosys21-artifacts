@@ -17,4 +17,8 @@ else
     cd ../aux && wget http://vmx.cs.pub.ro/~vmchecker/debian.qcow2
 fi
 
-echo "Creating bridge for the LinuxVM"
+cd unikraft_lwip/
+git clone https://github.com/unikraft/unikraft
+mkdir libs
+cd libs
+git clone https://github.com/unikraft/lib-lwip

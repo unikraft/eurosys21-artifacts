@@ -167,12 +167,12 @@ set fwd udpecho
 start
 ```
 
-## Linux VM Single
+## Linux VM Single & Batch
 We start the VM.
 
 ```
 cd server/linux
-./run_linuxvm.sh
+./run_linuxvm_vhost-net.sh
 ```
 
 On the VM:
@@ -182,7 +182,10 @@ ifconfig ens4 hw ether 52:54:00:12:34:57
 ip l set ens4 up
 ./server
 ```
-
+or
+```
+./udpreceiver1
+```
 
 # Client
 The client is running on uktut2. The client is a dpdk application that generates traffic. Run the client after starting one of the servers.

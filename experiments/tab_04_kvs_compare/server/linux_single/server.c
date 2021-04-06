@@ -458,7 +458,7 @@ int main() {
     	ret1 = recvfrom(sockfd, (char *)buffer, MAXLINE,  
                 MSG_WAITALL, ( struct sockaddr *) &cliaddr, 
                 &len);
-        do_processing(buffer);
+        //do_processing(buffer);
     	ret2 = sendto(sockfd, (const char *)buffer, ret1,  
         	0, (const struct sockaddr *) &cliaddr, 
             	len);

@@ -9,4 +9,4 @@ sudo iptables -P FORWARD ACCEPT
 sudo iptables -F
 sudo sysctl -w net.core.rmem_max=26214400
 sudo sysctl -w net.core.rmem_default=26214400
-./server
+taskset -c 6 ./server
