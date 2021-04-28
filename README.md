@@ -1,6 +1,14 @@
-<img width="40%" src="https://user-images.githubusercontent.com/905927/113136804-14c70f80-9224-11eb-8d44-f910166660dd.png" align="right" />
+<img width="35%" src="https://user-images.githubusercontent.com/905927/113136804-14c70f80-9224-11eb-8d44-f910166660dd.png" align="right" />
 
 # Unikraft EuroSys'21 Artifacts
+
+[![](https://img.shields.io/badge/arXiv-paper-red)](https://arxiv.org/pdf/2104.12721.pdf)
+[![](https://img.shields.io/badge/EuroSys'21-slides-blue)](https://unikraft.org/assets/files/eurosys2021-slides.pdf)
+[![](https://img.shields.io/badge/EuroSys'21-Best%20Paper%20Award%20%F0%9F%8F%86-yellow)](https://2021.eurosys.org/eurosys-awards.html#awards)
+
+[![](https://user-images.githubusercontent.com/905927/116413020-2275b200-a82f-11eb-93c7-9a6914b93529.png)](https://www.youtube.com/watch?v=74EXqOCt_Sw)
+
+
 
 This repository contains the artifacts, including experiments and graphs, for
 the paper:
