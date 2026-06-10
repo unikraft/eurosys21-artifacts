@@ -159,7 +159,7 @@ do
 
 	checker_pid=$!
 
-	taskset -c ${CPU1},${CPU2} ${QEMU_PATH} \
+	sudo taskset -c ${CPU1},${CPU2} ${QEMU_PATH} \
 		-L ${IMAGES}/qemu/pc-bios/ \
 		-enable-kvm -nographic -device isa-debug-exit \
 		-kernel /tmp/unikraft+qemu1nic.kernel -m 2M \
