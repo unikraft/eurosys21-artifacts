@@ -17,7 +17,7 @@ Run instructions:
 cd experiments/14_unikraft-nginx-alloc-boot
 ./genimages.sh
 ./benchmark.sh
-./plot.py
+python ./plot.py --data=results --output=boot_times.png
 ```
 
 - `./genimages.sh` takes about 5 minutes in average.

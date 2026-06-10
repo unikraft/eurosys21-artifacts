@@ -24,7 +24,7 @@ networking interface."
  * `./genimages.sh` downloads and builds the tested images anm takes about 2m
    on average;
  * `./benchmark.sh` runs the experiment and takes about 6m30s in average; and
- * `./plot.py` is used to generate the figure.
+ * `python ./plot.py --data=results --output=boot_times.png` is used to generate the figure.
 
  > **Note**: like [`fig_14`](../fig_14_unikraft-nginx-alloc-boot), this
  > experiment relies on Unikraft tracepoints.  Please refer to its `README.md`

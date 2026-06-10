@@ -52,7 +52,7 @@ non-turbo frequency permanently to your CPU.
    placed under `eval/parsed/`
 7. `./process.sh` - Generates CSV files containing the results ready
    for being plotted. The CSV files are placed under `results/`
-8. `./plot.py` - Plots a comparison graph based on the CSV files placed
+8. `python ./plot.py --data=results --output=boot_times.png` - Plots a comparison graph based on the CSV files placed
    under `results/`.
 
 Alternatively, you can execute these steps with `make all`.

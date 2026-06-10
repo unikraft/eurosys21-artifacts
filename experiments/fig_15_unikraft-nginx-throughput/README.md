@@ -18,4 +18,4 @@ including:
    minutes on average;
  * `./benchmark.sh` runs the experiment and takes about 20-25 minutes on
    average; and
- * `./plot.py` is used to generate the figure.
+ * `python ./plot.py --data=results --output=boot_times.png` is used to generate the figure.

@@ -14,4 +14,4 @@ Run instructions:
  * `./genimages.sh` downloads and builds the tested images anm takes about 2m
    on average;
  * `./benchmark.sh` runs the experiment and takes about 6m30s in average; and
- * `./plot.py` is used to generate the figure.
+ * ` python ./plot.py --data=results --output=boot_times.png` is used to generate the figure.

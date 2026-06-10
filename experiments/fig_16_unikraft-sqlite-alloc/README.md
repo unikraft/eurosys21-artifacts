@@ -12,7 +12,7 @@ Run instructions:
 cd experiments/16_unikraft-sqlite-alloc
 ./genimages.sh
 ./benchmark.sh
-python3 ./plot.py
+python ./plot.py --data=results --output=boot_times.png
 ```
 
 - `./genimages.sh` takes about 5 minutes in average.

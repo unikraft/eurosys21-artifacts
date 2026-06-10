@@ -31,4 +31,4 @@ using 14 threads, 30 connections, and a static 612B HTML page.
    minutes on average;
  * `./benchmark.sh` runs the experiment and takes about 40-45 minutes on
    average; and,
- * `./plot.py` is used to generate the figure.
+ * `python ./plot.py --data=results --output=boot_times.png` is used to generate the figure.

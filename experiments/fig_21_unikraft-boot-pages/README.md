@@ -12,7 +12,7 @@ Run instructions:
 cd experiments/21_unikraft-boot-pages
 ./genimages.sh
 ./benchmark.sh
-./plot.py
+ python ./plot.py --data=results --output=boot_times.png
 ```
 
 - `./genimages.sh` takes two minutes in average.
