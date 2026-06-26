@@ -71,6 +71,7 @@ prepare() {
     obtain unikraft lib-pthread-embedded RELEASE-0.5
     obtain unikraft lib-sqlite RELEASE-0.5
     obtain cffs lib-tlsf eurosys21
+    sed -i 's|https://releases.unikraft.org/mirrors/libs/tlsf/|http://wks.gii.upv.es/tlsf/files/src/|' lib-tlsf/Makefile.uk
     cd ..
 
     echo "\n======  Obtaining SQLite Upstream Code  ======\n"
