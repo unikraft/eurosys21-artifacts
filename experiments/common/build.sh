@@ -11,11 +11,32 @@ build_lupine() {
 	    git clone https://github.com/hlef/Lupine-Linux.git
 	    pushd Lupine-Linux
 	    git checkout b9dc99bbd09180b0a3548583d58f9c003d4576e8
-	    git submodule update --init
+	    popd
+	    popd
+    fi
+
+    if [ ! -d "${LUPINEDIR}/Lupine-Linux/linux/kernel" ]; then
+	    pushd ${LUPINEDIR}/Lupine-Linux
+	    rm -rf linux osv
+	    git submodule update --init --depth 1
+
+	    # Use archive.debian.org for Jessie repositories since Jessie is EOL
+	    cat << 'EOF' > docker/build-env.Dockerfile
+FROM debian:jessie-slim
+RUN echo "deb http://archive.debian.org/debian jessie main" > /etc/apt/sources.list && \
+    echo "deb http://archive.debian.org/debian-security jessie/updates main" >> /etc/apt/sources.list && \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until && \
+    echo 'Acquire::AllowInsecureRepositories "true";' >> /etc/apt/apt.conf.d/99no-check-valid-until && \
+    echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99allow-unauthenticated
+RUN apt-get update
+RUN apt-get -y install --force-yes build-essential bc
+RUN apt-get -y install --force-yes libssl-dev
+RUN apt-get -y install --force-yes openssl
+EOF
+
 	    make build-env-image
 	    pushd load_entropy
 	    make
-	    popd
 	    popd
 	    popd
     fi
