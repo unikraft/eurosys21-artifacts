@@ -38,7 +38,7 @@ do
 
 	for j in {1..5}
 	do
-		taskset -c ${CPU1} qemu-guest \
+		taskset -c ${CPU1} ../../tools/qemu-guest \
 			-i redis.cpio \
 			-k ${IMAGES}/unikraft+${alloc}.kernel \
 			-a "/redis.conf" -m 1024 -p ${CPU2} \
