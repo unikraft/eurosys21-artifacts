@@ -49,7 +49,7 @@ do
 		tail -n 1 | awk  '{print $3}'`
 
 	# benchmark
-	benchmark_nginx_server $ip $LOG
+	benchmark_nginx_server ${ip} $LOG
 	#curl http://${ip}/index.html --noproxy ${ip} --output -
 
 	# stop server

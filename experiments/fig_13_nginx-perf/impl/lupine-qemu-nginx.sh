@@ -36,7 +36,7 @@ for j in {1..5}
 do
 	cp ${IMAGES}/nginx.ext2 ${IMAGES}/nginx.ext2.disposible
 
-	taskset -c ${CPU1} qemu-guest \
+	taskset -c ${CPU1} ../../tools/qemu-guest \
 		-k ${IMAGES}/lupine-qemu.kernel \
 		-d ${IMAGES}/nginx.ext2 \
 		-a "root=/dev/vda rw console=ttyS0 init=/guest_start.sh /trusted/nginx" \

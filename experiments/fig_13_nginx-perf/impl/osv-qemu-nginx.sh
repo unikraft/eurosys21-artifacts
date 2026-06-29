@@ -17,8 +17,6 @@ touch $LOG
 
 create_bridge $NETIF $BASEIP
 kill_qemu
-
-# run dnsmasq
 dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
 function cleanup {
@@ -42,7 +40,7 @@ do
 		${IMAGES}/osv-qemu.img.disposible \
 		"--rootfs=ramfs /nginx.so -c /nginx/conf/nginx.conf"
 
-	taskset -c ${CPU1} qemu-guest \
+	taskset -c ${CPU1} ../../tools/qemu-guest \
 		-q ${IMAGES}/osv-qemu.img.disposible \
                 -m 1024 -p ${CPU2} \
 		-b ${NETIF} -x
@@ -54,7 +52,7 @@ do
 		tail -n 1 | awk  '{print $3}'`
 
 	# benchmark
-	benchmark_nginx_server $ip $LOG
+	benchmark_nginx_server ${ip} $LOG
 	#curl http://${ip}/index.html --noproxy ${ip} --output -
 
 	# stop server

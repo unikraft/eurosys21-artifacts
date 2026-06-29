@@ -15,8 +15,6 @@ mkdir -p rawdata results
 
 create_bridge $NETIF $BASEIP
 kill_qemu
-
-# run dnsmasq
 dnsmasq_pid=$(run_dhcp $NETIF $BASEIP)
 
 function cleanup {
@@ -34,7 +32,7 @@ touch $LOG
 
 for j in {1..5}
 do
-	taskset -c ${CPU1} qemu-guest \
+	taskset -c ${CPU1} ../../tools/qemu-guest \
 		-i data/nginx.cpio \
 		-k ${IMAGES}/unikraft+mimalloc.kernel \
 		-a "" -m 1024 -p ${CPU2} \
