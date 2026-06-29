@@ -39,13 +39,11 @@ do
 
 	for j in {1..5}
 	do
-		taskset -c ${CPU1} qemu-guest \
+		taskset -c ${CPU1} ./qemu-guest \
 			-i nginx.cpio \
 			-k ${IMAGES}/unikraft+${alloc}.kernel \
 			-a "" -m 1024 -p ${CPU2} \
 			-b ${NETIF} -x
-
-		child_pid=$!
 
 		# make sure that the server has properly started
 		sleep 5
@@ -55,11 +53,10 @@ do
 			tail -n 1 | awk  '{print $3}'`
 
 		# benchmark
-		benchmark_nginx_server ${ip} $LOG
+		benchmark_nginx_server "${ip}" $LOG
 		#curl http://${BASEIP}.2/index.html --noproxy ${BASEIP}.2 --output -
 
 		# stop server
-		kill -9 $child_pid
 		kill_qemu
 	done
 
