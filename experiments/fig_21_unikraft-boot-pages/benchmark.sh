@@ -7,7 +7,7 @@ source ../common/set-cpus.sh
 source ../common/qemu.sh
 
 IMAGES=$(pwd)/images
-QEMU_GUEST=qemu-guest
+QEMU_GUEST=../../tools/qemu-guest
 
 benchmark() {
 	taskset -c ${CPU1} ${QEMU_GUEST} \
