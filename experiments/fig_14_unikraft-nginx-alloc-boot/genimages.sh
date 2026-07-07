@@ -20,6 +20,11 @@ function build_for {
     docker pull hlefeuvre/unikraft-eurosys21:latest
     docker run --rm --privileged --name=$CONTAINER \
 			-dt hlefeuvre/unikraft-eurosys21
+    
+    # Update mirror URLs inside the container libraries
+    docker exec $CONTAINER sed -i 's|https://releases.unikraft.org/mirrors/libs/tlsf/|http://wks.gii.upv.es/tlsf/files/src/|g' /root/workspace/libs/lib-tlsf/Makefile.uk
+    docker exec $CONTAINER sed -i 's|github.com/antirez/redis|github.com/redis/redis|g' /root/workspace/libs/lib-redis/Makefile.uk
+
     docker exec -it $CONTAINER bash -c \
 	"cd app-${1} && cp configs/${2}.conf .config"
     docker exec -it $CONTAINER bash -c \

@@ -7,7 +7,7 @@ source ../common/set-cpus.sh
 source ../common/qemu.sh
 
 IMAGES=$(pwd)/images
-QEMU_GUEST=qemu-guest
+QEMU_GUEST=../../tools/qemu-guest
 MEM=1024
 
 kill_qemu
