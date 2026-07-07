@@ -84,6 +84,8 @@ docker run --rm --privileged --name=$CONTAINER \
 			--cpuset-cpus="${CPU1}-${CPU4}" \
 			-v $(pwd)/data:/data-imported \
 			-dt hlefeuvre/osv
+docker exec -it $CONTAINER sed -i -e "s/antirez\/redis/redis\/redis/g" \
+		   /root/osv/apps/redis-memonly/GET
 docker exec -it $CONTAINER cp /data-imported/redis.conf \
 		   /root/osv/apps/redis-memonly/redis.conf
 docker exec -it $CONTAINER sed -i -e "s/always-show-logo/#always-show-logo/" \

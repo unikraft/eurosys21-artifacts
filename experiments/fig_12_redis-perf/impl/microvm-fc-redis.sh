@@ -31,7 +31,7 @@ for j in {1..5}
 do
 	cp ${IMAGES}/redis.ext2 /tmp/redis.ext2.disposible
 
-	taskset -c ${CPU1},${CPU2} firectl --firecracker-binary=./.firecracker \
+	taskset -c ${CPU1},${CPU2} ../../tools/firectl --firecracker-binary=./.firecracker \
                 --kernel ${IMAGES}/generic-fc.kernel \
                 --tap-device=tap100/AA:FC:00:00:00:01 \
                 --root-drive=/tmp/redis.ext2.disposible \
